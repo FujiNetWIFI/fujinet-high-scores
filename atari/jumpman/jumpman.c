@@ -17,6 +17,7 @@
 #include <sys/inotify.h>
 #include <signal.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #define EVENT_SIZE ( sizeof(struct inotify_event) )
 #define EVENT_BUF_LEN ( 1024 * ( EVENT_SIZE + 16 ) )
@@ -126,6 +127,8 @@ int main(int argc, char *argv[])
       printf("%s <path-to-jumpman-atr> <path-to-output-html>\n",argv[0]);
       return 1;
     }
+
+  jumpman(argv[1],argv[2]);
   
   signal(SIGINT, setctrlc);
   signal(SIGTERM, setctrlc);
@@ -140,11 +143,17 @@ int main(int argc, char *argv[])
 
   inotify_wd = inotify_add_watch(inotify_fd, argv[1], IN_MODIFY);
 
+  /* Set for non-blocking */
+  fcntl (inotify_fd, F_SETFL, fcntl (inotify_fd, F_GETFL) | O_NONBLOCK);
+  
   while (!ctrlc)
     {
       int i;
       
       inotify_event_len = read(inotify_fd, event_buffer, EVENT_BUF_LEN);
+
+      if (errno == EAGAIN)
+	continue;
       
       if ( inotify_event_len < 0 )
 	{
