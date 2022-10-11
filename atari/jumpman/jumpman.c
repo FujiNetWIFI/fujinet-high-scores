@@ -162,6 +162,12 @@ int main(int argc, char *argv[])
       inotify_event_len = read(inotify_fd, event_buffer, EVENT_BUF_LEN);
 
       i=0;
+
+      if (inotify_event_len < 0)
+	{
+	  usleep(100000);
+	  continue;
+	}
       
       while (i < inotify_event_len)
 	{
