@@ -75,7 +75,7 @@ void jumpman(char *atr, char *html)
   fprintf(fh," <head>\n");
   fprintf(fh,"  <title>Latest Jumpman High Scores</title>\n");
   fprintf(fh,"  <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n");
-  fprintf(fh,"  <meta http-equiv=\"refresh\" content=\"1\" />");
+  fprintf(fh,"  <meta http-equiv=\"refresh\" content=\"30\" />");
   fprintf(fh,"  <meta name=\"keywords\" content=\" \" />\n");
   fprintf(fh,"  <meta name=\"description\" content=\" \" />\n");
   fprintf(fh,"  <link rel=\"stylesheet\" type=\"text/css\" href=\"jumpman.css\" media=\"screen\" />\n");
