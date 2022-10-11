@@ -18,9 +18,10 @@
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <linux/limits.h>
 
 #define EVENT_SIZE ( sizeof(struct inotify_event) )
-#define EVENT_BUF_LEN ( 1024 * ( EVENT_SIZE + 16 ) )
+#define EVENT_BUF_LEN ( 1024 * ( EVENT_SIZE + NAME_MAX ) )
 
 #define JUMPMAN_SEEK_POS (0x2ba*128+16)
 
@@ -145,6 +146,12 @@ int main(int argc, char *argv[])
 
   inotify_wd = inotify_add_watch(inotify_fd, argv[1], IN_MODIFY);
 
+  if (inotify_wd == -1)
+    {
+      perror("inotify_add_watch");
+      goto bye2;
+    }
+
   /* Set for non-blocking */
   fcntl (inotify_fd, F_SETFL, fcntl (inotify_fd, F_GETFL) | O_NONBLOCK);
   
@@ -154,23 +161,12 @@ int main(int argc, char *argv[])
       
       inotify_event_len = read(inotify_fd, event_buffer, EVENT_BUF_LEN);
 
-      if (errno == EAGAIN)
-	{
-	  usleep(100000);
-	  continue;
-	}
-      
-      if ( inotify_event_len < 0 )
-	{
-	  perror("read");
-	  return 1;
-	}
-      
       i=0;
       
       while (i < inotify_event_len)
 	{
 	  struct inotify_event *event = ( struct inotify_event * ) &event_buffer[ i ];
+
 	  if ( event->len )
 	    {
 	      if ( event->mask & IN_MODIFY )
@@ -184,7 +180,9 @@ int main(int argc, char *argv[])
   /* ctrl-C or termination, close it off. */
 
   printf("Exiting %s\n",argv[0]);
+ bye:
   inotify_rm_watch(inotify_fd,inotify_wd);
+ bye2:
   close(inotify_fd);
 
   return 0;
