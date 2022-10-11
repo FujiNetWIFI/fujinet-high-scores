@@ -41,6 +41,8 @@ void jumpman(char *atr, char *html)
   char buf[512];
   FILE *fa, *fh;
   int i, offset;
+
+  printf("Writing new jumpman.html\n");
   
   fa = fopen(atr,"rb");
   fh = fopen(html,"w");
@@ -153,7 +155,10 @@ int main(int argc, char *argv[])
       inotify_event_len = read(inotify_fd, event_buffer, EVENT_BUF_LEN);
 
       if (errno == EAGAIN)
-	continue;
+	{
+	  usleep(100000);
+	  continue;
+	}
       
       if ( inotify_event_len < 0 )
 	{
@@ -178,6 +183,7 @@ int main(int argc, char *argv[])
 
   /* ctrl-C or termination, close it off. */
 
+  printf("Exiting %s\n",argv[0]);
   inotify_rm_watch(inotify_fd,inotify_wd);
   close(inotify_fd);
 
