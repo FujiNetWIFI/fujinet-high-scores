@@ -167,12 +167,8 @@ int main(int argc, char *argv[])
 	{
 	  struct inotify_event *event = ( struct inotify_event * ) &event_buffer[ i ];
 
-	  if ( event->len )
-	    {
-	      if ( event->mask & IN_MODIFY )
-		jumpman(argv[1],argv[2]);
-	    }
-	  
+	  jumpman(argv[1],argv[2]);
+
 	  i += EVENT_SIZE + event->len;
 	}
     }
