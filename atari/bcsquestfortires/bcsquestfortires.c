@@ -63,14 +63,16 @@ void bcsquestfortires(char *atr, char *html)
       if (c<0) /* Strip away non-ASCII chars */
 	c=0x20; /* space */
 
-      if (c<32)
+      if (c<64)
 	c+=32;
       else if (c>64)
 	c-=32;
-      
       buf[i]=c;
     }
 
+  /* small fix, erase first char in buf */
+  buf[0]=0x20;
+  
   /* start html */
   fprintf(fh,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
   fprintf(fh,"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\n");
@@ -88,11 +90,11 @@ void bcsquestfortires(char *atr, char *html)
 
   /* start body */
 
-  offset=0x2b; /* buffer start for hi scores */
+  offset=0; /* buffer start for hi scores */
 
   fprintf(fh,"==== TOP SCORES ====\n");
   
-  for (i=0;i<88;i++)
+  for (i=0;i<96;i++)
     {
       fprintf(fh, "%c", buf[offset++]);
 
