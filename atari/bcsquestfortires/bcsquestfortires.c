@@ -92,7 +92,7 @@ void bcsquestfortires(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"==== TOP SCORES ====\n");
+  fprintf(fh,"\n==== TOP SCORES ====\n");
   
   for (i=0;i<96;i++)
     {
@@ -104,7 +104,7 @@ void bcsquestfortires(char *atr, char *html)
 
   /* end body */
 
-  fprintf(fh,"\n\n");
+  fprintf(fh,"\n");
   fprintf(fh,"  </pre>\n");
   fprintf(fh," </body>\n");
   fprintf(fh,"</html>\n");
