@@ -77,7 +77,7 @@ void trackattack(char *atr, char *html)
   
   /* end body */
 
-//  fprintf(fh,"\n\n");
+  fprintf(fh,"\n");
   fprintf(fh,"  </pre>\n");
   fprintf(fh," </body>\n");
   fprintf(fh,"</html>\n");
