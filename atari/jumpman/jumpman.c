@@ -88,7 +88,7 @@ void jumpman(char *atr, char *html)
 
   offset=0x2b; /* buffer start for hi scores */
 
-  fprintf(fh,"==== TOP SCORES ====\n");
+  fprintf(fh,"\n==== TOP SCORES ====\n");
   
   for (i=0;i<160;i++)
     {
@@ -98,7 +98,7 @@ void jumpman(char *atr, char *html)
 	fprintf(fh, "\n");
     }
 
-  fprintf(fh, "\n\n");
+  fprintf(fh, "\n");
 
   fprintf(fh,"==== HIGH BONUS ====\n");
   
