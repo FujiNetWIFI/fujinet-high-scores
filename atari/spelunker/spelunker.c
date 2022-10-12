@@ -76,7 +76,7 @@ void spelunker(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"==== TOP SCORES ====\n\n");
+  fprintf(fh,"\n==== TOP SCORES ====\n\n");
 
   for (i=0;i<4;i++)
     {
@@ -103,7 +103,7 @@ void spelunker(char *atr, char *html)
 
   /* end body */
 
-  fprintf(fh,"\n\n");
+  // fprintf(fh,"\n\n");
   fprintf(fh,"  </pre>\n");
   fprintf(fh," </body>\n");
   fprintf(fh,"</html>\n");
