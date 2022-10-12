@@ -71,13 +71,13 @@ void trackattack(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"==== TOP SCORE  ====\n");
+  fprintf(fh,"\n==== TOP SCORE  ====\n");
   
-  fprintf(fh,"\n    %01x%01x%01x%01x%01x%01x",buf[0],buf[1],buf[2],buf[3],buf[4],buf[5]);
+  fprintf(fh,"\n        %01x%01x%01x%01x%01x%01x",buf[0],buf[1],buf[2],buf[3],buf[4],buf[5]);
   
   /* end body */
 
-  fprintf(fh,"\n\n");
+//  fprintf(fh,"\n\n");
   fprintf(fh,"  </pre>\n");
   fprintf(fh," </body>\n");
   fprintf(fh,"</html>\n");
