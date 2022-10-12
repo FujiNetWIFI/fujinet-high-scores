@@ -76,13 +76,13 @@ void crisismountain(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"==== TOP SCORE  ====\n");
+  fprintf(fh,"\n==== TOP SCORE  ====\n");
   
-  fprintf(fh,"\n    %06lx",hiscore);
+  fprintf(fh,"\n       %06lx",hiscore);
   
   /* end body */
 
-  fprintf(fh,"\n\n");
+  fprintf(fh,"\n");
   fprintf(fh,"  </pre>\n");
   fprintf(fh," </body>\n");
   fprintf(fh,"</html>\n");
