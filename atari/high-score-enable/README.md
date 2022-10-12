@@ -22,4 +22,4 @@ All that is needed is a basic C environment, such as installing build-essential 
 
 ## Author
 
-Thomas Cherryhomes (thom dot cherryhomes at gmail dot com) s
+Thomas Cherryhomes (thom dot cherryhomes at gmail dot com)
