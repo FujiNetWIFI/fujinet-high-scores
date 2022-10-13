@@ -78,7 +78,7 @@ void adam_dkongjr(char *atr, char *html)
   fprintf(fh," </head>\n");
   fprintf(fh," <body>\n");
   fprintf(fh,"  <div id=\"logo\"><img src=\"adam-dkongjr.png\" alt=\"Donkey Kong(tm)\" /></div>\n");
-  fprintf(fh,"  <pre>\n");
+  fprintf(fh,"  <div><pre>\n");
 
   /* start body */
 
@@ -122,7 +122,7 @@ void adam_dkongjr(char *atr, char *html)
   /* end body */
 
   fprintf(fh,"\n");
-  fprintf(fh,"  </pre>\n");
+  fprintf(fh,"  </div></pre>\n");
   fprintf(fh," </body>\n");
   fprintf(fh,"</html>\n");
   
