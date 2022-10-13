@@ -39,10 +39,10 @@ void setctrlc(int dummy)
   ctrlc = true;
 }
 
-void adam-dkong(char *atr, char *html)
+void adam_dkong(char *atr, char *html)
 {
 
-  struct _adam-dkong_scores
+  struct _adam_dkong_scores
   {
     char scores[8][7];
     char names[8][12];
@@ -78,7 +78,7 @@ void adam-dkong(char *atr, char *html)
   fprintf(fh," </head>\n");
   fprintf(fh," <body>\n");
   fprintf(fh,"  <div id=\"logo\"><img src=\"adam-dkong.png\" alt=\"Donkey Kong(tm)\" /></div>\n");
-  fprintf(fh,"  <pre>\n");
+  fprintf(fh,"  <div><pre>\n");
 
   /* start body */
 
@@ -118,8 +118,7 @@ void adam-dkong(char *atr, char *html)
 
   /* end body */
 
-  fprintf(fh,"\n");
-  fprintf(fh,"  </pre>\n");
+  fprintf(fh,"  </pre></div>\n");
   fprintf(fh," </body>\n");
   fprintf(fh,"</html>\n");
   
@@ -135,7 +134,7 @@ int main(int argc, char *argv[])
       return 1;
     }
 
-  adam-dkong(argv[1],argv[2]);
+  adam_dkong(argv[1],argv[2]);
   
   signal(SIGINT, setctrlc);
   signal(SIGTERM, setctrlc);
@@ -177,7 +176,7 @@ int main(int argc, char *argv[])
 	{
 	  struct inotify_event *event = ( struct inotify_event * ) &event_buffer[ i ];
 
-	  adam-dkong(argv[1],argv[2]);
+	  adam_dkong(argv[1],argv[2]);
 
 	  i += EVENT_SIZE + event->len;
 	}
