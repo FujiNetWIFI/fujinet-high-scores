@@ -1,0 +1,13 @@
+@font-face {
+    font-family:'pixel-coleco';
+    src: url('coleco.woff2') format('woff2');
+}
+html {
+	background-color: black;
+	margin:auto;
+	padding:0;
+}
+img {
+	width: 100vw;
+}
+pre {margin-left: 20vw; margin-right: 32vw; width: 32; font-family:"pixel-coleco";font-size:2vw;text-transform:none;color:magenta;letter-spacing:.5rem;line-height:1.5em}
