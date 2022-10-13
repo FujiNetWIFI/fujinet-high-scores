@@ -5,9 +5,13 @@
 html {
 	background-color: black;
 	margin:auto;
+	margin-top:0;
 	padding:0;
 }
 img {
-	width: 100vw;
+	width: 50vw;
 }
-pre {margin-left: 20vw; margin-right: 32vw; width: 32; font-family:"pixel-coleco";font-size:2vw;text-transform:none;color:#EFD55A;letter-spacing:.5rem;line-height:1.5em}
+div {
+	text-align: center;
+}
+pre {margin-top: 0; font-family:"pixel-coleco";font-size:2vw;text-transform:none;color:yellow;letter-spacing:.5rem;line-height:1.5em}
