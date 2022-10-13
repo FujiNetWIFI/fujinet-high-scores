@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari Serpentine Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/serpentine "/tnfs/Atari 8-bit/Games/High Score Enabled/Serpentine.atr" "/var/www/atari-scores/serpentine.html"
+
+[Install]
+WantedBy=multi-user.target
