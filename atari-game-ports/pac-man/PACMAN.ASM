@@ -651,4 +651,6 @@ S2PLL1 STA TEXT+$2A,X
 
 ;:$922 .BY 0	;Fill gap with zeros
 
+ ICL "HISCORE.ASM"
+
  END INIT
