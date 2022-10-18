@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari Wizard of Wor Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/wizardofwor "/tnfs/Atari 8-bit/Games/High Score Enabled/Wizard of Wor.atr" "/var/www/atari-scores/wizardofwor.html"
+
+[Install]
+WantedBy=multi-user.target
