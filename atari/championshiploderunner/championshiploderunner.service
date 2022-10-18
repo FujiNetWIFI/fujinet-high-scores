@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari Tutti Frutti Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/championshiploderunner "/tnfs/Atari 8-bit/Games/High Score Enabled/Tutti Frutti (BASIC).atr" "/var/www/atari-scores/championshiploderunner.html"
+
+[Install]
+WantedBy=multi-user.target
