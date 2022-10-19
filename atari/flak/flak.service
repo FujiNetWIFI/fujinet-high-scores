@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari Flak Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/flak "/tnfs/Atari 8-bit/Games/High Score Enabled/Flak.atr" "/var/www/atari-scores/flak.html"
+
+[Install]
+WantedBy=multi-user.target
