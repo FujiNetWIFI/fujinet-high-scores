@@ -17,6 +17,7 @@ HISCR:	JSR OCOLRS
 	STA VDSLST
 	LDA #>HDLIV
 	STA VDSLST+1
+	JSR CKHIGH
 	JMP BLNKON
 
 HDLIV:	PHA
@@ -60,16 +61,16 @@ HIDAT:
 
 	.SB "     high scores    "
 	.SB "                    "
-	.SB "   1. AAA 0000000   "
-	.SB "   2. AAA 0000000   "
-	.SB "   3. AAA 0000000   "
-	.SB "   4. AAA 0000000   "
-	.SB "   5. AAA 0000000   "
-	.SB "   6. AAA 0000000   "
-	.SB "   7. AAA 0000000   "
-	.SB "   8. AAA 0000000   "
-	.SB "                    "
-	.SB "                    "
+HISTR:	.SB "   1.               "
+	.SB "   2.               "
+	.SB "   3.               "
+	.SB "   4.               "
+	.SB "   5.               "
+	.SB "   6.               "
+	.SB "   7.               "
+	.SB "   8.               "
+	.SB "   9.               "
+	.SB "  10.               "
 	.SB "                    "
 	.SB "                    "
 	.SB "                    "
