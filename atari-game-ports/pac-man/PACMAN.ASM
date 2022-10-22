@@ -13,6 +13,11 @@
 ;*                                  *
 ;*          DISK VERSION            *
 ;*                                  *
+;* High Score additions by          *
+;*  Thomas Cherryhomes              *
+;*   thom dot cherryhomes at gmail  *
+;*                  dot com         *
+;*                                  *
 ;*          REVISION 3.0            *
 ;*                                  *
 ;************************************
