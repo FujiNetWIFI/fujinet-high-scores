@@ -2,8 +2,10 @@
 	;; hiscore additions
 	;;
 
-	;; Clear off players
+CHKEY	= $02FC
+KGETCH 	= $F6E2
 	
+	;; Clear off players
 	;; Set display list and DLI
 HISCR:
 	LDA #$31		; Disk drive
@@ -65,9 +67,29 @@ HISCR:
 	STA VDSLST
 	LDA #>HDLIV
 	STA VDSLST+1
-	JSR CKHIGH
-	JMP BLNKON
 
+	JSR CKHIGH
+
+	;; Enter High score
+
+	JSR HRKEY
+	
+	LDX #$06
+	STA HISTR,X
+	
+	JMP BLNKON		; Wait for attract.
+
+	;; Read key, convert to screen code 
+	
+HRKEY:	LDA #$FF
+	STA CHKEY
+HRKEY2: LDA CHKEY
+        CMP #$FF
+        BEQ HRKEY2
+        LDX CHKEY
+        LDA HKTBL,X
+	RTS
+	
 HDLIV:	PHA
 	TXA
 	PHA
@@ -125,5 +147,10 @@ HISTR2:
 	.SB "                    "
 	.SB "                    "
 	.SB "                    "
+        .SB "                    "
 
 HCINDX  .BY >CHRORG,>CHRORG,>CHRORG,>CHRORG,>PACCHR
+
+        ;; Key to screen code table.
+
+HKTBL:	.SB "LJ;  K+*O PU I-=V C  BXZ4 36 521, .N MZ R EY TWQ9 07 8<>UD   GSA"
