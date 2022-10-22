@@ -2,10 +2,12 @@ AS=mads
 PACMAN=PACMAN.ASM
 BUILD=build
 MKDIR=mkdir
+DIR2ATR=dir2atr
+WRITE_HIGH_SCORE=./write-high-score
 
 .PHONY: clean pre
 
-all:	pre PACMAN-ORIGINAL.xex PACMAN-ROKLAN.xex PACMAN-ATARI82.xex PACMAN-DATASOFT.xex
+all:	pre PACMAN-ORIGINAL.xex dist hiscore
 
 pre:
 	$(MKDIR) -p $(BUILD)
@@ -13,15 +15,14 @@ pre:
 PACMAN-ORIGINAL.xex:
 	$(AS) -d:VERSION=1 PACMAN.ASM -o:$(BUILD)/PACMAN-ORIGINAL.xex
 
-PACMAN-ROKLAN.xex:
-	$(AS) -d:VERSION=2 PACMAN.ASM -o:$(BUILD)/PACMAN-ROKLAN.xex
+dist:
+	$(DIR2ATR) -B picoboot.bin -S "PAC-MAN.atr" $(BUILD)
 
-PACMAN-ATARI82.xex:
-	$(AS) -d:VERSION=3 PACMAN.ASM -o:$(BUILD)/PACMAN-ATARI82.xex
-
-PACMAN-DATASOFT.xex:
-	$(AS) -d:VERSION=4 PACMAN.ASM -o:$(BUILD)/PACMAN-DATASOFT.xex
+hiscore:
+	$(AS) HISCORE_TABLE.ASM -o:$(BUILD)/HISCORE_TABLE.bin	
+	$(CC) -o$(WRITE_HIGH_SCORE) $(WRITE_HIGH_SCORE).c
+	$(WRITE_HIGH_SCORE) PAC-MAN.atr $(BUILD)/HISCORE_TABLE.bin
 
 clean:
 	$(RM) -rf $(BUILD)
-
+	$(RM) -rf PAC-MAN.atr
