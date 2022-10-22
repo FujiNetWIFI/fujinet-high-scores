@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
       return 1; // Bail.
     }
 
-  if (!fseek(afp,SEEK_POS,SEEK_SET))
+  if (fseek(afp,SEEK_POS,SEEK_SET))
     {
       perror("Could not seek to ATR sector");
       fclose(afp);
