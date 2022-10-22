@@ -7,7 +7,7 @@ WRITE_HIGH_SCORE=./write-high-score
 
 .PHONY: clean pre
 
-all:	pre PACMAN-ORIGINAL.xex dist hiscore
+all:	clean pre PACMAN-ORIGINAL.xex dist hiscore
 
 pre:
 	$(MKDIR) -p $(BUILD)
