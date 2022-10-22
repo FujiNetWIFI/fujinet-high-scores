@@ -26,3 +26,4 @@ hiscore:
 clean:
 	$(RM) -rf $(BUILD)
 	$(RM) -rf PAC-MAN.atr
+	$(RM) -rf write-high-score
