@@ -5,8 +5,56 @@
 	;; Clear off players
 	
 	;; Set display list and DLI
-	
-HISCR:	JSR OCOLRS
+HISCR:
+	LDA #$31		; Disk drive
+	STA DDEVIC		; into device
+	LDA #$01		; Unit 1
+	STA DUNIT		; into unit.
+	LDA #'R'		; Read...
+	STA DCOMND		; into command
+	LDA #$40		; To Atari
+	STA DSTATS		; into data direction
+	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$0F		; Standard timeout value (approx 15 seconds)
+	STA DTIMLO		; into timeout.
+	LDA #$80		; 128 byte sector
+	STA DBYTLO		; ...
+	LDA #$00		; ...
+	STA DBYTHI		; into # of bytes requested.
+	LDA #$CF		; Sector 0x2CF (719)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR SIOV
+
+	LDA #$31		; Disk drive
+	STA DDEVIC		; into device
+	LDA #$01		; Unit 1
+	STA DUNIT		; into unit.
+	LDA #'R'		; Read...
+	STA DCOMND		; into command
+	LDA #$40		; To Atari
+	STA DSTATS		; into data direction
+	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR2)	; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$0F		; Standard timeout value (approx 15 seconds)
+	STA DTIMLO		; into timeout.
+	LDA #$80		; 128 byte sector
+	STA DBYTLO		; ...
+	LDA #$00		; ...
+	STA DBYTHI		; into # of bytes requested.
+	LDA #$D0		; Sector 0x2D0 (720)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR SIOV
+
+	JSR OCOLRS
 	LDA #<HDLIST
 	STA SDLSTL
 	STA DLISTL
@@ -61,16 +109,18 @@ HIDAT:
 
 	.SB "     high scores    "
 	.SB "                    "
-HISTR:	.SB "   1.               "
-	.SB "   2.               "
-	.SB "   3.               "
-	.SB "   4.               "
-	.SB "   5.               "
-	.SB "   6.               "
-	.SB "   7.               "
-	.SB "   8.               "
-	.SB "   9.               "
-	.SB "  10.               "
+HISTR:
+	.SB "                    "
+	.SB "  HI SCORE TABLE    "
+	.SB "                    "
+	.SB "     NOT READ       "
+	.SB "                    "
+	.SB "                    "
+	.SB "        "           
+HISTR2:
+	.SB         "            "
+	.SB "                    "
+	.SB "                    "
 	.SB "                    "
 	.SB "                    "
 	.SB "                    "
