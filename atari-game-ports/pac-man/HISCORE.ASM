@@ -55,19 +55,19 @@ HISCR:
 	STA DAUX2		; into the daux parameter.
 	JSR SIOV
 
-	JSR OCOLRS
-	LDA #<HDLIST
-	STA SDLSTL
-	STA DLISTL
-	LDA #>HDLIST
-	STA SDLSTH
-	STA DLISTH
-	LDA #<HDLIV
-	STA VDSLST
-	LDA #>HDLIV
-	STA VDSLST+1
+	JSR OCOLRS		; Set up color palette like ATRACT
+	LDA #<HDLIST		; Set up high score display list
+	STA SDLSTL		; ...
+	STA DLISTL		; ...
+	LDA #>HDLIST		; ...
+	STA SDLSTH		; ...
+	STA DLISTH		; ...
+	LDA #<HDLIV		; Set up high score DLI
+	STA VDSLST		; ...
+	LDA #>HDLIV		; ...
+	STA VDSLST+1		; ...
 
-	JSR CKHIGH
+	JSR CKHIGH		; Migrate player score to high score if needed.
 
 	;; Enter High score START
 
