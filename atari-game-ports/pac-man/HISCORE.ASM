@@ -72,10 +72,12 @@ HISCR:
 
 	;; Enter High score
 
-	JSR HRKEY
+XL	JSR HRKEY
 	
 	LDX #$06
 	STA HISTR,X
+
+	JMP XL
 	
 	JMP BLNKON		; Wait for attract.
 
@@ -153,4 +155,69 @@ HCINDX  .BY >CHRORG,>CHRORG,>CHRORG,>CHRORG,>PACCHR
 
         ;; Key to screen code table.
 
-HKTBL:	.SB "LJ;  K+*O PU I-=V C  BXZ4 36 521, .N MZ R EY TWQ9 07 8<>UD   GSA"
+HKTBL:
+	.SB "L"			; 0
+	.SB "J"			; 1
+	.SB ";"			; 2
+	.BY 0xFF			; 3 (F1)
+	.BY 0xFF			; 4 (F2)
+	.SB "K"			; 5
+	.SB "+"			; 6
+	.SB "*"			; 7
+	.SB "O"			; 8
+	.BY 0xFF			; 9
+	.SB "P"			; 10
+	.SB "U"			; 11
+	.BY 0xFF			; 12 (RETURN)
+	.SB "I"			; 13
+	.SB "-"			; 14
+	.SB "="			; 15
+	.SB "V"			; 16
+	.BY 0xFF			; 17 (HELP)
+	.SB "C"			; 18
+	.BY 0xFF			; 19 (F3)
+	.BY 0xFF			; 20 (F4)
+	.SB "B"			; 21
+	.SB "X"			; 22
+	.SB "Z"			; 23
+	.SB "4"			; 24
+	.BY 0xFF			; 25 (DEAD)
+	.SB "3"			; 26
+	.SB "6"			; 27
+	.BY 0xFF			; 28 (ESC)
+	.SB "5"			; 29
+	.SB "2"			; 30
+	.SB "1"			; 31
+	.SB ","			; 32
+	.SB " "			; 33 (SPACE)
+	.SB "."			; 34
+	.SB "N"			; 35
+	.BY 0xFF			; 36 (DEAD)
+	.SB "M"			; 37
+	.SB "/"			; 38
+	.BY 0xFF			; 39 (ATARI)
+	.SB "R"			; 40
+	.BY 0xFF			; 41 (DEAD)
+	.SB "E"			; 42
+	.SB "Y"			; 43
+	.BY 0xFF			; 44
+	.SB "T"			; 45
+	.SB "W"			; 46
+	.SB "Q"			; 47
+	.SB "9"			; 48
+	.BY 0xFF			; 49 (DEAD)
+	.SB "0"			; 50
+	.SB "7"			; 51
+	.BY 0xFF			; 52 (DEL)
+	.SB "8"			; 53
+	.SB "<"			; 54
+	.SB ">"			; 55
+	.SB "F"			; 56
+	.SB "H"			; 57
+	.SB "D"			; 58
+	.BY 0xFF			; 59 (DEAD)
+	.BY 0xFF			; 60 CAPS/LOWR
+	.SB "G"			; 61
+	.SB "S"			; 62
+	.SB "A"			; 63
+	
