@@ -73,10 +73,30 @@ HISCR:
 
 	LDX #$00		; Start with Place on board
 	STX TEMLOC		; Store it.
+
+	;; Scoot older high scores down from selected slot
+
+	LDY #$00
 	
+	LDA HINIOF,X
+	TAX
+
+HSCOOT:	LDA HISTR,X
+	STA HISTR+20,X
+	LDA #$00
+	STA HISTR,X
+	INY
+	INX
+	CPY #12
+	BNE HSCOOT
+	
+	;; Copy high score to slot
+
+	LDA TEMLOC		; Restore Score place
+	TAX			; into X.
  	LDA HSCROF,X		; Get score offset on screen
  	TAY			; And store in Y
-	
+
  	LDX #$00
 HCPY:	LDA TEXT+57,X
  	STA HISTR,Y
