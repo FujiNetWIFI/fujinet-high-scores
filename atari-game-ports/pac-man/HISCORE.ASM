@@ -66,9 +66,7 @@ HISCR:
 	STA VDSLST		; ...
 	LDA #>HDLIV		; ...
 	STA VDSLST+1		; ...
-
-	JSR CKHIGH		; Migrate player score to high score if needed.
-
+	
 	;; Enter High score START
 
 	LDX #$00		; Start with Place on board
