@@ -69,27 +69,70 @@ HISCR:
 
 	JSR CKHIGH
 
-	;; Enter High score
+	;; Enter High score START
 
-XL	JSR HRKEY
-	BMI XL
+	LDX #$00		; Start with Place on board
+	STX TEMLOC		; Store it.
 	
-	LDX #$06
-	STA HISTR,X
+ 	LDA HSCROF,X		; Get score offset on screen
+ 	TAY			; And store in Y
+	
+ 	LDX #$00
+HCPY:	LDA TEXT+57,X
+ 	STA HISTR,Y
+ 	INX
+ 	INY
+ 	CPX #$0C
+ 	BNE HCPY
 
-	JMP XL
+	LDX TEMLOC
+ 	LDA HINIOF,X		; Find screen offset
+ 	TAX			; Send it to X
+
+	LDY #$00		; # of initials entered
+	LDX TEMLOC
+	LDA HINIOF,X
+	TAX
+	
+HENT:	JSR HRKEY		; Get initial.
+	CMP #$FF		; Dead key?
+	BEQ HENT		; Go back.
+	
+	CMP #52			; Backspace?
+	BNE HENT2		; Nope, go to enter/advance.
+	CPY #$00		; Are we at beginning?
+	BEQ HENT		; Yes, ignore and get another key.
+	DEY			; Otherwise, go backward
+	DEX
+	LDA #$00		; Blank char
+	STA HISTR,X		; Store it.
+	BEQ HENT		; Back to HENT. (always branch)
+
+HENT2:	STA HISTR,X		; Enter onto screen.
+	INX			; Advance screen pointer
+	INY			; Advance initial pointer
+	CPY #$03		; Are we at end?
+	BNE HENT		; Nope, get another one.
+
+	;; Enter High Score END
 	
 	JMP BLNKON		; Wait for attract.
 
-	;; Read key, convert to screen code 
+	;; Read key, convert to screen code. stored in TEMLOC
 	
-HRKEY:	LDA #$FF
+HRKEY:  TXA			; Save X
+	PHA			; ...
+	LDA #$FF
 	STA CHKEY
 HRKEY2: LDA CHKEY
         CMP #$FF
         BEQ HRKEY2
         LDX CHKEY
         LDA HKTBL,X
+	STA TEMLOC		; Store into temp.
+	PLA			; Restore X
+	TAX			; ...
+	LDA TEMLOC		; restore A from temp.
 	RTS
 	
 HDLIV:	PHA
@@ -156,30 +199,30 @@ HCINDX  .BY >CHRORG,>CHRORG,>CHRORG,>CHRORG,>PACCHR
         ;; Key to screen code table.
 
 HKTBL:
-	.SB "L"			; 0
-	.SB "J"			; 1
+	.SB "l"+0x80			; 0
+	.SB "j"+0x80			; 1
 	.SB ";"			; 2
 	.BY 0xFF			; 3 (F1)
 	.BY 0xFF			; 4 (F2)
-	.SB "K"			; 5
+	.SB "k"+0x80			; 5
 	.SB "+"			; 6
 	.SB "*"			; 7
-	.SB "O"			; 8
+	.SB "o"+0x80			; 8
 	.BY 0xFF			; 9
-	.SB "P"			; 10
-	.SB "U"			; 11
+	.SB "p"+0x80			; 10
+	.SB "u"+0x80			; 11
 	.BY 0xFF			; 12 (RETURN)
-	.SB "I"			; 13
+	.SB "i"+0x80			; 13
 	.SB "-"			; 14
 	.SB "="			; 15
-	.SB "V"			; 16
+	.SB "v"+0x80			; 16
 	.BY 0xFF			; 17 (HELP)
-	.SB "C"			; 18
+	.SB "c"+0x80			; 18
 	.BY 0xFF			; 19 (F3)
 	.BY 0xFF			; 20 (F4)
-	.SB "B"			; 21
-	.SB "X"			; 22
-	.SB "Z"			; 23
+	.SB "b"+0x80			; 21
+	.SB "x"+0x80			; 22
+	.SB "z"+0x80			; 23
 	.SB "4"			; 24
 	.BY 0xFF			; 25 (DEAD)
 	.SB "3"			; 26
@@ -191,19 +234,19 @@ HKTBL:
 	.SB ","			; 32
 	.SB " "			; 33 (SPACE)
 	.SB "."			; 34
-	.SB "N"			; 35
+	.SB "n"+0x80			; 35
 	.BY 0xFF			; 36 (DEAD)
-	.SB "M"			; 37
+	.SB "m"+0x80			; 37
 	.SB "/"			; 38
 	.BY 0xFF			; 39 (ATARI)
-	.SB "R"			; 40
+	.SB "r"+0x80			; 40
 	.BY 0xFF			; 41 (DEAD)
-	.SB "E"			; 42
-	.SB "Y"			; 43
+	.SB "e"+0x80			; 42
+	.SB "y"+0x80			; 43
 	.BY 0xFF			; 44
-	.SB "T"			; 45
-	.SB "W"			; 46
-	.SB "Q"			; 47
+	.SB "t"+0x80			; 45
+	.SB "w"+0x80			; 46
+	.SB "q"+0x80			; 47
 	.SB "9"			; 48
 	.BY 0xFF			; 49 (DEAD)
 	.SB "0"			; 50
@@ -212,12 +255,19 @@ HKTBL:
 	.SB "8"			; 53
 	.SB "<"			; 54
 	.SB ">"			; 55
-	.SB "F"			; 56
-	.SB "H"			; 57
-	.SB "D"			; 58
+	.SB "f"+0x80			; 56
+	.SB "h"+0x80			; 57
+	.SB "d"+0x80			; 58
 	.BY 0xFF			; 59 (DEAD)
 	.BY 0xFF			; 60 CAPS/LOWR
-	.SB "G"			; 61
-	.SB "S"			; 62
-	.SB "A"			; 63
+	.SB "g"+0x80			; 61
+	.SB "s"+0x80			; 62
+	.SB "a"+0x80			; 63
+
+	;; High score screen offsets for each place.
 	
+HINIOF:
+	.byte 6, 26, 46, 66, 86, 106, 126, 146, 166, 186
+
+HSCROF:
+	.byte 10, 20+10, 40+10, 60+10, 80+10, 100+10, 120+10, 140+10, 160+10, 180+10
