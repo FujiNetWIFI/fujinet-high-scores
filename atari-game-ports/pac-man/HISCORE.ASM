@@ -3,7 +3,6 @@
 	;;
 
 CHKEY	= $02FC
-KGETCH 	= $F6E2
 	
 	;; Clear off players
 	;; Set display list and DLI
@@ -73,6 +72,7 @@ HISCR:
 	;; Enter High score
 
 XL	JSR HRKEY
+	BMI XL
 	
 	LDX #$06
 	STA HISTR,X
