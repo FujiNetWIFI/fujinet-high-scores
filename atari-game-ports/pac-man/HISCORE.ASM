@@ -69,24 +69,54 @@ HISCR:
 	
 	;; Enter High score START
 
-	LDX #$00		; Start with Place on board
+	LDX #$00		; Start with first place
 	STX TEMLOC		; Store it.
-
-	;; Scoot older high scores down from selected slot
-
-	LDY #$00
 	
-	LDA HINIOF,X
-	TAX
+	;; Find possible slot
 
-HSCOOT:	LDA HISTR,X
+HFSLT:	LDX TEMLOC
+	LDY #$00		; First score char position
+	LDA HSCROF,X		; Get high score screen ptr offset
+	TAX			; Set to X
+HFSLT2:	LDA HISTR,X		; Load next char of high score slot
+	CMP TEXT+$2A,Y		; Compare against top high score.
+	BCS HSETSLT		; higher score than current slot, select this one.
+	INY			; Increment current hiscore slot ptr.
+	INX			; Increment hiscore screen slot ptr
+	CPY #$06		; Are we done with string comparison?
+	BNE HFSLT2		; No, Continue string comparison
+	INC TEMLOC		; Increment slot #
+	LDX TEMLOC		; Get Slot #
+	CPX #$10		; Are we at last slot?
+	BNE HFSLT		; Not done yet, next slot.
+	JMP BLNKON		; Didn't find one, don't enter.
+	
+	;; Set Slot
+
+HSETSLT:
+	LDX TEMLOC		; Store found place.
+	LDY #$09		; Start at end.
+	STY TUNLOC
+	
+	;; Scoot older high scores down from selected slot
+	
+HSCOOT: LDY TUNLOC
+	LDA HINIOF,Y
+	TAX
+	LDY #$00		; Beginning of string.
+
+HSCOOT2:
+	LDA HISTR,X
 	STA HISTR+20,X
-	LDA #$00
-	STA HISTR,X
-	INY
+	;; LDA #$00
+	;; STA HISTR,X
 	INX
+	INY
 	CPY #12
-	BNE HSCOOT
+	BNE HSCOOT2
+
+	DEC TUNLOC
+	BPL HSCOOT
 	
 	;; Copy high score to slot
 
@@ -96,7 +126,7 @@ HSCOOT:	LDA HISTR,X
  	TAY			; And store in Y
 
  	LDX #$00
-HCPY:	LDA TEXT+57,X
+HCPY:	LDA TEXT+$2A,X
  	STA HISTR,Y
  	INX
  	INY
@@ -133,6 +163,56 @@ HENT2:	STA HISTR,X		; Enter onto screen.
 	BNE HENT		; Nope, get another one.
 
 	;; Enter High Score END
+
+	;; Write High score to disk
+
+	LDA #$31		; Disk drive
+	STA DDEVIC		; into device
+	LDA #$01		; Unit 1
+	STA DUNIT		; into unit.
+	LDA #'W'		; Write...
+	STA DCOMND		; into command
+	LDA #$80		; To Drive.
+	STA DSTATS		; into data direction
+	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$0F		; Standard timeout value (approx 15 seconds)
+	STA DTIMLO		; into timeout.
+	LDA #$80		; 128 byte sector
+	STA DBYTLO		; ...
+	LDA #$00		; ...
+	STA DBYTHI		; into # of bytes requested.
+	LDA #$CF		; Sector 0x2CF (719)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR SIOV
+
+	LDA #$31		; Disk drive
+	STA DDEVIC		; into device
+	LDA #$01		; Unit 1
+	STA DUNIT		; into unit.
+	LDA #'W'		; Write...
+	STA DCOMND		; into command
+	LDA #$80		; To Drive
+	STA DSTATS		; into data direction
+	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR2)	; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$0F		; Standard timeout value (approx 15 seconds)
+	STA DTIMLO		; into timeout.
+	LDA #$80		; 128 byte sector
+	STA DBYTLO		; ...
+	LDA #$00		; ...
+	STA DBYTHI		; into # of bytes requested.
+	LDA #$D0		; Sector 0x2D0 (720)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR SIOV	
 	
 	JMP BLNKON		; Wait for attract.
 
@@ -182,7 +262,7 @@ HDLIX	INC DLICNT
 HDLIST
 	.byte $70,$70		; 16 blank scanlines
 	.byte $42,$00,$28,$02	; mode 2 for score
-	.byte $C6,a(HIDAT),$07,$07,$86,$06,$06,$06,$06,$86,$06,$86,$06,$06,$06,$06,$06,$06,$06,$06,$86,$44,$70,$17 ; Score
+	.byte $C6,a(HIDAT),$07,$07,$86,$06,$06,$06,$06,$86,$06,$86,$06,$06,$06,$06,$06,$70,$70,$70,$86,$44,$70,$17 ; Score
 	.byte $41, a(HDLIST)
 
 	
