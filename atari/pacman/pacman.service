@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari Bcsquestfortires Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/pacman "/tnfs/Atari 8-bit/Games/High Score Enabled/B.C.'s Quest for Tires.atr" "/var/www/atari-scores/bc-quest-for-tires.html"
+
+[Install]
+WantedBy=multi-user.target
