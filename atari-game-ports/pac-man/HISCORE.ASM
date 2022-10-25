@@ -78,14 +78,16 @@ HFSLT:	LDX TEMLOC
 	LDY #$00		; First score char position
 	LDA HSCROF,X		; Get high score screen ptr offset
 	TAX			; Set to X
-HFSLT2:	LDA HISTR,X		; Load next char of high score slot
-	CMP TEXT+$2A,Y		; Compare against top high score.
+HFSLT2:	LDA TEXT+$2A,Y		; Load next char of high score slot
+	CMP HISTR,X		; Compare against top high score.
+	BEQ HFSLT3
+	BCC HFSLT4
 	BCS HSETSLT		; higher score than current slot, select this one.
-	INY			; Increment current hiscore slot ptr.
+HFSLT3:	INY			; Increment current hiscore slot ptr.
 	INX			; Increment hiscore screen slot ptr
 	CPY #$06		; Are we done with string comparison?
 	BNE HFSLT2		; No, Continue string comparison
-	INC TEMLOC		; Increment slot #
+HFSLT4:	INC TEMLOC		; Increment slot #
 	LDX TEMLOC		; Get Slot #
 	CPX #$10		; Are we at last slot?
 	BNE HFSLT		; Not done yet, next slot.
@@ -97,7 +99,7 @@ HSETSLT:
 	LDX TEMLOC		; Store found place.
 	LDY #$09		; Start at end.
 	STY TUNLOC
-	
+
 	;; Scoot older high scores down from selected slot
 	
 HSCOOT: LDY TUNLOC
