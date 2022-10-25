@@ -89,8 +89,8 @@ HFSLT3:	INY			; Increment current hiscore slot ptr.
 	BNE HFSLT2		; No, Continue string comparison
 HFSLT4:	INC TEMLOC		; Increment slot #
 	LDX TEMLOC		; Get Slot #
-	CPX #$09		; Are we at last slot?
-	BCC HFSLT		; Not done yet, next slot.
+	CPX #$0A		; Are we at last slot?
+	BNE HFSLT		; Not done yet, next slot.
 	JMP BLNKON		; Didn't find one, don't enter.
 	
 	;; Set Slot
@@ -99,6 +99,12 @@ HSETSLT:
 	LDX TEMLOC		; Store found place.
 	LDA #$08		; Second to last place for scoot.
 	STA TUNLOC		; Store in scoot position.
+
+	;; Are we in slot 10? if so, bypass the scoot.
+
+	LDA TEMLOC
+	CMP #$09
+	BEQ HENTR
 	
 	;; Scoot older high scores down from selected slot
 	
@@ -122,7 +128,7 @@ HSCOOT2:
 	
 	;; Copy high score to slot
 
-	LDA TEMLOC		; Restore Score place
+HENTR:	LDA TEMLOC		; Restore Score place
 	TAX			; into X.
  	LDA HSCROF,X		; Get score offset on screen
  	TAY			; And store in Y
