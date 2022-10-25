@@ -110,8 +110,6 @@ HSCOOT: LDY TUNLOC
 HSCOOT2:
 	LDA HISTR,X
 	STA HISTR+20,X
-	;; LDA #$00
-	;; STA HISTR,X
 	INX
 	INY
 	CPY #12
@@ -139,6 +137,17 @@ HCPY:	LDA TEXT+$2A,X
  	LDA HINIOF,X		; Find screen offset
  	TAX			; Send it to X
 
+	;; Blank out initials
+	
+	LDA #"."+0x40		; RED
+	STA HISTR,X
+	INX
+	STA HISTR,X
+	INX
+	STA HISTR,X
+	DEX
+	DEX
+	
 	LDY #$00		; # of initials entered
 	LDX TEMLOC
 	LDA HINIOF,X
