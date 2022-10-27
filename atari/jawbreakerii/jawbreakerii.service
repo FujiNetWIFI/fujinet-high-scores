@@ -1,5 +1,5 @@
 [Unit]
-Description=Atari Frogger Hi-scores
+Description=Atari Jawbreaker II Hi-scores
 After=remote-fs.target
 After=syslog.target
 

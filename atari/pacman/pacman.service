@@ -1,5 +1,5 @@
 [Unit]
-Description=Atari Bcsquestfortires Hi-scores
+Description=Atari PAC-MAN Hi-scores
 After=remote-fs.target
 After=syslog.target
 

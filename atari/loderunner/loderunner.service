@@ -1,5 +1,5 @@
 [Unit]
-Description=Atari Tutti Frutti Hi-scores
+Description=Atari LodeRunner Hi-scores
 After=remote-fs.target
 After=syslog.target
 
