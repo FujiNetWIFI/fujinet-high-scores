@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/rearguard "/tnfs/Atari 8-bit/Games/High Score Enabled/Rear Guard (BASIC).atr" "/var/www/atari-scores/rearguard.html"
+ExecStart=/usr/local/sbin/rearguard "/tnfs/Rear Guard (BASIC).atr" "/var/www/html/rearguard.html"
 
 [Install]
 WantedBy=multi-user.target

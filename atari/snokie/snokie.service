@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/snokie "/tnfs/Atari 8-bit/Games/High Score Enabled/Snokie.atr" "/var/www/atari-scores/snokie.html"
+ExecStart=/usr/local/sbin/snokie "/tnfs/Snokie.atr" "/var/www/html/snokie.html"
 
 [Install]
 WantedBy=multi-user.target

@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/flak "/tnfs/Atari 8-bit/Games/High Score Enabled/Flak.atr" "/var/www/atari-scores/flak.html"
+ExecStart=/usr/local/sbin/flak "/tnfs/Flak.atr" "/var/www/html/flak.html"
 
 [Install]
 WantedBy=multi-user.target

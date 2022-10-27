@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/serpentine "/tnfs/Atari 8-bit/Games/High Score Enabled/Serpentine.atr" "/var/www/atari-scores/serpentine.html"
+ExecStart=/usr/local/sbin/serpentine "/tnfs/Serpentine.atr" "/var/www/html/serpentine.html"
 
 [Install]
 WantedBy=multi-user.target

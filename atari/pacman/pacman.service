@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/pacman "/tnfs/Atari 8-bit/Games/High Score Enabled/B.C.'s Quest for Tires.atr" "/var/www/atari-scores/bc-quest-for-tires.html"
+ExecStart=/usr/local/sbin/pacman "/tnfs/B.C.'s Quest for Tires.atr" "/var/www/html/bc-quest-for-tires.html"
 
 [Install]
 WantedBy=multi-user.target

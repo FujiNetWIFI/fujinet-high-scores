@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/tuttifrutti "/tnfs/Atari 8-bit/Games/High Score Enabled/Tutti Frutti (BASIC).atr" "/var/www/atari-scores/tuttifrutti.html"
+ExecStart=/usr/local/sbin/tuttifrutti "/tnfs/Tutti Frutti (BASIC).atr" "/var/www/html/tuttifrutti.html"
 
 [Install]
 WantedBy=multi-user.target

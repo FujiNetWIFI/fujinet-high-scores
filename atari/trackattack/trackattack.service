@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/trackattack "/tnfs/Atari 8-bit/Games/High Score Enabled/Track Attack.atr" "/var/www/atari-scores/track-attack.html"
+ExecStart=/usr/local/sbin/trackattack "/tnfs/Track Attack.atr" "/var/www/html/track-attack.html"
 
 [Install]
 WantedBy=multi-user.target

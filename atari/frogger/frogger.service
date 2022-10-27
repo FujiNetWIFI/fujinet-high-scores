@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/frogger "/tnfs/Atari 8-bit/Games/High Score Enabled/Frogger.atr" "/var/www/atari-scores/frogger.html"
+ExecStart=/usr/local/sbin/frogger "/tnfs/Frogger.atr" "/var/www/html/frogger.html"
 
 [Install]
 WantedBy=multi-user.target

@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/jumpman "/tnfs/Atari 8-bit/Games/High Score Enabled/Jumpman.atr" "/var/www/atari-scores/jumpman.html"
+ExecStart=/usr/local/sbin/jumpman "/tnfs/Jumpman.atr" "/var/www/html/jumpman.html"
 
 [Install]
 WantedBy=multi-user.target

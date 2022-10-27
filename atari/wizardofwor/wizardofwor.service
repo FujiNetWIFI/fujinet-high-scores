@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/wizardofwor "/tnfs/Atari 8-bit/Games/High Score Enabled/Wizard of Wor.atr" "/var/www/atari-scores/wizardofwor.html"
+ExecStart=/usr/local/sbin/wizardofwor "/tnfs/Wizard of Wor.atr" "/var/www/html/wizardofwor.html"
 
 [Install]
 WantedBy=multi-user.target

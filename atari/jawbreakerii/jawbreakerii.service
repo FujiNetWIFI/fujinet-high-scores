@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/jawbreakerii "/tnfs/Atari 8-bit/Games/High Score Enabled/Jawbreaker II.atr" "/var/www/atari-scores/jawbreaker-ii.html"
+ExecStart=/usr/local/sbin/jawbreakerii "/tnfs/Jawbreaker II.atr" "/var/www/html/jawbreaker-ii.html"
 
 [Install]
 WantedBy=multi-user.target

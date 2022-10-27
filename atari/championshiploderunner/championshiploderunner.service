@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/championshiploderunner "/tnfs/Atari 8-bit/Games/High Score Enabled/Tutti Frutti (BASIC).atr" "/var/www/atari-scores/championshiploderunner.html"
+ExecStart=/usr/local/sbin/championshiploderunner "/tnfs/Tutti Frutti (BASIC).atr" "/var/www/html/championshiploderunner.html"
 
 [Install]
 WantedBy=multi-user.target
