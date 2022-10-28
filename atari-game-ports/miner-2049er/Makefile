@@ -14,7 +14,7 @@ patch:
 	$(AS) -o:write.bin write.asm
 	$(CC) -opatch patch.c
 	$(PATCH) "build/Miner 2049er.xex" read.bin write.bin
-	$(DIR2ATR) -S "Miner 2049er.atr" build/
+	$(DIR2ATR) -B picoboot.bin -S "Miner 2049er.atr" build/
 	$(CC) -opatch2 patch2.c
 	$(PATCH2) "Miner 2049er.atr" score.bin
 
