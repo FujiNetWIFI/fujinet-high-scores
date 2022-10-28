@@ -20,8 +20,12 @@ DBYTHI	=	$0309
 DAUX1	=	$030A	;command auxiliary bytes
 DAUX2	=	$030B
 
+NMIEN	=	$D40E
+	
 SIOV	=	$E459   ; SIO Vector
 
+	LDA #$00
+	STA NMIEN
 	LDA #$31		; Drive 1
 	STA DDEVIC
 	LDA #$01		; Unit 1 (D1:)
@@ -41,6 +45,7 @@ SIOV	=	$E459   ; SIO Vector
 	LDA #$CF		; Sector $02CF
 	STA DAUX1
 	LDA #$02
+	STA DAUX2
 	JSR SIOV		; Do it
 
 	LDA #$80		
@@ -49,10 +54,13 @@ SIOV	=	$E459   ; SIO Vector
 	STA DBUFLO
 	LDA #$08
 	STA DBUFHI
-	LDA #$89		; Sector $02D0
+	LDA #$D0		; Sector $02D0
 	STA DAUX1
 	JSR SIOV		; do it
 
+	LDA #$C0
+	STA NMIEN
+	
 	JMP $92B9		; Finish and back to High scores screen
 
 	ORG $02E0
