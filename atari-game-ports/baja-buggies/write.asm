@@ -20,9 +20,9 @@ SIOV	=	$E459   ; SIO Vector
 
 	ORG $0489
 
-	LDA #$00		; This prevents score from exploding
-	STA $43E2		; I have no idea why.
-	STA $43E3
+	LDA #$00		; We need to put the bottom of the display back to blank
+	STA $37D2		; because we are writing it back to disk.
+	STA $37D3		; otherwise all hell breaks loose.
 	
 	LDA #$31		; Drive 1
 	STA DDEVIC
