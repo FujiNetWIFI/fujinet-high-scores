@@ -11,14 +11,7 @@
 
 #define XEX_END 0x38EF // End of XEX file, minus the $02E2 segment.
 
-#define JUMP_READ_POS1 0x186B
-#define JUMP_READ_POS2 0x1A17
-#define JUMP_WRITE_POS1 0x1E4B
-
 unsigned char sectorBuf[256];
-
-const char jump_read[3]={0x4C,0x00,0x59};
-const char jump_write[3]={0x4C,0x00,0x5A};
 
 int main(int argc, char *argv[])
 {
@@ -60,21 +53,10 @@ int main(int argc, char *argv[])
       return 1; // Bail.
     }
 
-  // Everything open, seek and patch. First, the jumps into our code.
+  // Everything open, seek and patch
 
-  fseek(afp,JUMP_READ_POS1,SEEK_SET);
-  fwrite(&jump_read[0],sizeof(const char),sizeof(jump_read),afp);
-
-  fseek(afp,JUMP_READ_POS2,SEEK_SET);
-  fwrite(&jump_read[0],sizeof(const char),sizeof(jump_read),afp);
-
-  fseek(afp,JUMP_WRITE_POS1,SEEK_SET);
-  fwrite(&jump_write[0],sizeof(const char),sizeof(jump_write),afp);
-
-  // Now the read and write code. Go ahead and skip over the first two bytes on both files
-  // and seek to the end of the game on ATR
   fseek(afp,XEX_END,SEEK_SET);
-  fseek(bfp,2,SEEK_SET);
+  fseek(bfp,2,SEEK_SET); // skip past $FF $FF on both.
   fseek(cfp,2,SEEK_SET);
 
   len = fread(&sectorBuf[0],sizeof(unsigned char),sizeof(sectorBuf),bfp);

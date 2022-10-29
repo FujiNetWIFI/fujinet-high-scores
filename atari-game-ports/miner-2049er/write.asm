@@ -63,5 +63,30 @@ SIOV	=	$E459   ; SIO Vector
 	
 	JMP $92B9		; Finish and back to High scores screen
 
-	ORG $02E0
-	.WORD $2000
+	;; Patch routine to inject read/write score jumps
+
+	ORG $5B00
+
+	LDA #$4C		; High score read during attract
+	STA $9CD9
+	LDA #$00
+	STA $9CDA
+	LDA #$59
+	STA $9CDB
+
+	LDA #$4C		; High score write after enter.
+	STA $A36B
+	LDA #$00
+	STA $A36C
+	LDA #$5A
+	STA $A36D
+
+	JMP $7FC1		; ...and continue onto game.
+
+	ORG $2012		; Patch the final jump in the loader/decompressor.
+
+	JMP $5B00		; ...To go to our patch routine.
+	
+	ORG $02E0		; Finally fix up the RUN address
+	.WORD $2000		; To go to the loader/decompressor. Whew.
+
