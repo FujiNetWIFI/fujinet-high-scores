@@ -13,7 +13,7 @@ pre:
 	$(MKDIR) -p $(BUILD)
 
 PACMAN-ORIGINAL.xex:
-	$(AS) -d:VERSION=1 PACMAN.ASM -o:$(BUILD)/PACMAN-ORIGINAL.xex -l:PACMAN.lst
+	$(AS) -d:VERSION=4 PACMAN.ASM -o:$(BUILD)/PACMAN-ORIGINAL.xex -l:PACMAN.lst
 
 dist:
 	$(DIR2ATR) -B picoboot.bin -S "PAC-MAN.atr" $(BUILD)

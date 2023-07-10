@@ -26,17 +26,23 @@ DMACTL	=	$D400
 NMIEN	=	$D40E
 	
 SIOV	=	$E459   ; SIO Vector
+SETVBV	=	$E45C	; Set VBV
 POKMSK  =	$0010	; Pokey mask
 IRQEN   = 	$D20E	; IRQ Enable
 
-	LDA #$00
+	JMP $92B9
+	
+	LDA $5BFE
+	STA $0222
+
+	LDA $5BFF
+	STA $0223
+	
+	LDA #$40
 	STA NMIEN
-	STA DMACTL
-	STA SDMCTL
 
 	LDA #$C0
 	STA POKMSK
-	STA IRQEN
 	
 	LDA #$31		; Drive 1
 	STA DDEVIC
@@ -57,6 +63,7 @@ IRQEN   = 	$D20E	; IRQ Enable
 	LDA #$CF		; Sector $02CF
 	STA DAUX1
 	LDA #$02
+	CLI
 	JSR SIOV		; Do it
 
 	LDA #$40		
@@ -67,12 +74,20 @@ IRQEN   = 	$D20E	; IRQ Enable
 	STA DBUFHI
 	LDA #$89		; Sector $02D0
 	STA DAUX1
+	CLI
 	JSR SIOV		; do it
 
-	LDA #$3E
-	STA DMACTL
+	LDA #$BB
+	STA $0222
+	LDA #$B0
+	STA $0223
 
-	LDA #$80
+	LDA #$C0
 	STA NMIEN
+
+	LDA #$00
+	STA POKMSK
+
+	SEI
 	
 	JMP $92B9		; Finish and back to high score display

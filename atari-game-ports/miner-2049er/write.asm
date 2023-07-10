@@ -67,6 +67,10 @@ SIOV	=	$E459   ; SIO Vector
 
 	ORG $5B00
 
+	LDA $0222
+	STA VVBLKISAVE
+	LDA $0223
+	STA VVBLKISAVE+1
 	LDA #$4C		; High score read during attract
 	STA $9CD9
 	LDA #$00
@@ -83,6 +87,9 @@ SIOV	=	$E459   ; SIO Vector
 
 	JMP $7FC1		; ...and continue onto game.
 
+	ORG $5BFE
+VVBLKISAVE:	.ds 2
+	
 	ORG $2012		; Patch the final jump in the loader/decompressor.
 
 	JMP $5B00		; ...To go to our patch routine.
