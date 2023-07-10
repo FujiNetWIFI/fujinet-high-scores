@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari smol snek Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/smolsnek "/tnfs/smolsnek-fn-version.atr" "/var/www/html/smolsnek.html"
+
+[Install]
+WantedBy=multi-user.target
