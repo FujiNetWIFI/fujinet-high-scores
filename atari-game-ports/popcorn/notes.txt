@@ -1,0 +1,3 @@
+22F6	Jump back to title screen
+2674	End of Your Fired! (put hiscore here)
+
