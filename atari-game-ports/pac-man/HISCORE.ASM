@@ -4,50 +4,54 @@
 
 CHKEY	= $02FC
 
+	;; Patched ATSQ18
+
+ATSQ18P:
+	CMP #$18		; Are we in Attract seq $18?
+	BNE ATSQ19P		; No, go to patched 19
+	JMP ATSQ18R		; Otherwise, go back to 18.
+
+	;; Patched ATSQ19 Return
+ATSQ19P:
+	DEC ATTIMR		; Count down attract timer
+	LDA ATTIMR		; Check it
+	BEQ A19R		; If we're at zero, roll over
+	RTS			; Otherwise continue normal vblank processing
+
+A19R:	LDA ATSEQU		; Check attract sequence
+	CMP #$1C		; have we counted from $19 to $1C 
+	BCS ADQ			; Yes, reset attract to 0 and go to options
+	INC ATSEQU		; No, increment...
+	RTS			; and continue norm al vblank processing
+	
+	;; Patched ATDONE
+	
+ATDONEP:
+	LDA ATSEQU		; Get Attract Sequence #
+	CMP #$18		; Are we done?
+	BNE ADQ			; Yes, Quit
+	JMP ATSCR		; No, set up and show hi-score
+ADQ:	LDA #0			; Quit, Set attract sequence
+	STA ATSEQU		; to zero
+	LDA #7			; Reset attract clock
+	STA ATCLOK		; ...
+	RTS			; Bye.
+	
 	;; Attract mode hi-score view
-ATSCR:	LDA #$00
-	STA HPOSM0
-	STA HPOSM1
-	STA HPOSM2
-	STA HPOSM3
-	LDA ATSEQU
-	CMP #$19
-	BEQ ATSCRD
-	CMP #$1A
-	BEQ ATSCRD
-	CMP #$1B
-	BEQ ATSCRD
-	CMP #$1C
-	BEQ ATSCRD
-	CMP #$1D
-	BEQ ATSCRD
-	CMP #$1E
-	BEQ ATSCRD
-	CMP #$1F
-	BEQ ATSCRDDD
-	JSR OCOLRS
-	JSR HISCRL
-	JSR HISCRD
-	LDA #7
-	STA ATCLOK
-	LDA #$19
-	STA ATSEQU
-	RTS
 
-ATSCRD: DEC ATTIMR
-	LDA ATTIMR
-	BNE ATSCRDD
-	LDA #$FF
-	STA ATTIMR
-	INC ATSEQU
-ATSCRDD:
-	RTS
+ATSCR:	LDA #$00		; Zero out missiles to get rid of dangling score display
+	STA HPOSM0		; ...
+	STA HPOSM1		; ...
+	STA HPOSM2		; ...
+	STA HPOSM3		; ...
+	JSR OCOLRS		; Set Options screen colors
+	JSR HISCRL		; Load hi-score into display
+	JSR HISCRD		; Set display list/DLI for high score display
+	LDA #$FF		; ...
+	STA ATTIMR		; Set attract timer
+	INC ATSEQU		; Increment attract sequence
+	RTS			; and bounce back.
 
-ATSCRDDD:
-	LDA #$00
-	STA ATSEQU
-	RTS
-		
 	;; Clear off players
 	;; Set display list and DLI
 HISCR:
