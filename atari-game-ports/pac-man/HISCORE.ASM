@@ -3,72 +3,61 @@
 	;;
 
 CHKEY	= $02FC
-	
+
+	;; Attract mode hi-score view
+ATSCR:	LDA #$00
+	STA HPOSM0
+	STA HPOSM1
+	STA HPOSM2
+	STA HPOSM3
+	LDA ATSEQU
+	CMP #$19
+	BEQ ATSCRD
+	CMP #$1A
+	BEQ ATSCRD
+	CMP #$1B
+	BEQ ATSCRD
+	CMP #$1C
+	BEQ ATSCRD
+	CMP #$1D
+	BEQ ATSCRD
+	CMP #$1E
+	BEQ ATSCRD
+	CMP #$1F
+	BEQ ATSCRDDD
+	JSR OCOLRS
+	JSR HISCRL
+	JSR HISCRD
+	LDA #7
+	STA ATCLOK
+	LDA #$19
+	STA ATSEQU
+	RTS
+
+ATSCRD: DEC ATTIMR
+	LDA ATTIMR
+	BNE ATSCRDD
+	LDA #$FF
+	STA ATTIMR
+	INC ATSEQU
+ATSCRDD:
+	RTS
+
+ATSCRDDD:
+	LDA #$00
+	STA ATSEQU
+	RTS
+		
 	;; Clear off players
 	;; Set display list and DLI
 HISCR:
-	LDA #$31		; Disk drive
-	STA DDEVIC		; into device
-	LDA #$01		; Unit 1
-	STA DUNIT		; into unit.
-	LDA #'R'		; Read...
-	STA DCOMND		; into command
-	LDA #$40		; To Atari
-	STA DSTATS		; into data direction
-	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
-	STA DBUFLO		; into Buffer lo byte
-	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
-	STA DBUFHI		; into Buffer hi byte
-	LDA #$0F		; Standard timeout value (approx 15 seconds)
-	STA DTIMLO		; into timeout.
-	LDA #$80		; 128 byte sector
-	STA DBYTLO		; ...
-	LDA #$00		; ...
-	STA DBYTHI		; into # of bytes requested.
-	LDA #$CF		; Sector 0x2CF (719)
-	STA DAUX1		; ...
-	LDA #$02		; ...
-	STA DAUX2		; into the daux parameter.
-	JSR SIOV
-
-	LDA #$31		; Disk drive
-	STA DDEVIC		; into device
-	LDA #$01		; Unit 1
-	STA DUNIT		; into unit.
-	LDA #'R'		; Read...
-	STA DCOMND		; into command
-	LDA #$40		; To Atari
-	STA DSTATS		; into data direction
-	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
-	STA DBUFLO		; into Buffer lo byte
-	LDA #.HI(HISTR2)	; Hi score screen data buffer (HI)
-	STA DBUFHI		; into Buffer hi byte
-	LDA #$0F		; Standard timeout value (approx 15 seconds)
-	STA DTIMLO		; into timeout.
-	LDA #$80		; 128 byte sector
-	STA DBYTLO		; ...
-	LDA #$00		; ...
-	STA DBYTHI		; into # of bytes requested.
-	LDA #$D0		; Sector 0x2D0 (720)
-	STA DAUX1		; ...
-	LDA #$02		; ...
-	STA DAUX2		; into the daux parameter.
-	JSR SIOV
-
+	JSR HISCRL		; Load Hi Score from disk
 	JSR OCOLRS		; Set up color palette like ATRACT
-	LDA #<HDLIST		; Set up high score display list
-	STA SDLSTL		; ...
-	STA DLISTL		; ...
-	LDA #>HDLIST		; ...
-	STA SDLSTH		; ...
-	STA DLISTH		; ...
-	LDA #<HDLIV		; Set up high score DLI
-	STA VDSLST		; ...
-	LDA #>HDLIV		; ...
-	STA VDSLST+1		; ...
-	
+	JSR HISCRD		; Set up hi-score display list and DLI
+		
 	;; Enter High score START
 
+HSCONT:	
 	LDX #$00		; Start with first place
 	STX TEMLOC		; Store it.
 	
@@ -235,6 +224,69 @@ HENT2:	STA HISTR,X		; Enter onto screen.
 	
 	JMP BLNKON		; Wait for attract.
 
+	;; Load hi score from disk into memory
+
+HISCRL:	LDA #$31		; Disk drive
+	STA DDEVIC		; into device
+	LDA #$01		; Unit 1
+	STA DUNIT		; into unit.
+	LDA #'R'		; Read...
+	STA DCOMND		; into command
+	LDA #$40		; To Atari
+	STA DSTATS		; into data direction
+	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$0F		; Standard timeout value (approx 15 seconds)
+	STA DTIMLO		; into timeout.
+	LDA #$80		; 128 byte sector
+	STA DBYTLO		; ...
+	LDA #$00		; ...
+	STA DBYTHI		; into # of bytes requested.
+	LDA #$CF		; Sector 0x2CF (719)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR SIOV
+
+	LDA #$31		; Disk drive
+	STA DDEVIC		; into device
+	LDA #$01		; Unit 1
+	STA DUNIT		; into unit.
+	LDA #'R'		; Read...
+	STA DCOMND		; into command
+	LDA #$40		; To Atari
+	STA DSTATS		; into data direction
+	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR2)	; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$0F		; Standard timeout value (approx 15 seconds)
+	STA DTIMLO		; into timeout.
+	LDA #$80		; 128 byte sector
+	STA DBYTLO		; ...
+	LDA #$00		; ...
+	STA DBYTHI		; into # of bytes requested.
+	LDA #$D0		; Sector 0x2D0 (720)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR SIOV
+	RTS
+	
+HISCRD:	LDA #<HDLIST		; Set up high score display list
+	STA SDLSTL		; ...
+	STA DLISTL		; ...
+	LDA #>HDLIST		; ...
+	STA SDLSTH		; ...
+	STA DLISTH		; ...
+	LDA #<HDLIV		; Set up high score DLI
+	STA VDSLST		; ...
+	LDA #>HDLIV		; ...
+	STA VDSLST+1		; ...
+	RTS
+	
 	;; Read key, convert to screen code. stored in TEMLOC
 	
 HRKEY:  TXA			; Save X
