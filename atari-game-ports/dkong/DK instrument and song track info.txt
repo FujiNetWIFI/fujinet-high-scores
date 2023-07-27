@@ -1,0 +1,55 @@
+Start Track for song	          Song
+
+------------------------------------------------
+
+	00		   How High can you get?
+
+	02		   Bend the Girders (intro Animation)
+
+	04		   Level one - Ingame
+
+	06		   Level two - Blue Level
+
+	08		   Death Music
+
+	0A		   Hammer Music
+
+	0C		   Got to the Top
+
+	0E		   Title Screen Music
+
+	13		   Girders Fall (End of Level 2)
+
+	15		   Cement Factory Level
+
+	17		   Empty Song Track for Use with Out of time sound and Elevator lift Level
+
+
+
+
+
+    Instruments			What is used for
+
+----------------------------------------------------
+    
+	06			     Jump
+
+	07			Donkey Kong Growl
+
+	08			Chest Beat Hi
+
+	09			Chest Beat Low
+
+	0A		Gameplay Chest Beat and Barrel Hit
+
+	0C			Hammer Kill
+
+	0D			Points Made
+
+	0E			Fall  ( use C-1 )
+
+	0F			Walk Low
+
+	10			Walk Hi
+
+	11		Springs / Title Screen Selection Change Sound

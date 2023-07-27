@@ -1,0 +1,8 @@
+ Aha, takze on to nema jako sfx, ale jako normalni skladby (jingly).
+Takze to budes normalne spoustet jako jednotlive nove songy:
+	ldx #<MODUL					;low byte of RMT module to X reg
+	ldy #>MODUL					;hi byte of RMT module to Y reg
+	lda #0						;starting song line 0-255 to A reg
+	jsr RASTERMUSICTRACKER		;Init
+pricemz to lda #0 bude vzdy ruzne podle songline radku na kterym ten kterej subsong zacina
+0,2,4,6,8,10,12,14
