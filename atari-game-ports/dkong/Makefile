@@ -1,28 +1,30 @@
 AS=mads
+CP=cp
 SRC=dk.asm
-XEX=XAUTORUN
+XEX=AUTORUN
 LST=dkong.lst
 ATR="Donkey Kong.atr"
 BUILD=build
 MKDIR=mkdir
 DIR2ATR=dir2atr
 WRITE_HIGH_SCORE=./write-high-score
-BOOTLOADER_BIN=xboot.obx
 HISCORE_TABLE_ASM=hiscore_table.asm
 HISCORE_TABLE_BIN=hiscore_table.bin
+BOOT_PROGRAM=picoboot.bin
 
 .PHONY: clean pre
 
 all:	clean pre xex dist hiscore
 
 pre:
+	$(RM) -rf $(BUILD)
 	$(MKDIR) -p $(BUILD)
 
 xex:
 	$(AS) $(SRC) -o:$(BUILD)/$(XEX) -l:$(LST)
 
 dist:
-	$(DIR2ATR) -md -B $(BOOTLOADER_BIN) $(ATR) $(BUILD)
+	$(DIR2ATR) -md -B $(BOOT_PROGRAM) -S $(ATR) $(BUILD)
 
 hiscore:
 	$(AS) $(HISCORE_TABLE_ASM) -o:$(BUILD)/$(HISCORE_TABLE_BIN)	
