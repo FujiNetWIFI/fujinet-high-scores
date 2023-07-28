@@ -167,9 +167,12 @@ hiscore:
 	lda #.hi(hiscore_dlist)
 	sta $0231
 
+	;; Do not translate until we hit first non-zero digit.
 	;; Convert player score to screen codes and store
 	ldx #$00
 @	lda $D3,X
+	cmp #$00
+	
 	sta hiscore_store,X
 	cmp #$05
 	bne @-
