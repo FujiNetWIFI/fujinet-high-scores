@@ -160,26 +160,40 @@ histr2:	.ds 128
 hiscore:
 	;; Load hi-score sectors (719-720) into memory
 	jsr hiscrl
-	
+
 	;; Set up display list
 	lda #.lo(hiscore_dlist)
 	sta $0230
 	lda #.hi(hiscore_dlist)
 	sta $0231
 
-	;; Do not translate until we hit first non-zero digit.
-	;; Convert player score to screen codes and store
-	ldx #$00
-@	lda $D3,X
-	cmp #$00
-	
+hisz:	;; Zero out hiscore store
+	ldx #$06
+	lda #$00
+@	dex
 	sta hiscore_store,X
-	cmp #$05
+	cpx #$00
 	bne @-
-
 	
+	;; skip past zero bytes in front of score
+hisk:	ldx #$00		; Start at offset 0
+@	lda $D3,X		; Check player score relative to X offset
+	cmp #$00		; is digit zero?
+	bne hisc		; No, go to score digit copy
+	inx			; yes, increment.
+	cpx #$06		; Are we at end?
+	bne @-			; No, continue marching right.
 
-hiscore_convert:
+	;; X now contains starting position of right justified score as BCD digits
+	;; Convert to screen code
+hisc:	clc			; clear carry
+	lda $D3,X		; Get digit
+	adc #$10		; add screen code offset
+	sta hiscore_store,X	; store it.
+	inx			; Increment
+	cpx #$06		; are we past end?
+	bne hisc		; nope, go again.
+
 	
 loo:	jmp loo			; Temporary while I work out the screen/dlist.
 	jmp $B1E8		; go back to where we were.
