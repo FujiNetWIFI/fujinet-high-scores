@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari Track Attack Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/todnc "/tnfs/Track Attack.atr" "/var/www/html/track-attack.html"
+
+[Install]
+WantedBy=multi-user.target
