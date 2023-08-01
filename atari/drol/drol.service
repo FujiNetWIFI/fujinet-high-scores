@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari Drol Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/drol "/tnfs/Drol.atr" "/var/www/html/drol.html"
+
+[Install]
+WantedBy=multi-user.target
