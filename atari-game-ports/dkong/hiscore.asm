@@ -4,6 +4,7 @@
 
 	org $6000
 
+chkey	equ $02FC
 ddevic	equ $0300
 dunit	equ $0301
 dcomnd	equ $0302	
@@ -16,6 +17,8 @@ dbythi	equ $0309
 daux1	equ $030A
 daux2	equ $030B
 siov	equ $E459
+vkeybd	equ $0208
+	
 	
 ;;; The High score display list
 	
@@ -137,25 +140,18 @@ hiscore_dlist:
 
 	dta $41,.lo(hiscore_dlist),.hi(hiscore_dlist)
 
-hiscore_store:	.ds 6		; Store hiscore here in screen code form.
+vkeybd_store:	.ds 2		; vkeybd store
+hiscore_store:	.ds 7		; Store hiscore here in screen code form.
+temloc:	        .ds 1           ; Temporary location
+tunloc:		.ds 1		; Another temp location
 	
 hiscore_txt:
 	.sb '                    '
 	.sb '    high   scores   '
 	.sb '                    '
+
 histr:  .ds 128
 histr2:	.ds 128
-	;; .sb '    1. TRC 000000   '
-	;; .sb '    2. ABC 000000   '
-	;; .sb '    3. DEF 000000   '
-	;; .sb '    4. GHI 000000   '
-	;; .sb '    5. JKL 000000   '
-	;; .sb '    6. MNO 000000   '
-	;; .sb '    7. PQR 000000   '
-	;; .sb '    8. STU 000000   '
-	;; .sb '    9. VWX 000000   '
-	;; .sb '   10. YZA 000000   '
-	;; .sb '                    '
 	
 hiscore:
 	;; Load hi-score sectors (719-720) into memory
@@ -167,8 +163,12 @@ hiscore:
 	lda #.hi(hiscore_dlist)
 	sta $0231
 
+	lda vkeybd_store
+	sta $0208
+	lda vkeybd_store+1
+	sta $0209
 hisz:	;; Zero out hiscore store
-	ldx #$06
+	ldx #$07
 	lda #$00
 @	dex
 	sta hiscore_store,X
@@ -194,10 +194,141 @@ hisc:	clc			; clear carry
 	cpx #$06		; are we past end?
 	bne hisc		; nope, go again.
 
+HSCONT:	
+	LDX #$00		; Start with first place
+	STX TEMLOC		; Store it.
 	
-loo:	jmp loo			; Temporary while I work out the screen/dlist.
+	;; Find possible slot
+
+HFSLT:	LDX TEMLOC
+	LDY #$00		; First score char position
+	LDA HSCROF,X		; Get high score screen ptr offset
+	TAX			; Set to X
+HFSLT2:	LDA hiscore_store,Y	; Load next char of high score slot
+	CMP HISTR,X		; Compare against top high score.
+	BEQ HFSLT3
+	BCC HFSLT4
+	BCS HSETSLT		; higher score than current slot, select this one.
+HFSLT3:	INY			; Increment current hiscore slot ptr.
+	INX			; Increment hiscore screen slot ptr
+	CPY #$06		; Are we done with string comparison?
+	BNE HFSLT2		; No, Continue string comparison
+HFSLT4:	INC TEMLOC		; Increment slot #
+	LDX TEMLOC		; Get Slot #
+	CPX #$0A		; Are we at last slot?
+	BNE HFSLT		; Not done yet, next slot.
+	JMP $B1E8		; Didn't find one, don't enter.
+	
+	;; Set Slot
+
+HSETSLT:
+	LDX TEMLOC		; Store found place.
+	LDA #$08		; Second to last place for scoot.
+	STA TUNLOC		; Store in scoot position.
+
+	;; Are we in slot 10? if so, bypass the scoot.
+
+	LDA TEMLOC
+	CMP #$09
+	BEQ HENTR
+	
+	;; Scoot older high scores down from selected slot
+	
+HSCOOT: LDY TUNLOC
+	LDA HINIOF,Y
+	TAX
+	LDY #$00		; Beginning of string.
+
+HSCOOT2:
+	LDA HISTR,X
+	STA HISTR+20,X
+	INX
+	INY
+	CPY #12
+	BNE HSCOOT2
+
+	DEC TUNLOC
+	LDA TUNLOC
+	CMP TEMLOC
+	BPL HSCOOT
+	
+	;; Copy high score to slot
+
+HENTR:	LDA TEMLOC		; Restore Score place
+	TAX			; into X.
+ 	LDA HSCROF,X		; Get score offset on screen
+ 	TAY			; And store in Y
+
+ 	LDX #$00
+HCPY:	LDA hiscore_store,X
+ 	STA HISTR,Y
+ 	INX
+ 	INY
+ 	CPX #$06
+ 	BNE HCPY
+
+	LDX TEMLOC
+ 	LDA HINIOF,X		; Find screen offset
+ 	TAX			; Send it to X
+
+	;; Blank out initials
+	
+	LDA #"."+0x40		; RED
+	STA HISTR,X
+	INX
+	STA HISTR,X
+	INX
+	STA HISTR,X
+	DEX
+	DEX
+	
+	LDY #$00		; # of initials entered
+	LDX TEMLOC
+	LDA HINIOF,X
+	TAX
+	
+HENT:	JSR HRKEY		; Get initial.
+	CMP #$FF		; Dead key?
+	BEQ HENT		; Go back.
+	
+	CMP #52			; Backspace?
+	BNE HENT2		; Nope, go to enter/advance.
+	CPY #$00		; Are we at beginning?
+	BEQ HENT		; Yes, ignore and get another key.
+	DEY			; Otherwise, go backward
+	DEX
+	LDA #$00		; Blank char
+	STA HISTR,X		; Store it.
+	BEQ HENT		; Back to HENT. (always branch)
+
+HENT2:	STA HISTR,X		; Enter onto screen.
+	INX			; Advance screen pointer
+	INY			; Advance initial pointer
+	CPY #$03		; Are we at end?
+	BNE HENT		; Nope, get another one.
+
+	jsr hiscrw		; Write to Disk.
+
+	lda #$76		; restore the VKEYBD vector.
+	sta vkeybd
+	lda #$B1
+	sta vkeybd+1
+	
 	jmp $B1E8		; go back to where we were.
 
+	;; Subroutines *********************************************************
+
+	;; store VKEYBD vector so we can have keyboard during high score entries.
+	
+hiscore_store_vectors:
+	lda vkeybd
+	sta vkeybd_store
+	lda vkeybd+1
+	sta vkeybd_store+1
+	rts			; Go back to start
+
+	;; Load hiscore table from disk into screen memory
+	
 hiscrl:	LDA #$31		; Disk drive
 	STA DDEVIC		; into device
 	LDA #$01		; Unit 1
@@ -245,6 +376,74 @@ hiscrl:	LDA #$31		; Disk drive
 	LDA #$02		; ...
 	STA DAUX2		; into the daux parameter.
 	JSR SIOV
+	RTS
+
+	;; Write high score table from screen memory to sectors 719-720
+
+hiscrw:	LDA #$31		; Disk drive
+	STA DDEVIC		; into device
+	LDA #$01		; Unit 1
+	STA DUNIT		; into unit.
+	LDA #'W'		; Write...
+	STA DCOMND		; into command
+	LDA #$80		; To Drive.
+	STA DSTATS		; into data direction
+	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$0F		; Standard timeout value (approx 15 seconds)
+	STA DTIMLO		; into timeout.
+	LDA #$80		; 128 byte sector
+	STA DBYTLO		; ...
+	LDA #$00		; ...
+	STA DBYTHI		; into # of bytes requested.
+	LDA #$CF		; Sector 0x2CF (719)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR SIOV		; Do it.
+
+	LDA #$31		; Disk drive
+	STA DDEVIC		; into device
+	LDA #$01		; Unit 1
+	STA DUNIT		; into unit.
+	LDA #'W'		; Write...
+	STA DCOMND		; into command
+	LDA #$80		; To Drive
+	STA DSTATS		; into data direction
+	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR2)	; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$0F		; Standard timeout value (approx 15 seconds)
+	STA DTIMLO		; into timeout.
+	LDA #$80		; 128 byte sector
+	STA DBYTLO		; ...
+	LDA #$00		; ...
+	STA DBYTHI		; into # of bytes requested.
+	LDA #$D0		; Sector 0x2D0 (720)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR SIOV		; Do it.
+	RTS	 		; Done, goodbye
+
+	;; Read key, convert to screen code. stored in TEMLOC
+	
+HRKEY:  TXA			; Save X
+	PHA			; ...
+	LDA #$FF
+	STA CHKEY
+HRKEY2: LDA CHKEY
+        CMP #$FF
+        BEQ HRKEY2
+        LDX CHKEY
+        LDA HKTBL,X
+	STA TEMLOC		; Store into temp.
+	PLA			; Restore X
+	TAX			; ...
+	LDA TEMLOC		; restore A from temp.
 	RTS
 	
         ;; Key to screen code table.
@@ -314,3 +513,11 @@ HKTBL:
 	.SB "g"+0x80			; 61
 	.SB "s"+0x80			; 62
 	.SB "a"+0x80			; 63
+
+	;; High score screen offsets for each place.
+	
+HINIOF:
+	.byte 6, 26, 46, 66, 86, 106, 126, 146, 166, 186
+
+HSCROF:
+	.byte 11, 20+11, 40+11, 60+11, 80+11, 100+11, 120+11, 140+11, 160+11, 180+11

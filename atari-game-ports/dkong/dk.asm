@@ -336,7 +336,8 @@ rmt_music
 		org $7b00		
 		
 my_start
-		lda #0
+		jsr hiscore_store_vectors
+	        lda #0
 		sta rmt_flag ; default = no music
 		lda #$ff
 		sta rmt_effect0 ; default = no sfx
