@@ -84,6 +84,7 @@ void adam_zaxxon(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
+  fprintf(fh," ZAXXON    HIGH SCORES    \n\n");
   fprintf(fh,"       NAME     SCORE   SK\n");
 
   for (i=0;i<8;i++)

@@ -85,6 +85,7 @@ void adam_dragonslair(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
+  fprintf(fh," DRAGONS LAIR HIGH SCORES \n\n");
   fprintf(fh,"       NAME     SCORE   SK\n");
 
   for (i=0;i<8;i++)

@@ -84,6 +84,7 @@ void adam_dkongjr(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
+  fprintf(fh," DONKEY KONG JUNIOR   SCORES \n\n");
   fprintf(fh,"       NAME     SCORE   SK SC\n");
 
   for (i=0;i<8;i++)
