@@ -81,7 +81,7 @@ void todnc(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"\n==== TOP SCORE  ====\n");
+  fprintf(fh,"\n==== DRAGONS AND CAVEMEN TOP SCORE ====\n");
   
   fprintf(fh,"\n      %c%c%c%c%c%c%c",buf[0],buf[1],buf[2],buf[3],buf[4],buf[5],buf[6]);
   
