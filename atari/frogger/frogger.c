@@ -1,5 +1,5 @@
 /**
- * Grab high score from Jumpman, write to HTML
+ * Grab high score from Frogger, write to HTML
  *
  * Linux required. (uses inotify)
  * 
@@ -92,7 +92,7 @@ void frogger(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"\n==== TOP SCORES ====\n");
+  fprintf(fh,"\n==== FROGGER TOP SCORES ====\n");
   
   for (i=0;i<96;i++)
     {
