@@ -79,7 +79,7 @@ void smolsnek(char *atr, char *html)
 
 	/* start body */
 
-	fprintf(fh,"\n==== TOP SCORES ====\n");
+	fprintf(fh,"\n==== SMOLSNEK TOP SCORES ====\n");
 	
 	char name[10];
 	name[9] = 0;

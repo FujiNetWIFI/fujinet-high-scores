@@ -92,7 +92,7 @@ void wizardofwor(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"\n==== TOP SCORES ====\n");
+  fprintf(fh,"\n==== WIZARD OF WOR TOP SCORES ====\n");
   
   for (i=0;i<116;i++)
     {
