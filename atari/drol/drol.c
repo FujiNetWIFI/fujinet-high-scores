@@ -121,7 +121,7 @@ void drol(char *atr, char *html)
 
   /* start body */
 
-  fprintf(fh,"\n==== TOP SCORES ====\n\n");
+  fprintf(fh,"\n==== DROL TOP SCORES ====\n\n");
 
   for (j=0;j<5;j++)
     {
