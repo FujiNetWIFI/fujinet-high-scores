@@ -287,6 +287,19 @@ systemctl enable serpentine
 systemctl start serpentine
 ```
 
+#### Smol Snek
+
+```sh
+cd smol-snek
+make
+install smolsnek /usr/local/sbin
+install smolsnek.css /var/www/html
+install smolsnek.png /var/www/html
+install smolsnek.service /etc/systemd/system
+systemctl enable smolsnek
+systemctl start smolsnek
+```
+
 #### Snokie
 
 ```sh

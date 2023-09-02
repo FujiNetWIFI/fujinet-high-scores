@@ -21,35 +21,14 @@ HTML
 body {
   font-family: 'atari_classicchunky';
   justify-content: center;
-  margin: 3em;
+  margin: 4em;
   background-color: rgba(10,73,132,0.8);
-  color: #5a97d0;
-}
-
-/* unvisited link */
-a:link {
-  color: #5a97d0;
-}
-
-/* visited link */
-a:visited {
-  color: #5a97d0;
-}
-
-/* mouse over link */
-a:hover {
-  color: #5a97d0;
-}
-
-/* selected link */
-a:active {
   color: #5a97d0;
 }
 
 pre {
 	font-family: 'atari_classicchunky';
-	font-size: 4vw;
+	font-size: 3vw;
 	display: flex;
 	justify-content: center;
-	width: 20;
 }
