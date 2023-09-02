@@ -92,7 +92,7 @@ void crab(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"\n==== TOP SCORES ====\n");
+  fprintf(fh,"\n==== CRAB NEBULA TOP SCORES ====\n");
   
   /*
   for (i=0;i<sizeof(buf);i++)

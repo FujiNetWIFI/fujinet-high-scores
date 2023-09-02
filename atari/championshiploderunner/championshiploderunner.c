@@ -85,7 +85,7 @@ void championshiploderunner(char *atr, char *html)
 
   /* start body */
 
-  fprintf(fh,"\n==== TOP SCORES ====\n\n");
+  fprintf(fh,"\n= CHAMPIONSHIP LODE RUNNER TOP SCORES =\n\n");
 
   p=strtok(buf,"\x9b");
 

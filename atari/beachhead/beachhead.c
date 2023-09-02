@@ -91,7 +91,7 @@ void beachhead(char *atr, char *html)
   offset=0; /* buffer start for hi scores */
   lc=0; /* Line counter */
   
-  fprintf(fh,"\n==== TOP SCORES ====\n");
+  fprintf(fh,"\n==== BEACH HEAD TOP SCORES ====\n");
   
   for (i=0;i<sizeof(buf);i++)
     {

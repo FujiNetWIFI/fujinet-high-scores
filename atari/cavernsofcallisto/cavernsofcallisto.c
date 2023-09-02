@@ -77,7 +77,7 @@ void cavernsofcallisto(char *atr, char *html)
   fprintf(fh,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
   fprintf(fh,"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\n");
   fprintf(fh," <head>\n");
-  fprintf(fh,"  <title>Latest B.C.'s Quest for Tires High Scores</title>\n");
+  fprintf(fh,"  <title>Latest Caverns of Callisto High Scores</title>\n");
   fprintf(fh,"  <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n");
   fprintf(fh,"  <meta http-equiv=\"refresh\" content=\"30\" />");
   fprintf(fh,"  <meta name=\"keywords\" content=\" \" />\n");
@@ -92,7 +92,7 @@ void cavernsofcallisto(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"==== TOP SCORES ====\n");
+  fprintf(fh,"=== CAVERNS OF CALLISTO TOP SCORES ===\n");
   
   for (i=0;i<96;i++)
     {

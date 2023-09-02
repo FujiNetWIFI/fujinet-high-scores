@@ -76,7 +76,7 @@ void crisismountain(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"\n==== TOP SCORE  ====\n");
+  fprintf(fh,"\n==== CRISIS MOUNTAIN TOP SCORE ====\n");
   
   fprintf(fh,"\n       %06lx",hiscore);
   

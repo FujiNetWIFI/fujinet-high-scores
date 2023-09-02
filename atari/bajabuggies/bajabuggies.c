@@ -95,7 +95,9 @@ void bajabuggies(char *atr, char *html)
   /* start body */
 
   offset=0; /* buffer start for hi scores */
-  
+
+  fprintf(fh,"==== BAJA BUGGIES TOP SCORES ====\n")
+	
   for (i=0;i<sizeof(buf);i++)
     {
       fprintf(fh, "%c", buf[offset++]);

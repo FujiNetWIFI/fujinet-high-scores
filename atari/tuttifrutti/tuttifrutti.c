@@ -130,7 +130,7 @@ void tuttifrutti(char *atr, char *html)
 
   /* start body */
 
-  fprintf(fh,"\n==== TOP SCORES ====\n\n");
+  fprintf(fh,"\n==== TUTTI FRUTTI TOP SCORES ====\n\n");
 
   p=strtok(buf,"\x9b");
 
