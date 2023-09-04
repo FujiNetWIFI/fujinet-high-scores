@@ -1,0 +1,4 @@
+mariorun
+*.o
+*.html
+.DS_Store
