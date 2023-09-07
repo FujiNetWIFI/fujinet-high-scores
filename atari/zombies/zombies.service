@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/zombies "/tnfs/Atari_8-bit/High Score Enabled/Zombies.atr" "/var/www/atari-scores/zombies.html"
+ExecStart=/usr/local/sbin/zombies "/tnfs/zombies.atr" "/var/www/html/zombies.html"
 
 [Install]
 WantedBy=multi-user.target

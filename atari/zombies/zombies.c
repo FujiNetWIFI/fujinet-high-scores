@@ -1,9 +1,9 @@
 /**
- * Grab high score from Wizard of Wor, write to HTML
+ * Grab high score from Zombies, write to HTML
  *
  * Linux required. (uses inotify)
  * 
- * @author  Thomas Cherryhomes
+ * @author  Shawn Jefferson (based on jawbreakerii by Thom Cherryhomes)
  * @email   thom dot cherryhomes at gmail dot com
  * @license gpl v. 3
  */
@@ -23,9 +23,9 @@
 #define EVENT_SIZE ( sizeof(struct inotify_event) )
 #define EVENT_BUF_LEN ( 1024 * ( EVENT_SIZE + NAME_MAX ) )
 
-#define WIZARDOFWOR_SEEK_POS (0x16710)
+#define ZOMBIES_SEEK_POS (0x16710)
 
-#define LINE_WIDTH 24 
+#define LINE_WIDTH 12
 
 static volatile bool ctrlc = false;
 
@@ -41,24 +41,34 @@ void setctrlc(int dummy)
 
 void zombies(char *atr, char *html)
 {
-  char buf[128];
   FILE *fa, *fh;
-  int i, offset;
+  int i, j, offset;
+
+  struct
+  {
+    char entry[24];		// each entry is 24 chars, in ATASCII
+  } hiscores[4];
 
   printf("Writing new zombies.html\n");
-  
+
   fa = fopen(atr,"rb");
   fh = fopen(html,"w");
 
-  fseek(fa,WIZARDOFWOR_SEEK_POS,SEEK_SET);
+  fseek(fa,ZOMBIES_SEEK_POS,SEEK_SET);
 
-  fread(buf,sizeof(char),sizeof(buf),fa);
-  
+  fread(&hiscores,sizeof(hiscores),1,fa);
+
+  for (i=0;i<4;i++)
+  {
+    hiscores[i].entry[22] = '\0';       // put a string terminator on each entry
+  }
+
+
   /* start html */
   fprintf(fh,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
   fprintf(fh,"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\n");
   fprintf(fh," <head>\n");
-  fprintf(fh,"  <title>Latest Wizard of Wor High Scores</title>\n");
+  fprintf(fh,"  <title>Latest Zombies High Scores</title>\n");
   fprintf(fh,"  <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n");
   fprintf(fh,"  <meta http-equiv=\"refresh\" content=\"30\" />");
   fprintf(fh,"  <meta name=\"keywords\" content=\" \" />\n");
@@ -73,23 +83,20 @@ void zombies(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"\n==== TOP SCORES ====\n");
-  
-  for (i=0;i<116;i++)
-    {
-      fprintf(fh, "%c", buf[offset++]);
+  fprintf(fh,"\n     RATING RECORDS\n\n");
 
-      if ((i % LINE_WIDTH) == 0)
-	fprintf(fh, "\n   ");
-    }
+  fprintf(fh,"ONE PLAYER: EASY\n%s\n\n", hiscores[0].entry);
+  fprintf(fh,"ONE PLAYER: HARD\n%s\n\n", hiscores[1].entry);
+  fprintf(fh,"TWO PLAYER: EASY\n%s\n\n", hiscores[2].entry);
+  fprintf(fh,"TWO PLAYER: HARD\n%s\n\n", hiscores[3].entry); 
 
   /* end body */
 
-  fprintf(fh,"\n");
+  // fprintf(fh,"\n");
   fprintf(fh,"  </pre>\n");
   fprintf(fh," </body>\n");
   fprintf(fh,"</html>\n");
-  
+
   fclose(fh);
   fclose(fa);
 }
@@ -103,10 +110,10 @@ int main(int argc, char *argv[])
     }
 
   zombies(argv[1],argv[2]);
-  
+
   signal(SIGINT, setctrlc);
   signal(SIGTERM, setctrlc);
-  
+
   inotify_fd = inotify_init();
 
   if (inotify_fd < 0)
@@ -125,11 +132,11 @@ int main(int argc, char *argv[])
 
   /* Set for non-blocking */
   fcntl (inotify_fd, F_SETFL, fcntl (inotify_fd, F_GETFL) | O_NONBLOCK);
-  
+
   while (!ctrlc)
     {
       int i;
-      
+
       inotify_event_len = read(inotify_fd, event_buffer, EVENT_BUF_LEN);
 
       i=0;
@@ -139,7 +146,7 @@ int main(int argc, char *argv[])
 	  usleep(100000);
 	  continue;
 	}
-      
+
       while (i < inotify_event_len)
 	{
 	  struct inotify_event *event = ( struct inotify_event * ) &event_buffer[ i ];
