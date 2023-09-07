@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari Mario Run Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/mariorun "/tnfs/Mario Run.atr" "/var/www/html/mariorun.html"
+
+[Install]
+WantedBy=multi-user.target
