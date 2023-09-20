@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari Dropzone Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/dropzone "/tnfs/Atari_8-bit/Games/High Score Enabled/Dropzone.atr" "/var/www/atari-scores/dropzone.html"
+
+[Install]
+WantedBy=multi-user.target
