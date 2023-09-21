@@ -164,7 +164,7 @@ void drop(char *atr, char *html)
       j++;
     }
 
-    if (j>=8) break;    // your new score is in 8th place
+    if (j>8) break;    // your new score is in 8th place
 
     fprintf(fh, " %d. ", j);
     fprintf(fh, " %7d ", hiscore[i]);
