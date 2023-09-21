@@ -82,20 +82,20 @@ void drop(char *atr, char *html)
     {
       k = buf[i][j] & 0x0f;
       l = buf[i][j] >> 4;
-  //   printf( "%2x ", (10 * l) + k);
+     printf( "%2x ", (10 * l) + k);
       buf[i][j] = (10 * l) + k;
     }
-  //  printf("\n");
+    printf("\n");
   } 
 
-//  printf("\n");
+  printf("\n");
 
   /* Process scores */
   for (j=0; j<9; j++)     // across the columns
   {
     hiscore[j] = (((((buf[0][j] * 100) + buf[1][j]) * 100) 
       + buf[2][j]) * 100 + buf[3][j]);
-  //  printf("hiscore: %'10d \n", hiscore[j]);
+    printf("hiscore: %'10d \n", hiscore[j]);
   }
 
   /* By score comparison, find where newest one will be placed */
@@ -109,11 +109,11 @@ void drop(char *atr, char *html)
     }
   }
 
-//  printf("The value of inserthere: %d\n", inserthere);
+  printf("The value of inserthere: %d\n", inserthere);
 
   // Process initials
 
-//  printf("\n");
+  printf("\n");
 
   for (j=0; j<9; j++)   // down the rows
   {     // first change lower case to upper case with & 0x5f
@@ -122,11 +122,11 @@ void drop(char *atr, char *html)
                 (initials[2][j] & 0x5f) << 16;
     inames[1] = 0;
     char *s = (char *)inames;
-//    printf("  Name: %s\n", s);
+    printf("  Name: %s\n", s);
     strcpy(hiscname[j], s);
   }
 
-//  printf("\n");
+  printf("\n");
   
   /* start html */
   printf("Writing new dropzone.html\n");
@@ -152,7 +152,7 @@ void drop(char *atr, char *html)
   fprintf(fh,"\n==== TOP SCORES ====\n\n");
   
   j = 1;
-  for (i=0; i<7; i++)
+  for (i=0; i<8; i++)   // allows score in 8th place to be shown
   {
     if (inserthere == i) 
     {
@@ -163,6 +163,9 @@ void drop(char *atr, char *html)
       fprintf(fh, " \n");
       j++;
     }
+
+    if (j>=8) break;    // your new score is in 8th place
+
     fprintf(fh, " %d. ", j);
     fprintf(fh, " %7d ", hiscore[i]);
     fprintf(fh, " %s", hiscname[i]);
