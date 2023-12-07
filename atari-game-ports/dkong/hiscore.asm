@@ -155,16 +155,10 @@ histr2:	.ds 128
 	
 hiscore:
 	lda #$00
-	sta $D000
-	sta $D001
-	sta $D002
-	sta $D003
-	sta $D004
-	sta $D005
-	sta $D006
-	sta $D007
+	sta $D01D
 	lda #$40
 	sta $D40E
+	
 	;; Load hi-score sectors (719-720) into memory
 	jsr hiscrl
 
@@ -464,6 +458,10 @@ HSBYE:	LDA #$00		; Store zero in
 HSBL1:	LDA $13			; Check every 256 frames
 	CMP #$04		; Waited long enough?
 	BNE HSBL1		; Nope, wait some more.
+
+	LDA #$03	        ; Turn the players and missiles back on
+	STA $D01D
+	
 	JMP $B1E8		; Go back.
 	
 	
