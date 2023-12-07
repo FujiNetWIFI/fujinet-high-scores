@@ -189,6 +189,10 @@ hisk:	ldx #$00		; Start at offset 0
 	cpx #$06		; Are we at end?
 	bne @-			; No, continue marching right.
 
+	cpx #$06                ; Did we hit end without finding digits?
+	bne hisc                ; no, continue.
+	jmp HSBYE		; Otherwise, bail out.
+	
 	;; X now contains starting position of right justified score as BCD digits
 	;; Convert to screen code
 hisc:	clc			; clear carry
