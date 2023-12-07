@@ -228,7 +228,7 @@ HFSLT4:	INC TEMLOC		; Increment slot #
 	LDX TEMLOC		; Get Slot #
 	CPX #$0A		; Are we at last slot?
 	BNE HFSLT		; Not done yet, next slot.
-	JMP $B1E8		; Didn't find one, don't enter.
+	JMP HSBYE		; Didn't find one, don't enter.
 	
 	;; Set Slot
 
@@ -325,7 +325,7 @@ HENT2:	STA HISTR,X		; Enter onto screen.
 	lda #$B1
 	sta vkeybd+1
 	
-	jmp $B1E8		; go back to where we were.
+	jmp HSBYE		; go back to where we were.
 
 	;; Subroutines *********************************************************
 
@@ -456,6 +456,16 @@ HRKEY2: LDA CHKEY
 	TAX			; ...
 	LDA TEMLOC		; restore A from temp.
 	RTS
+
+HSBYE:	LDA #$00		; Store zero in
+	STA $12			; RTCLOKage
+	STA $13
+	STA $14
+HSBL1:	LDA $13			; Check every 256 frames
+	CMP #$04		; Waited long enough?
+	BNE HSBL1		; Nope, wait some more.
+	JMP $B1E8		; Go back.
+	
 	
         ;; Key to screen code table.
 
