@@ -142,8 +142,9 @@ hiscore_dlist:
 
 vkeybd_store:	.ds 2		; vkeybd store
 hiscore_store:	.ds 7		; Store hiscore here in screen code form.
-temloc:	        .ds 1           ; Temporary location
-tunloc:		.ds 1		; Another temp location
+slot:	        .ds 1           ; Hiscore slot
+scootslot:		.ds 1		; Another temp location
+temp:	        .ds 1           ; temporary var used during key entry
 	
 hiscore_txt:
 	.sb '                    '
@@ -205,11 +206,11 @@ hisc:	clc			; clear carry
 
 HSCONT:	
 	LDX #$00		; Start with first place
-	STX TEMLOC		; Store it.
+	STX SLOT		; Store it.
 	
 	;; Find possible slot
 
-HFSLT:	LDX TEMLOC
+HFSLT:	LDX SLOT
 	LDY #$00		; First score char position
 	LDA HSCROF,X		; Get high score screen ptr offset
 	TAX			; Set to X
@@ -222,8 +223,8 @@ HFSLT3:	INY			; Increment current hiscore slot ptr.
 	INX			; Increment hiscore screen slot ptr
 	CPY #$06		; Are we done with string comparison?
 	BNE HFSLT2		; No, Continue string comparison
-HFSLT4:	INC TEMLOC		; Increment slot #
-	LDX TEMLOC		; Get Slot #
+HFSLT4:	INC SLOT		; Increment slot #
+	LDX SLOT		; Get Slot #
 	CPX #$0A		; Are we at last slot?
 	BNE HFSLT		; Not done yet, next slot.
 	JMP HSBYE		; Didn't find one, don't enter.
@@ -231,19 +232,19 @@ HFSLT4:	INC TEMLOC		; Increment slot #
 	;; Set Slot
 
 HSETSLT:
-	LDX TEMLOC		; Store found place.
+	LDX SLOT		; Store found place.
 	LDA #$08		; Second to last place for scoot.
-	STA TUNLOC		; Store in scoot position.
+	STA SCOOTSLOT		; Store in scoot position.
 
 	;; Are we in slot 10? if so, bypass the scoot.
 
-	LDA TEMLOC
+	LDA SLOT
 	CMP #$09
 	BEQ HENTR
 	
 	;; Scoot older high scores down from selected slot
 	
-HSCOOT: LDY TUNLOC
+HSCOOT: LDY SCOOTSLOT
 	LDA HINIOF,Y
 	TAX
 	LDY #$00		; Beginning of string.
@@ -256,14 +257,14 @@ HSCOOT2:
 	CPY #12
 	BNE HSCOOT2
 
-	DEC TUNLOC
-	LDA TUNLOC
-	CMP TEMLOC
+	DEC SCOOTSLOT
+	LDA SCOOTSLOT
+	CMP SLOT
 	BPL HSCOOT
 	
 	;; Copy high score to slot
 
-HENTR:	LDA TEMLOC		; Restore Score place
+HENTR:	LDA SLOT		; Restore Score place
 	TAX			; into X.
  	LDA HSCROF,X		; Get score offset on screen
  	TAY			; And store in Y
@@ -276,7 +277,7 @@ HCPY:	LDA hiscore_store,X
  	CPX #$06
  	BNE HCPY
 
-	LDX TEMLOC
+	LDX SLOT
  	LDA HINIOF,X		; Find screen offset
  	TAX			; Send it to X
 
@@ -292,7 +293,7 @@ HCPY:	LDA hiscore_store,X
 	DEX
 	
 	LDY #$00		; # of initials entered
-	LDX TEMLOC
+	LDX SLOT
 	LDA HINIOF,X
 	TAX
 	
@@ -438,7 +439,7 @@ hiscrw:	LDA #$31		; Disk drive
 	JSR SIOV		; Do it.
 	RTS	 		; Done, goodbye
 
-	;; Read key, convert to screen code. stored in TEMLOC
+	;; Read key, convert to screen code. stored in SLOT
 	
 HRKEY:  TXA			; Save X
 	PHA			; ...
@@ -449,10 +450,10 @@ HRKEY2: LDA CHKEY
         BEQ HRKEY2
         LDX CHKEY
         LDA HKTBL,X
-	STA TEMLOC		; Store into temp.
+	STA TEMP		; Store into temp.
 	PLA			; Restore X
 	TAX			; ...
-	LDA TEMLOC		; restore A from temp.
+	LDA TEMP		; restore A from temp.
 	RTS
 
 HSBYE:	LDA #$00		; Store zero in
@@ -543,4 +544,4 @@ HINIOF:
 	.byte 6, 26, 46, 66, 86, 106, 126, 146, 166, 186
 
 HSCROF:
-	.byte 11, 20+11, 40+11, 60+11, 80+11, 100+11, 120+11, 140+11, 160+11, 180+11
+	.byte 10, 20+10, 40+10, 60+10, 80+10, 100+10, 120+10, 140+10, 160+10, 180+10
