@@ -4,6 +4,7 @@
 
 	org $6000
 
+CH1	equ $02F2
 chkey	equ $02FC
 ddevic	equ $0300
 dunit	equ $0301
@@ -16,7 +17,8 @@ dbytlo	equ $0308
 dbythi	equ $0309
 daux1	equ $030A
 daux2	equ $030B
-siov	equ $E459
+DSKINV	equ $E453
+;siov	equ $E459
 vkeybd	equ $0208
 	
 	
@@ -339,104 +341,34 @@ hiscore_store_vectors:
 
 	;; Load hiscore table from disk into screen memory
 	
-hiscrl:	LDA #$31		; Disk drive
-	STA DDEVIC		; into device
-	LDA #$01		; Unit 1
-	STA DUNIT		; into unit.
-	LDA #'R'		; Read...
-	STA DCOMND		; into command
-	LDA #$40		; To Atari
-	STA DSTATS		; into data direction
-	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
-	STA DBUFLO		; into Buffer lo byte
-	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
-	STA DBUFHI		; into Buffer hi byte
-	LDA #$0F		; Standard timeout value (approx 15 seconds)
-	STA DTIMLO		; into timeout.
-	LDA #$80		; 128 byte sector
-	STA DBYTLO		; ...
-	LDA #$00		; ...
-	STA DBYTHI		; into # of bytes requested.
-	LDA #$CF		; Sector 0x2CF (719)
-	STA DAUX1		; ...
-	LDA #$02		; ...
-	STA DAUX2		; into the daux parameter.
-	JSR SIOV
-
-	LDA #$31		; Disk drive
-	STA DDEVIC		; into device
-	LDA #$01		; Unit 1
-	STA DUNIT		; into unit.
-	LDA #'R'		; Read...
-	STA DCOMND		; into command
-	LDA #$40		; To Atari
-	STA DSTATS		; into data direction
-	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
-	STA DBUFLO		; into Buffer lo byte
-	LDA #.HI(HISTR2)	; Hi score screen data buffer (HI)
-	STA DBUFHI		; into Buffer hi byte
-	LDA #$0F		; Standard timeout value (approx 15 seconds)
-	STA DTIMLO		; into timeout.
-	LDA #$80		; 128 byte sector
-	STA DBYTLO		; ...
-	LDA #$00		; ...
-	STA DBYTHI		; into # of bytes requested.
-	LDA #$D0		; Sector 0x2D0 (720)
-	STA DAUX1		; ...
-	LDA #$02		; ...
-	STA DAUX2		; into the daux parameter.
-	JSR SIOV
-	RTS
+hiscrl:	LDA #'R'		; Read...
+	BNE hiscrio
 
 	;; Write high score table from screen memory to sectors 719-720
 
-hiscrw:	LDA #$31		; Disk drive
-	STA DDEVIC		; into device
-	LDA #$01		; Unit 1
+hiscrw:	LDA #'W'		; Write...
+hiscrio:	STA DCOMND		; into command
+	LDA #$01		; drive 1
 	STA DUNIT		; into unit.
-	LDA #'W'		; Write...
-	STA DCOMND		; into command
-	LDA #$80		; To Drive.
-	STA DSTATS		; into data direction
 	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
 	STA DBUFLO		; into Buffer lo byte
 	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
 	STA DBUFHI		; into Buffer hi byte
-	LDA #$0F		; Standard timeout value (approx 15 seconds)
-	STA DTIMLO		; into timeout.
-	LDA #$80		; 128 byte sector
-	STA DBYTLO		; ...
-	LDA #$00		; ...
-	STA DBYTHI		; into # of bytes requested.
 	LDA #$CF		; Sector 0x2CF (719)
 	STA DAUX1		; ...
 	LDA #$02		; ...
 	STA DAUX2		; into the daux parameter.
-	JSR SIOV		; Do it.
+	JSR DSKINV		; Do it.
 
-	LDA #$31		; Disk drive
-	STA DDEVIC		; into device
-	LDA #$01		; Unit 1
-	STA DUNIT		; into unit.
-	LDA #'W'		; Write...
-	STA DCOMND		; into command
-	LDA #$80		; To Drive
-	STA DSTATS		; into data direction
 	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
 	STA DBUFLO		; into Buffer lo byte
 	LDA #.HI(HISTR2)	; Hi score screen data buffer (HI)
 	STA DBUFHI		; into Buffer hi byte
-	LDA #$0F		; Standard timeout value (approx 15 seconds)
-	STA DTIMLO		; into timeout.
-	LDA #$80		; 128 byte sector
-	STA DBYTLO		; ...
-	LDA #$00		; ...
-	STA DBYTHI		; into # of bytes requested.
 	LDA #$D0		; Sector 0x2D0 (720)
 	STA DAUX1		; ...
 	LDA #$02		; ...
 	STA DAUX2		; into the daux parameter.
-	JSR SIOV		; Do it.
+	JSR DSKINV		; Do it.
 	RTS	 		; Done, goodbye
 
 	;; Read key, convert to screen code. stored in SLOT
@@ -445,7 +377,14 @@ HRKEY:  TXA			; Save X
 	PHA			; ...
 	LDA #$FF
 	STA CHKEY
-HRKEY2: LDA CHKEY
+	LDA $14
+	ADC #30			; keyboard debounce delay =30 jiffies
+	TAX
+HRKEY2: CPX $14			; delay expired?
+	BNE @+
+	LDA #0			; yes => reset "last" key
+	STA CH1
+@	LDA CHKEY
         CMP #$FF
         BEQ HRKEY2
         LDX CHKEY
