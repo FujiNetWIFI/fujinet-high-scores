@@ -91,7 +91,7 @@ void dkong(char *atr, char *html)
 
   offset=0; /* buffer start for hi scores */
 
-  fprintf(fh,"\n==== DONKEY KONG TOP SCORES ====\n");
+  fprintf(fh,"\n== DONKEY KONG TOP SCORES ==\n");
   
   for (i=0;i<sizeof(buf);i++)
     {
