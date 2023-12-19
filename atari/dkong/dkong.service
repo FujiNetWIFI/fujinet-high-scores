@@ -1,5 +1,5 @@
 [Unit]
-Description=Atari PAC-MAN Hi-scores
+Description=Atari Donkey Kong Hi-scores
 After=remote-fs.target
 After=syslog.target
 
@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/dkong "/tnfs/Atari_8-bit/Games/High Score Enabled/Donkey Kong.atr" "/var/www/atari-scores/dkong.html"
+ExecStart=/usr/local/sbin/dkong "/tnfs/Atari_8-bit/Games/High Score Enabled/Donkey Kong.atr" "/scores/dkong.html"
 
 [Install]
 WantedBy=multi-user.target
