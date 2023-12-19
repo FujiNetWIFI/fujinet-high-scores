@@ -340,8 +340,23 @@ hiscore_store_vectors:
 	rts			; Go back to start
 
 	;; Load hiscore table from disk into screen memory
+	;; First, a fake read to sector 1 to clear cache.
+
+hiscrl:	LDA #'R'
+	STA DCOMND
+	LDA #$01
+	STA DUNIT
+	LDA #$00
+	STA DBUFLO
+	LDA #$50
+	STA DBUFHI
+	LDA #$01
+	STA DAUX1
+	LDA #$00
+	STA DAUX2
+	JSR DSKINV
 	
-hiscrl:	LDA #'R'		; Read...
+	LDA #'R'		; Read...
 	BNE hiscrio
 
 	;; Write high score table from screen memory to sectors 719-720
