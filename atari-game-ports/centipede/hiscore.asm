@@ -16,7 +16,7 @@ dbythi	equ $0309
 daux1	equ $030A
 daux2	equ $030B
 DSKINV	equ $E453
-;siov	equ $E459
+siov	equ $E459
 vkeybd	equ $0208
 setvbv  equ $E45C
 
@@ -51,6 +51,8 @@ xoff:		.ds 1		; Score digit offset
 	;; Hiscore entry point
 	
 hiscore:
+
+	jsr hiscrl		; Load hiscore table.
 	
 	;; Set display list to show score
 	lda #.lo(hiscore_dlist)
@@ -187,18 +189,27 @@ HENT2:	STA HISTR,X		; Enter onto screen.
 	INY			; Advance initial pointer
 	CPY #$03		; Are we at end?
 	BNE HENT		; Nope, get another one.
-	
-	jmp HSBYE		; go back to where we were.
-	
-hl:	jmp hl
 
+	jsr hiscrw		; Write to Disk.
+
+	jmp HSBYE		; go back to where we were.
+
+
+
+	
 	;; Load hiscore table from disk into screen memory
 	;; First, a fake read to sector 1 to clear cache.
 
 hiscrl:	LDA #'R'
 	STA DCOMND
+	LDA #$31
+	STA DDEVIC
 	LDA #$01
 	STA DUNIT
+	LDA #$80
+	STA DBYTLO
+	LDA #$00
+	STA DBYTHI
 	LDA #$00
 	STA DBUFLO
 	LDA #$50
@@ -207,7 +218,7 @@ hiscrl:	LDA #'R'
 	STA DAUX1
 	LDA #$00
 	STA DAUX2
-	JSR DSKINV
+	JSR SIOV
 	
 	LDA #'R'		; Read...
 	BNE hiscrio
@@ -216,8 +227,14 @@ hiscrl:	LDA #'R'
 
 hiscrw:	LDA #'W'		; Write...
 hiscrio:	STA DCOMND		; into command
+	LDA #$31
+	STA DDEVIC
 	LDA #$01		; drive 1
 	STA DUNIT		; into unit.
+	LDA #$80
+	STA DBYTLO
+	LDA #$00
+	STA DBYTHI
 	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
 	STA DBUFLO		; into Buffer lo byte
 	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
@@ -226,7 +243,7 @@ hiscrio:	STA DCOMND		; into command
 	STA DAUX1		; ...
 	LDA #$02		; ...
 	STA DAUX2		; into the daux parameter.
-	JSR DSKINV		; Do it.
+	JSR SIOV		; Do it.
 
 	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
 	STA DBUFLO		; into Buffer lo byte
@@ -236,7 +253,7 @@ hiscrio:	STA DCOMND		; into command
 	STA DAUX1		; ...
 	LDA #$02		; ...
 	STA DAUX2		; into the daux parameter.
-	JSR DSKINV		; Do it.
+	JSR SIOV		; Do it.
 	RTS	 		; Done, goodbye
 	
 	;; Read key, convert to screen code. stored in SLOT

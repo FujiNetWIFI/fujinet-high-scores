@@ -25,7 +25,7 @@ xex:
 	$(AS) $(SRC) -o:$(BUILD)/$(XEX) -l:$(LST)
 
 dist:
-	$(DIR2ATR) -md -B $(BOOT_PROGRAM) -S $(ATR) $(BUILD)
+	$(DIR2ATR) -B $(BOOT_PROGRAM) -S $(ATR) $(BUILD)
 
 hiscore:
 	$(AS) $(HISCORE_TABLE_ASM) -o:$(BUILD)/$(HISCORE_TABLE_BIN)	
