@@ -28,10 +28,10 @@ hiscore_dlist:
 	dta $70, $70, $70						; 3 sets of 8 blank lines (24 lines)
 	dta $44, $20, $38 						; existing centipede playfield
 	dta $04, $04, $04						; ...
-	dta $04, $04						; ...
+	dta $04						; ...
 	dta $46, .lo(hiscore_txt), .hi(hiscore_txt)		  ; LMS to hiscore text
 	dta $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06 ; Hiscore text
-	dta $44, $00, $3a	; Back to playfield
+	dta $44, $18, $3B	; Back to playfield
 	dta $04, $04, $04
 	dta $04
 	dta $41, .lo(hiscore_dlist), .hi(hiscore_dlist) ; Done
@@ -52,7 +52,31 @@ xoff:		.ds 1		; Score digit offset
 	
 hiscore:
 
+	LDA RTCLOK+2
+wait1:
+	CMP RTCLOK+2
+	BEQ wait1	; wait for end of current/next VBI
+
+	LDA VVBLKI
+	PHA
+	LDA VVBLKI+1
+	PHA
+	LDA SYSVBV+1
+	STA VVBLKI
+	LDA SYSVBV+2
+	STA VVBLKI+1
+	
 	jsr hiscrl		; Load hiscore table.
+
+	LDA RTCLOK+2
+wait2:
+	CMP RTCLOK+2
+	BEQ wait2	; wait for end of current/next VBI
+
+	PLA
+	STA VVBLKI+1
+	PLA
+	STA VVBLKI
 	
 	;; Set display list to show score
 	lda #.lo(hiscore_dlist)
@@ -190,8 +214,32 @@ HENT2:	STA HISTR,X		; Enter onto screen.
 	CPY #$03		; Are we at end?
 	BNE HENT		; Nope, get another one.
 
+	LDA RTCLOK+2
+wait3:
+	CMP RTCLOK+2
+	BEQ wait3	; wait for end of current/next VBI
+
+	LDA VVBLKI
+	PHA
+	LDA VVBLKI+1
+	PHA
+	LDA SYSVBV+1
+	STA VVBLKI
+	LDA SYSVBV+2
+	STA VVBLKI+1
+
 	jsr hiscrw		; Write to Disk.
 
+	LDA RTCLOK+2
+wait4:
+	CMP RTCLOK+2
+	BEQ wait4	; wait for end of current/next VBI
+
+	PLA
+	STA VVBLKI+1
+	PLA
+	STA VVBLKI
+	
 	jmp HSBYE		; go back to where we were.
 
 
@@ -202,14 +250,8 @@ HENT2:	STA HISTR,X		; Enter onto screen.
 
 hiscrl:	LDA #'R'
 	STA DCOMND
-	LDA #$31
-	STA DDEVIC
 	LDA #$01
 	STA DUNIT
-	LDA #$80
-	STA DBYTLO
-	LDA #$00
-	STA DBYTHI
 	LDA #$00
 	STA DBUFLO
 	LDA #$50
@@ -218,23 +260,18 @@ hiscrl:	LDA #'R'
 	STA DAUX1
 	LDA #$00
 	STA DAUX2
-	JSR SIOV
+	JSR DSKINV
 	
 	LDA #'R'		; Read...
 	BNE hiscrio
 
 	;; Write high score table from screen memory to sectors 719-720
 
-hiscrw:	LDA #'W'		; Write...
+hiscrw:
+	LDA #'W'		; Write...
 hiscrio:	STA DCOMND		; into command
-	LDA #$31
-	STA DDEVIC
 	LDA #$01		; drive 1
 	STA DUNIT		; into unit.
-	LDA #$80
-	STA DBYTLO
-	LDA #$00
-	STA DBYTHI
 	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
 	STA DBUFLO		; into Buffer lo byte
 	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
@@ -243,7 +280,7 @@ hiscrio:	STA DCOMND		; into command
 	STA DAUX1		; ...
 	LDA #$02		; ...
 	STA DAUX2		; into the daux parameter.
-	JSR SIOV		; Do it.
+	JSR DSKINV		; Do it.
 
 	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
 	STA DBUFLO		; into Buffer lo byte
@@ -253,7 +290,7 @@ hiscrio:	STA DCOMND		; into command
 	STA DAUX1		; ...
 	LDA #$02		; ...
 	STA DAUX2		; into the daux parameter.
-	JSR SIOV		; Do it.
+	JSR DSKINV		; Do it.
 	RTS	 		; Done, goodbye
 	
 	;; Read key, convert to screen code. stored in SLOT
