@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari Centipede Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/centipede "/tnfs/Atari_8-bit/Games/High Score Enabled/Centipede.atr" "/scores/centipede.html"
+
+[Install]
+WantedBy=multi-user.target
