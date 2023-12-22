@@ -210,7 +210,7 @@ HENT:	JSR HRKEY		; Get initial.
 	LDA #$00		; Blank char
 	STA HISTR,X		; Store it.
 	BEQ HENT		; Back to HENT. (always branch)
-
+	
 HENT2:	STA HISTR,X		; Enter onto screen.
 	INX			; Advance screen pointer
 	INY			; Advance initial pointer
@@ -297,10 +297,10 @@ HRKEY:  TXA			; Save X
 	PHA			; ...
 	LDA #$FF
 	STA CHKEY
-	LDA $14
+	LDA RTCLOK+1
 	ADC #30			; keyboard debounce delay =30 jiffies
 	TAX
-HRKEY2: CPX $14			; delay expired?
+HRKEY2: CPX RTCLOK+1		; delay expired?
 	BNE @+
 	LDA #0			; yes => reset "last" key
 	STA CH1
@@ -316,6 +316,13 @@ HRKEY2: CPX $14			; delay expired?
 	RTS
 
 HSBYE:
+	LDA #$00		; Wait 7 secs or so.
+	STA RTCLOK
+	STA RTCLOK+1
+HSWAIT:	LDA RTCLOK
+	CMP #$03
+	BNE HSWAIT
+	
 	LDA #$00		; Otherwise, restore display list
 	STA $0230
 	LDA #$06
