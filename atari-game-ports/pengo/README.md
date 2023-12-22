@@ -31,3 +31,6 @@ $1180 to skip
 $03C0
  
 1290
+
+
+Could not use same VVBLKI trick as Centipede, so we store the original VVBLKI and use SETVBV to swap it in during each disk operation, and restore to the game as soon as possible.

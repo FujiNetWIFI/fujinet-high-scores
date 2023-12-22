@@ -15,12 +15,18 @@ DSKINV	equ $E453
 siov	equ $E459
 setvbv  equ $E45C
 p1scr	equ $0805		; Screen memory for P1 score
-	
+
+	org $5F00
+
+histr:	.ds 128
+histr2:	.ds 128
+
 	org $6000
 
 slot:	        .ds 1           ; Hiscore slot
 scootslot:		.ds 1		; Another temp location
 xoff:		.ds 1		; Score digit offset
+vvblki_store:	.ds 2           ; temp storage for initial vvblki
 	
 hiscore_dlist:	
 	dta $70, $60		; blank 8, blank 7
@@ -34,12 +40,14 @@ hiscore_dlist:
 	dta $0E, $0E, $0E, $0E, $0E
 
 	dta $46, .lo(hiscore_txt), .hi(hiscore_txt)		  ; LMS to hiscore text
-	dta $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06 ; Hiscore text
+	dta $06, $06
+	dta $46, .lo(histr), .hi(histr)
+	dta $06, $06, $06, $06, $06, $06, $06, $06, $06, $06 ; Hiscore text
 	
 	dta $4E, $D0, $27	; mode E at $27D0
 	dta $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E
 	dta $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E
-	dta $0E, $0E, $0E, $0E, $0E
+	dta $0E, $0E, $0E
 	
 	dta $44, $A0, $08	; mode 4 at $08A0
 	dta $44, $C8, $08	; mode 4 at $08C8
@@ -50,27 +58,51 @@ hiscore_txt:
 	.sb '    high   scores   '
 	.sb '                    '
 
-HISTR:	.SB "   1.               "
-	.SB "   2.               "
-	.SB "   3.               "
-	.SB "   4.               "
-	.SB "   5.               "
-	.SB "   6.               "
-	.SB "   7.               "
-	.SB "   8.               "
-	.SB "   9.               "
-	.SB "  10.               "
-	.SB "                    "
-	.SB "                    "
-	.SB "                "	
-
+;; HISTR:	.SB "   1.               "
+;; 	.SB "   2.               "
+;; 	.SB "   3.               "
+;; 	.SB "   4.               "
+;; 	.SB "   5.               "
+;; 	.SB "   6.               "
+;; 	.SB "   7.               "
+;; 	.SB "   8.               "
+;; 	.SB "   9.               "
+;; 	.SB "  10.               "
+;; 	.SB "                    "
+;; 	.SB "                    "
+;; 	.SB "                "	
+		
 hiscore:
 
+	ldy VVBLKI_STORE
+	ldx VVBLKI_STORE+1	
+	lda #$06
+	jsr setvbv
+
+	lda #$40
+	sta NMIEN
+	
+	lda #$00
+	sta SDMCTL
+
+	jsr hiscrl
+	
 	;; Set display list to show score
 	lda #.lo(hiscore_dlist)
 	sta $0230
 	lda #.hi(hiscore_dlist)
 	sta $0231
+
+	ldy #$e0
+	ldx #$86
+	lda #$06
+	jsr setvbv
+	
+	lda #$C0
+	sta NMIEN
+
+	lda #$3E
+	sta SDMCTL
 	
 HSCONT:	
 	LDX #$00		; Start with first place
@@ -185,8 +217,80 @@ HENT2:	STA HISTR,X		; Enter onto screen.
 	CPY #$03		; Are we at end?
 	BNE HENT		; Nope, get another one.
 
+	ldy VVBLKI_STORE
+	ldx VVBLKI_STORE+1	
+	lda #$06
+	jsr setvbv
+
+	lda #$40
+	sta NMIEN
+	
+	lda #$00
+	sta SDMCTL
+
+	jsr hiscrw		; Write to disk
+
+	ldy #$e0
+	ldx #$86
+	lda #$06
+	jsr setvbv
+	
+	lda #$C0
+	sta NMIEN
+
+	lda #$3E
+	sta SDMCTL	
+	
 	JMP HSBYE
 
+	;; Load hiscore table from disk into screen memory
+	;; First, a fake read to sector 1 to clear cache.
+
+hiscrl:	LDA #'R'
+	STA DCOMND
+	LDA #$01
+	STA DUNIT
+	LDA #$00
+	STA DBUFLO
+	LDA #$50
+	STA DBUFHI
+	LDA #$01
+	STA DAUX1
+	LDA #$00
+	STA DAUX2
+	JSR DSKINV
+	
+	LDA #'R'		; Read...
+	BNE hiscrio
+
+	;; Write high score table from screen memory to sectors 719-720
+
+hiscrw:
+	LDA #'W'		; Write...
+hiscrio:	STA DCOMND		; into command
+	LDA #$01		; drive 1
+	STA DUNIT		; into unit.
+	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$CF		; Sector 0x2CF (719)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR DSKINV		; Do it.
+
+	LDA #.LO(HISTR2)		; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR2)		; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$D0		; Sector 0x2D0 (720)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR DSKINV		; Do it.
+	RTS	 		; Done, goodbye
+	
 	;; Read key, convert to screen code. stored in SLOT
 	
 HRKEY:  TXA			; Save X
@@ -294,3 +398,13 @@ HINIOF:
 
 HSCROF:
 	.byte 11, 20+11, 40+11, 60+11, 80+11, 100+11, 120+11, 140+11, 160+11, 180+11
+
+
+	;; store original VVBLKI for disk use
+	
+init:	LDA VVBLKI
+	STA VVBLKI_STORE
+	LDA VVBLKI+1
+	STA VVBLKI_STORE+1
+	JMP $83B9		; Go to original init.
+

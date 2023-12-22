@@ -26,7 +26,8 @@ L203A       .byte $20
             org $D301
 ;
             .byte $FF
-				;
+	
+;
 
 	icl 'hiscore.asm'
 	
@@ -7682,6 +7683,6 @@ LBFDF       .byte $00,$00,$00,$00
 ;
             org $02E2
 ;
-            .word L83B9
+            .word init
 ;
          
