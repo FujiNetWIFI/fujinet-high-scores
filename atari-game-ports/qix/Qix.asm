@@ -5255,10 +5255,9 @@ DLI1        pha
             cmp #$60
             bmi L966B
             jmp L9B76
-DLI1P
 L966B       lda #$D1
             sta VDSLST
-DLI1Q	    lda #$96
+	    lda #$96
             sta VDSLST+1
             lda FKDEF+1
             sta COLPF1

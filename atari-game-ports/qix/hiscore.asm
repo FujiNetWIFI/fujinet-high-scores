@@ -8,7 +8,14 @@ histr2:	.ds 128
 	org $5000
 
 VVBLKI      equ $0222
+SDMCTL	equ $022F
+COLOR0	equ $02C4
+COLOR1  equ $02C5
+COLOR2  equ $02C6
+COLOR3  equ $02C7
+COLOR4  equ $02C8
 CH1	equ $02F2
+CHBAS   equ $02F4
 chkey	equ $02FC
 ddevic	equ $0300
 dunit	equ $0301
@@ -24,7 +31,7 @@ DSKINV	equ $E453
 ;siov	equ $E459
 
 hiscore_dlist:
-	dta $70, $70, $60 	; 8 blank, very tall.
+	dta $70, $70, $E0 	; 8 blank, very tall.
 	dta $44, $80, $20	; Mode 4 @ $2080
 	dta $04			; Mode 4
 	dta $00			; Blank 1
@@ -40,7 +47,7 @@ hiscore_dlist:
 	dta $46, $00, $4F
 	dta $06, $06, $06, $06, $06, $06, $06, $06, $06, $06
 
-	dta $cd, $c0, $38	; Mode.i D @ $38C0
+	dta $4d, $c0, $38	; Mode.i D @ $38C0
 	
 	dta $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d, $0d ; continue on mode D
 	dta $0d, $0d, $0d, $0d, $0d, $0d
@@ -89,11 +96,32 @@ hiscore:
 	lda #.hi(hiscore_dlist)
 	sta DLISTH
 	sta $0231
+
+	;; Set DMA back
+	lda #$3D
+	sta SDMCTL
+
+	;; Set colors
+
+	lda #$0e
+	sta COLOR0
+	lda #$a6
+	sta COLOR1
+	lda #$26
+	sta COLOR2
+	lda #$48
+	sta COLOR3
+	lda #$C0
+	sta COLOR4
+
+vbl:	lda RTCLOK+2
+	cmp RTCLOK+2
+	beq vbl
 	
 	;; bring in our dli
-	lda #.lo(hiscore_dli1)
+	lda #.lo(hiscore_dli2)
 	sta VDSLST
-	lda #.hi(hiscore_dli1)
+	lda #.hi(hiscore_dli2)
 	sta VDSLST+1
 
 	;; Scoot the P/Ms out the way
@@ -302,9 +330,7 @@ HENT2:	STA HISTR,X		; Enter onto screen.
 	CPY #$03		; Are we at end?
 	BNE HENT		; Nope, get another one.
 
-	lda #$40
-	sta NMIEN
-	   jsr hiscrw		; Write to Disk.
+	jsr hiscrw		; Write to Disk.
 
 	lda #$C0
 	sta NMIEN
@@ -346,11 +372,22 @@ HSBL1:	LDA $13			; Check every 256 frames
 
 	;; Try to undo what we've just done...
 
+	;; store character set back to QIX
+	lda #$9C
+	sta CHBASE
+	sta CHBAS
+	
 	;; Restore DLI
+	lda #$40
+	sta NMIEN
+	
 	lda #$5C
 	sta VDSLST
 	lda #$96
 	sta VDSLST+1
+
+	lda #$C0
+	sta NMIEN
 	
 	;; Restore VKEYBD
         lda #$00
@@ -463,8 +500,7 @@ hiscore_dli1:			; Switch to ROM charset
 	tya
 	pha
 
-	sta WSYNC
-	lda #$9c
+	lda #$E0
 	sta CHBASE
 
 	lda #.lo(hiscore_dli2)
@@ -486,8 +522,7 @@ hiscore_dli2:
 	tya
 	pha
 
-	sta WSYNC
-	lda #$e0		; Switch back to QIX charset
+	lda #$9c		; Switch back to QIX charset
 	sta CHBASE
 
 	lda #.lo(hiscore_dli1)
