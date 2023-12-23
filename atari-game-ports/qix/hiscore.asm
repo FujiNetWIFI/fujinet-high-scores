@@ -410,6 +410,10 @@ HSBL1:	LDA $13			; Check every 256 frames
 	;; Set temp to 0 for 1 player
 	lda #$00
 	sta TEMP
+
+	;; Reset PRIOR, which got clobbered.
+	lda #$11
+	STA PRIOR
 	
 	;; Display list will restore when the VBI resyncs.
 
