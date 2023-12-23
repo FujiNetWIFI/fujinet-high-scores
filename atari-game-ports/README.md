@@ -11,7 +11,6 @@ Can you help? Grab one, and use one of the done games as a template to add Hisco
 * miner-2049er
 * moon-patrol-redux
 * popcorn
-* qix
 
 ## DONE
 
@@ -20,6 +19,7 @@ Can you help? Grab one, and use one of the done games as a template to add Hisco
 * dkong
 * pac-man
 * pengo
+* qix
 * rear-guard
 
 ## Inside the working examples
