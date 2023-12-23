@@ -225,7 +225,7 @@ HFSLT:	LDX SLOT
 	LDA HSCROF,X		; Get high score screen ptr offset
 	TAX			; Set to X
 HFSLT2:	LDA histore,Y	; Load next char of high score slot
-	CMP HISTR,X		; Compare against top high score.
+	CMP HISTR-1,X		; Compare against top high score.
 	BEQ HFSLT3
 	BCC HFSLT4
 	BCS HSETSLT		; higher score than current slot, select this one.
@@ -493,7 +493,7 @@ HINIOF:
 	.byte 4, 20, 36, 52, 68, 84, 100, 116, 132, 148
 
 HSCROF:
-	.byte 8, 24, 40, 56, 72, 88, 104, 120, 136, 152
+	.byte 9, 25, 41, 57, 73, 89, 105, 121, 137, 153
 	
 	;; The DLIs we need to display the high scores
 	
