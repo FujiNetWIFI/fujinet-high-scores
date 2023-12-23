@@ -6318,6 +6318,6 @@ L9FF7       rti
 ;
             org $02E2
 ;
-            .word L6000
+            .word myinit
 ;
          

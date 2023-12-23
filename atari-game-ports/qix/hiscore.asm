@@ -1,7 +1,13 @@
 	;; FujiNet High Score Enabled code for Qix
 
+	org $4F00
+
+histr:	.ds 128
+histr2:	.ds 128
+	
 	org $5000
 
+VVBLKI      equ $0222
 CH1	equ $02F2
 chkey	equ $02FC
 ddevic	equ $0300
@@ -30,7 +36,9 @@ hiscore_dlist:
 	dta $0d, $0d, $0d
 
 	dta $c6, .lo(hiscore_txt), .hi(hiscore_txt) ; Mode 6.i @ (hiscore_txt)
-	dta $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06
+	dta $06, $06
+	dta $46, $00, $4F
+	dta $06, $06, $06, $06, $06, $06, $06, $06, $06, $06
 
 	dta $cd, $c0, $38	; Mode.i D @ $38C0
 	
@@ -46,20 +54,6 @@ hiscore_txt:
 	.sb '  high   scores '
 	.sb '                '
 
-HISTR:	.SB " 1.             "
-	.SB " 2.             "
-	.SB " 3.             "
-	.SB " 4.             "
-	.SB " 5.             "
-	.SB " 6.             "
-	.SB " 7.             "
-	.SB " 8.             "
-	.SB " 9.             "
-	.SB "10.             "
-	.SB "                "
-	.SB "                "
-	.SB "            "	
-
 histore:	.ds 8		; Hiscore screen code storage after BCD
 slot:	        .ds 1           ; Hiscore slot
 scootslot:		.ds 1		; Another temp location
@@ -67,18 +61,52 @@ scootslot:		.ds 1		; Another temp location
 	
 hiscore:
 
+	;; Restore the VVBLKI
+	
+	ldy VVBLKI_STORE
+	ldx VVBLKI_STORE+1	
+	lda #$06
+	jsr setvbv
+
+	;; Restore the VVBLKD
+
+	ldy VVBLKD_STORE
+	ldx VVBLKD_STORE+1	
+	lda #$07
+	jsr setvbv
+	
+	;; Restore the VKEYBD
+	
+	lda vkeybd_store
+	sta $0208
+	lda vkeybd_store+1
+	sta $0209
+
 	;; Set display list to hiscores
 	lda #.lo(hiscore_dlist)
-	sta RAMLO+1
+	sta DLISTL
+	sta $0230
 	lda #.hi(hiscore_dlist)
-	sta TRAMSZ
-
+	sta DLISTH
+	sta $0231
+	
 	;; bring in our dli
 	lda #.lo(hiscore_dli1)
 	sta VDSLST
 	lda #.hi(hiscore_dli1)
 	sta VDSLST+1
 
+	;; Scoot the P/Ms out the way
+	LDA #$00
+	STA HPOSP0
+	STA HPOSP1
+	STA HPOSP2
+	STA HPOSP3
+	STA HPOSM0
+	STA HPOSM1
+	STA HPOSM2
+	STA HPOSM3
+	
 	;; Convert score BCD to screen code
 	ldx #$07		; Start at end
 
@@ -143,7 +171,7 @@ hs4	lda $95
 	;; Strip off leading zeroes
 hss:	lda histore,x
 	cmp #$10
-	bne HSCONT
+	bne HSLD
 	eor histore,x
 	sta histore,x
 	inx
@@ -152,6 +180,12 @@ hss:	lda histore,x
 
 	;; Hiscore now stored in histore.
 
+HSLD:	lda #$40
+	sta NMIEN
+	jsr HISCRL
+	lda #$C0
+	sta NMIEN
+	
 HSCONT:	
 	LDX #$00		; Start with first place
 	STX SLOT		; Store it.
@@ -245,7 +279,10 @@ HCPY:	LDA histore,X
 	LDA HINIOF,X
 	TAX
 	
-HENT:	JSR HRKEY		; Get initial.
+HENT:	LDA #$C0
+	STA IRQEN
+	STA POKMSK
+	JSR HRKEY		; Get initial.
 	CMP #$FF		; Dead key?
 	BEQ HENT		; Go back.
 	
@@ -265,13 +302,13 @@ HENT2:	STA HISTR,X		; Enter onto screen.
 	CPY #$03		; Are we at end?
 	BNE HENT		; Nope, get another one.
 
-	;; jsr hiscrw		; Write to Disk.
+	lda #$40
+	sta NMIEN
+	   jsr hiscrw		; Write to Disk.
 
-	lda #$76		; restore the VKEYBD vector.
-	sta vkeybd
-	lda #$B1
-	sta vkeybd+1
-	
+	lda #$C0
+	sta NMIEN
+		
 	jmp HSBYE		; go back to where we were.
 
 
@@ -307,11 +344,39 @@ HSBL1:	LDA $13			; Check every 256 frames
 	CMP #$04		; Waited long enough?
 	BNE HSBL1		; Nope, wait some more.
 
-	LDA #$03	        ; Turn the players and missiles back on
-	STA $D01D
+	;; Try to undo what we've just done...
+
+	;; Restore DLI
+	lda #$5C
+	sta VDSLST
+	lda #$96
+	sta VDSLST+1
 	
-	JMP $B1E8		; Go back.
+	;; Restore VKEYBD
+        lda #$00
+        sta VKEYBD
+        lda #$68
+        sta VKEYBD+1
+
+	;; Restore VVBLKI
+	ldy #$0E
+	ldx #$60	
+	lda #$06
+	jsr setvbv
+
+	;; Restore the VVBLKD
+	ldy #$7C
+	ldx #$9B
+	lda #$07
+	jsr setvbv
+
+	;; Set temp to 0 for 1 player
+	lda #$00
+	sta TEMP
 	
+	;; Display list will restore when the VBI resyncs.
+
+	jmp $7B71		; Continue onward
 	
         ;; Key to screen code table.
 
@@ -399,7 +464,7 @@ hiscore_dli1:			; Switch to ROM charset
 	pha
 
 	sta WSYNC
-	lda #$e0
+	lda #$9c
 	sta CHBASE
 
 	lda #.lo(hiscore_dli2)
@@ -436,3 +501,72 @@ hiscore_dli2:
 	tax
 	pla
 	rti
+
+vvblki_store:	.ds 2
+vvblkd_store:	.ds 2
+vkeybd_store:	.ds 2
+	
+myinit: lda VVBLKI
+	sta VVBLKI_STORE
+	LDA VVBLKI+1
+	sta VVBLKI_STORE+1
+
+	lda VVBLKD
+	sta VVBLKD_STORE
+	LDA VVBLKD+1
+	sta VVBLKD_STORE+1
+
+	lda vkeybd
+	sta vkeybd_store
+	lda vkeybd+1
+	sta vkeybd_store+1
+
+	jmp L6000
+
+	;; Load hiscore table from disk into screen memory
+	;; First, a fake read to sector 1 to clear cache.
+
+hiscrl:	LDA #'R'
+	STA DCOMND
+	LDA #$01
+	STA DUNIT
+	LDA #$00
+	STA DBUFLO
+	LDA #$40
+	STA DBUFHI
+	LDA #$01
+	STA DAUX1
+	LDA #$00
+	STA DAUX2
+	JSR DSKINV
+	
+	LDA #'R'		; Read...
+	BNE hiscrio
+
+	;; Write high score table from screen memory to sectors 719-720
+
+hiscrw:
+	LDA #'W'		; Write...
+hiscrio:	STA DCOMND		; into command
+	LDA #$01		; drive 1
+	STA DUNIT		; into unit.
+	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$CF		; Sector 0x2CF (719)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR DSKINV		; Do it.
+
+	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR2)	; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$D0		; Sector 0x2D0 (720)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR DSKINV		; Do it.
+	RTS	 		; Done, goodbye
