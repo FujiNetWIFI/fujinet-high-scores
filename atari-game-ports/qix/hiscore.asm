@@ -1,5 +1,14 @@
 	;; FujiNet High Score Enabled code for Qix
 
+	org $4800
+
+page0_save_os:	.ds 256
+page2_save_os:	.ds 256
+page3_save_os:	.ds 256
+page0_save_gm:	.ds 256
+page2_save_gm:	.ds 256
+page3_save_gm:	.ds 256
+
 	org $4F00
 
 histr:	.ds 128
@@ -61,27 +70,29 @@ scootslot:		.ds 1		; Another temp location
 	
 hiscore:
 
-	;; Restore the VVBLKI
+	;; Preserve game pages, for exit from hiscore
 	
-	ldy VVBLKI_STORE
-	ldx VVBLKI_STORE+1	
-	lda #$06
-	jsr setvbv
+	ldx #$FF
+cpgs	lda $0000,x
+	sta page0_save_gm,x
+	lda $0200,x
+	sta page2_save_gm,x
+	lda $0300,x
+	sta page3_save_gm,x
+	dex
+	bne cpgs
 
-	;; Restore the VVBLKD
+	;; Transfer in OS pages
 
-	ldy VVBLKD_STORE
-	ldx VVBLKD_STORE+1	
-	lda #$07
-	jsr setvbv
+	ldx #$FF
+cpor	lda page0_save_os,x
+	sta $0000,x
+	lda page2_save_os,x
+	sta $0200,x
+	lda page3_save_os,x
+	dex
+	bne cpor
 	
-	;; Restore the VKEYBD
-	
-	lda vkeybd_store
-	sta $0208
-	lda vkeybd_store+1
-	sta $0209
-
 	;; Set display list to hiscores
 	lda #.lo(hiscore_dlist)
 	sta DLISTL
@@ -344,31 +355,17 @@ HSBL1:	LDA $13			; Check every 256 frames
 	CMP #$04		; Waited long enough?
 	BNE HSBL1		; Nope, wait some more.
 
-	;; Try to undo what we've just done...
-
-	;; Restore DLI
-	lda #$5C
-	sta VDSLST
-	lda #$96
-	sta VDSLST+1
+	;; restore game pages
 	
-	;; Restore VKEYBD
-        lda #$00
-        sta VKEYBD
-        lda #$68
-        sta VKEYBD+1
-
-	;; Restore VVBLKI
-	ldy #$0E
-	ldx #$60	
-	lda #$06
-	jsr setvbv
-
-	;; Restore the VVBLKD
-	ldy #$7C
-	ldx #$9B
-	lda #$07
-	jsr setvbv
+	ldx #$FF
+cpgr	lda page0_save_gm,x
+	sta $0000,x
+	lda page2_save_gm,x
+	sta $0200,x
+	lda page3_save_gm,x
+	sta $0300,x
+	dex
+	bne cpgr
 
 	;; Set temp to 0 for 1 player
 	lda #$00
@@ -501,25 +498,23 @@ hiscore_dli2:
 	tax
 	pla
 	rti
-
-vvblki_store:	.ds 2
-vvblkd_store:	.ds 2
-vkeybd_store:	.ds 2
 	
-myinit: lda VVBLKI
-	sta VVBLKI_STORE
-	LDA VVBLKI+1
-	sta VVBLKI_STORE+1
+;;; ----------------------------------------------------
+	
+myinit:
 
-	lda VVBLKD
-	sta VVBLKD_STORE
-	LDA VVBLKD+1
-	sta VVBLKD_STORE+1
-
-	lda vkeybd
-	sta vkeybd_store
-	lda vkeybd+1
-	sta vkeybd_store+1
+	;; Preserve OS pages, for use in hiscore
+	
+	ldx #$FF
+cpos	lda $0000,x
+	sta page0_save_os,x
+	lda $0200,x
+	sta page2_save_os,x
+	lda $0300,x
+	sta page3_save_os,x
+	dex
+	bne cpos
+	
 
 	jmp L6000
 
