@@ -26,7 +26,9 @@ L203A       .byte $20
             org $D301
 ;
             .byte $FF
-;
+				;
+	icl 'hiscore.asm'
+	
             org $8000
 ;
 L8000       pla
@@ -6190,7 +6192,7 @@ LB70E       jsr LB8A1
             jsr L8B3E
             jmp LB732
 LB72F       jsr L8B09
-LB732       jsr LB81E
+LB732       jsr LB81E		
             lda #$00
             sta L00BE
             sta L00B0
@@ -6205,7 +6207,7 @@ LB732       jsr LB81E
             bne LB6E3
 LB74E       lda L19C6
             bne LB6E3
-LB753       jsr LBAA0
+LB753       jsr hiscore
             sec
             ror L00AF
             bit L00BE
@@ -6213,7 +6215,7 @@ LB753       jsr LBAA0
             jmp L8369
 LB760       bit L00B0
             bpl LB753
-            jmp L8031
+            jmp L8031		; Other console key pressed, go back to selection screen.
 LB767       clc
             rts
 LB769       lda #$00
@@ -7361,7 +7363,9 @@ LBCFC       .byte $00,$00,$00
             .byte $FF,$00,$00,$80,$00,$04,$00,$80
 ;
             org $02E2
-;
-            .word L8000
+				;
+	.word myinit
+	
+            ;; .word L8000
 ;
          
