@@ -17,6 +17,7 @@ Can you help? Grab one, and use one of the done games as a template to add Hisco
 * baja-buggies
 * centipede
 * dkong
+* defender
 * pac-man
 * pengo
 * qix
