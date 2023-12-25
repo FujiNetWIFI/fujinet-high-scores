@@ -978,7 +978,9 @@ LF0F0       = $F0F0
 LF42C       = $F42C
 ;
 ; Start of code
-;
+				;
+	icl 'hiscore.asm'
+	
             org $7500
 ;
             jsr L94FA
@@ -4507,7 +4509,8 @@ L9B94:      lda L9D6A,X
 L9BAC:      jsr L9C49
             pla
             bne L9BBD
-            jmp L9C88
+	    jmp hiscore
+            ;; jmp L9C88
 L9BB5:      ldx #$20
             jsr L9C4B
             jmp L9BF7
@@ -7740,6 +7743,6 @@ LB7DB:      jsr L987E
 ;
             org $02E0
 ;
-            .word L7D00
+            .word $7D00
 ;
          
