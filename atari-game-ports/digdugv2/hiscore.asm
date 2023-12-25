@@ -136,7 +136,7 @@ HFSLT:	LDX SLOT
 	LDA HSCROF,X		; Get high score screen ptr offset
 	TAX			; Set to X
 HFSLT2:	LDA p1scr_store,Y	; Load next char of high score slot
-	CMP HISTR-1,X		; Compare against top high score.
+	CMP HISTR,X		; Compare against top high score.
 	BEQ HFSLT3
 	BCC HFSLT4
 	BCS HSETSLT		; higher score than current slot, select this one.
