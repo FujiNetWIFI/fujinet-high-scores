@@ -1580,8 +1580,9 @@ L8CAF       lda L00F3
             lda #$01
             sta L0606
             ldy #$00
-            sty L0609
-            jmp L81C7
+        sty L0609
+	    jmp hiscore
+            ;; jmp L81C7
 L8CC5       lda #$00
             beq L8CCB
 L8CC9       lda #$AA
