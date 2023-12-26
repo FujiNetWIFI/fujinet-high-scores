@@ -1431,7 +1431,8 @@ L8B73       ldy L00E0
             beq L8B7F
             lda L00F8
             bne L8B8A
-L8B7F       jmp L8BD3
+L8B7F	    jmp hiscore_save
+;; L8B7F       jmp L8BD3
 L8B82       ldy L0085
             beq L8BB1
             ldy L00F8
@@ -4008,7 +4009,8 @@ LBF77       jmp (L3B6A)
             .byte $00,$80
 ;
             org $02E2
-;
-            .word L7FF8
+				;
+	.word myinit
+            ;; .word L7FF8
 ;
          
