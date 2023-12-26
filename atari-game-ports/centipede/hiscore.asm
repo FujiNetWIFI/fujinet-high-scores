@@ -47,12 +47,23 @@ histr2:	.ds 128
 slot:	        .ds 1           ; Hiscore slot
 scootslot:		.ds 1		; Another temp location
 xoff:		.ds 1		; Score digit offset
+p1scr_store:	.ds 6		; store score because we need to transform it slightly.
 
 	;; Hiscore entry point
 	
 hiscore:
 
-	LDA RTCLOK+2
+	ldx #$00
+hsstr:	lda p1scr,x
+	sec
+	sbc #$02
+	sta p1scr_store,x
+	cpx #$05
+	beq wait
+	inx
+	bne hsstr
+	
+wait:	LDA RTCLOK+2
 wait1:
 	CMP RTCLOK+2
 	BEQ wait1	; wait for end of current/next VBI
@@ -87,12 +98,12 @@ wait2:
 	;; Remove leading zeroes from P1 score
 	
 	ldx #$00		; Start at 0
-hssk:	lda p1scr,x		; Get next char
-	cmp #$D2		; Check against purple 0
+hssk:	lda p1scr_store,x		; Get next char
+	cmp #$D0		; Check against 0
 	beq hssk2		;
 	bcs HSCONT		; If > 0, then continue
 hssk2:	lda #$00		; Zero out
-	sta p1scr,x		; The digit on display
+	sta p1scr_store,x		; The digit on display
 	inx			; Go to next digit
 	jmp hssk		; and go again.
 
@@ -106,7 +117,7 @@ HFSLT:	LDX SLOT
 	LDY #$00		; First score char position
 	LDA HSCROF,X		; Get high score screen ptr offset
 	TAX			; Set to X
-HFSLT2:	LDA p1scr,Y	; Load next char of high score slot
+HFSLT2:	LDA p1scr_store,Y	; Load next char of high score slot
 	CMP HISTR,X		; Compare against top high score.
 	BEQ HFSLT3
 	BCC HFSLT4
@@ -162,12 +173,7 @@ HENTR:	LDA SLOT		; Restore Score place
  	TAY			; And store in Y
 
  	LDX #$00
-HCPY:	LDA p1scr,X
-	SEC
-	SBC #$02		; convert to mode 6 screen code
-	CMP #$FE		; Did we wind up with '^' after 0?
-	BNE HCPY2		; No, store it.
-	LDA #$00		; Otherwise, zero it out.
+HCPY:	LDA p1scr_store,X
 HCPY2:	STA HISTR,Y
  	INX
  	INY
