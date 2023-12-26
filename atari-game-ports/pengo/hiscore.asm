@@ -87,6 +87,9 @@ hiscore:
 
 	jsr hiscrl
 	
+	lda #$03
+	sta SKCTL
+	
 	;; Set display list to show score
 	lda #.lo(hiscore_dlist)
 	sta $0230
@@ -227,9 +230,12 @@ HENT2:	STA HISTR,X		; Enter onto screen.
 	
 	lda #$00
 	sta SDMCTL
-
+	
 	jsr hiscrw		; Write to disk
 
+	lda #$03
+	sta SKCTL
+	
 	ldy #$e0
 	ldx #$86
 	lda #$06
@@ -322,8 +328,10 @@ HSBYE:
 HSWAIT:	LDA RTCLOK
 	CMP #$03
 	BNE HSWAIT
-	
+	SEI
 	LDA #$00		; Otherwise, restore display list
+	STA AUDCTL
+	CLI
 	STA $0230
 	LDA #$06
 	STA $0231
