@@ -60,16 +60,15 @@ void congobongo(char *atr, char *html)
       /* Do very simple ANTIC screen code conversion to ASCII */
       unsigned char c = buf[i];
 
+      if (c>0x89 && c<0x9A)
+	c -= 0x80;
+      
       if (c>127)
 	c -= 0xA0;
       else if (c<64)
 	c+=32;
       else if (c>64)
 	c-=32;
-
-      // Quick hack. :)
-      if (c=='@')
-	c=' ';
 
       buf[i]=c;
     }
