@@ -2,7 +2,9 @@
             icl 'Hot Lips.inc'
 ;
 ; Start of code
-;
+				;
+	icl 'hiscore.asm'
+	
             org $2000
 ;
 L2000       lda #$01
@@ -2373,7 +2375,8 @@ L34C8       lda L2078
             beq L34C8
             lda L20B3
             bne L34D7
-            jmp L3544
+	    jmp hiscore
+            ;; jmp L3544
 L34D7       cmp #$02
             bne L34F4
             ldy #$04
