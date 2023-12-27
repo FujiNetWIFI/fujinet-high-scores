@@ -66,6 +66,11 @@ void missilecommand(char *atr, char *html)
 	c+=32;
       else if (c>64)
 	c-=32;
+
+      // Quick hack. :)
+      if (c=='@')
+	c=' ';
+
       buf[i]=c;
     }
 
