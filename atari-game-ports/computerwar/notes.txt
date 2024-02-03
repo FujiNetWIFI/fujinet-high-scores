@@ -1,0 +1,4 @@
+$98CD is a straight jump back to the main program, so this is our entry point.
+Score at 070A, screen code + $40
+
+VBI needed saving/swapping out.
