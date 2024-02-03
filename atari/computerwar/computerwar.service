@@ -1,0 +1,14 @@
+[Unit]
+Description=Atari Computer War Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/computerwar "/tnfs/Atari_8-bit/Games/High Score Enabled/Computer War.atr" "/scores/computerwar.html"
+
+[Install]
+WantedBy=multi-user.target
