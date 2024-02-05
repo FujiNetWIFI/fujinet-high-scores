@@ -7,6 +7,7 @@ Can you help? Grab one, and use one of the done games as a template to add Hisco
 ## TODO
 
 * berzerk
+* embargo
 * miner-2049er
 * moon-patrol-redux
 * popcorn
