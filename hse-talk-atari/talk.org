@@ -2,6 +2,8 @@
 #+author: Thomas Cherryhomes
 #+email: thom.cherryhomes@gmail.com
 
+#+note: How do we find high score sectors?
+
 * in This Video
 
 - What is High Score Enabled?
