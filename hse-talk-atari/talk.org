@@ -1,0 +1,1437 @@
+#+title: Adding High Score Table an Atari Game
+#+author: Thomas Cherryhomes
+#+email: thom.cherryhomes@gmail.com
+
+* in This Video
+
+- What is High Score Enabled?
+
+- Anatomy of a High Score Enabled Game
+
+- Needed tools and Procedure
+
+- What to do, by Game Type
+  
+* What is High Score Enabled?
+
+- Play existing Atari games on Internet servers
+
+- Post high scores in those games
+
+- Others can see the high scores:
+  + In the game.
+  + On the Web.
+
+* Anatomy of a High Score Enabled Game
+
+- A Game that writes its high scores to disk
+
+- Header Bytes in the disk image
+  that mark sectors that can be written
+  in a disk image normally mounted
+  as read only.
+
+- A scraper that reads the disk image
+  and writes out a web page.
+
+* Needed tools and Procedure
+
+- [[https://github.com/FujiNetWIFI/fujinet-high-scores/tree/main/atari/high-score-enable][high-score-enable]], to write the ATR header
+  
+- A Debugger (I use [[https://www.virtualdub.org/altirra.html][Altirra]]'s debugger.)
+
+- [[https://sourceforge.net/projects/dis6502/][dis6502]], an excellent disassembler.
+
+- [[https://github.com/cc65/cc65][CC65]] (for compiler and assembler)
+
+* What to do, by Game Type
+
+- Already Write Scores to Disk
+
+- Need Write to Disk
+
+- Need High Score and Write to Disk
+
+** Already Write Scores to Disk
+
+- Drol
+  
+- Frogger
+
+- Jumpman
+
+- All that was needed was the header change
+  to mark the high score sectors.
+
+*** high-score-enable.c
+
+#+begin_src c
+
+/**
+ * Set high-score-mode bytes in ATR file
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+int high_score_enable(char *atr, unsigned short start, unsigned char len)
+{
+  FILE *f = fopen(atr,"r+");
+  unsigned char id[2];
+ 
+  if (!f)
+    {
+      perror("error opening file.");
+      return 1;
+    }
+
+  fread(&id,sizeof(unsigned char),2,f);
+
+  if ((id[0] != 0x96) || (id[1] != 0x02))
+    {
+      printf("Not a valid ATR file. Aborting.\n");
+      fclose(f);
+      return 1;
+    }
+
+  fseek(f,0x0C,SEEK_SET);
+
+  fwrite(&len,sizeof(unsigned char),1,f);
+  fwrite(&start,sizeof(unsigned short),1,f);
+
+  fclose(f);
+
+  return 0;
+}
+
+int main(int argc, char* argv[])
+{
+  if (argc < 4)
+    {
+      printf("%s <file.atr> <starting sector> <number of sectors>\n",argv[0]);
+      return 1;
+    }
+
+  return high_score_enable(argv[1],atoi(argv[2]),atoi(argv[3]));
+}
+
+#+end_src
+
+
+** Need Write to Disk
+
+- Baja Buggies
+
+- Unused memory in binary patched
+  to add disk writing routine.
+
+*** write.asm
+
+#+begin_src asm
+
+;; 
+;; Write high scores to disk
+;;
+
+        OPT h-
+
+DDEVIC  =       $0300   ;peripheral bus ID number
+DUNIT   =       $0301   ;unit number
+DCOMND  =       $0302   ;bus command ordinal
+DSTATS  =       $0303   ;command type/status return
+DBUFLO  =       $0304   ;data buffer pointer
+DBUFHI  =       $0305
+DTIMLO  =       $0306   ;device timeout in seconds
+DBYTLO  =       $0308   ;number of bytes transferred
+DBYTHI  =       $0309
+DAUX1   =       $030A   ;command auxiliary bytes
+DAUX2   =       $030B
+
+SIOV    =       $E459   ; SIO Vector
+
+        ORG $0489
+
+        LDA #$00                ; We need to put the bottom of the display back to blank
+        STA $37D2               ; because we are writing it back to disk.
+        STA $37D3               ; otherwise all hell breaks loose.
+
+        LDA #$31                ; Drive 1
+        STA DDEVIC
+        LDA #$01                ; Unit 1 (D1:)
+        STA DUNIT
+        LDA #'W'                ; Write
+        STA DCOMND
+        LDA #$80                ; ->Drive
+        STA DSTATS
+        LDA #$80                ; $3780
+        STA DBUFLO
+        LDA #$37
+        STA DBUFHI
+        LDA #$80                ; 128 bytes
+        STA DBYTLO
+        LDA #$00
+        STA DBYTHI
+        LDA #$88                ; Sector $88
+        STA DAUX1
+        LDA #$00
+        JSR SIOV                ; Do it
+
+        LDA #$80
+        STA DSTATS
+        LDA #$00                ; $3800
+        STA DBUFLO
+        LDA #$38
+        STA DBUFHI
+        LDA #$89                ; Sector $89
+        STA DAUX1
+        JSR SIOV                ; do it
+
+        LDA #$80
+        STA DSTATS
+        LDA #$80                ; $3880
+        STA DBUFLO
+        LDA #$38
+        STA DBUFHI
+        LDA #$8A                ; Sector $8A
+        STA DAUX1
+        JSR SIOV                ; do it.
+
+        JMP $38DF               ; Finish and back to Attract mode.
+
+
+#+end_src
+
+- A C program to patch routine to Unprotected Boot loader game
+
+*** patch.c
+
+#+begin_src c
+
+/**
+ * Patch Baja Buggies to add score code.
+ * @author  Thomas Cherryhomes
+ * @email   thom dot cherryhomes at gmail dot com
+ * @license gpl v. 3
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define SEEK_POS 0x19 /* Right after JMP $0506 in Sector 1 */
+#define JUMP_POS 0x45EC /* Replacing the 38DF */
+
+#define MAX_PATCH_SIZE 115
+
+char sectorBuf[MAX_PATCH_SIZE];
+
+const char jump[2]={0x89,0x04};
+
+int main(int argc, char *argv[])
+{
+  FILE *afp; FILE *bfp;
+  size_t len;
+  
+  if (argc<3)
+    {
+      printf("%s <atr-file> <bin-file>\n",argv[0]);
+      return 1;
+    }
+
+  afp = fopen(argv[1],"r+");
+
+  if (!afp)
+    {
+      perror("Could not open ATR file");
+      return 1; // Bail.
+    }
+
+  bfp = fopen(argv[2],"r");
+
+  if (!bfp)
+    {
+      perror("Could not open BIN file");
+      fclose(afp);
+      return 1; // Bail.
+    }
+
+  if (fseek(afp,SEEK_POS,SEEK_SET))
+    {
+      perror("Could not seek to ATR sector");
+      fclose(afp);
+      fclose(bfp);
+      return 1;
+    }
+
+  len = fread(&sectorBuf[0],sizeof(char),sizeof(sectorBuf),bfp);
+
+  fclose(bfp);
+  
+  fwrite(&sectorBuf[0],sizeof(char),MAX_PATCH_SIZE,afp);
+
+  // Patch 0x45EC to jump to our new routine
+  fseek(afp,JUMP_POS,SEEK_SET);
+  fwrite(&jump[0],sizeof(const char),sizeof(jump),afp);
+  
+  fclose(afp);
+
+  // Done.
+  return 0;
+}
+
+#+end_src
+
+
+** Needs a High Score Table/Write to Disk
+
+- Centipede
+  
+- Congo Bongo
+
+- Donkey Kong
+  
+- PAC-MAN
+
+- Pengo
+
+*** Modifying Centipede
+
+- Get Copy of Centipede from Homesoft
+
+- Disassemble
+
+- Find Game Over
+
+- Add JSR to HISCORE
+
+- Implement HISCORE.ASM
+
+- hiscore_table.asm
+
+- write-high-score.c
+
+- picoboot.bin
+
+- Makefile
+
+**** Get Copy of Centipede from Homesoft
+
+- Centipede in HomeSoft:
+  http://apps.irata.online/Atari_8-bit/Games/Homesoft/C/Centipede%20%28Atari%2C%201982%29.xex
+
+- Binary Load games are chosen because they can
+  easily be adapted to be boot loadable, via picoboot.bin
+
+- Some Homesoft games are compressed,
+  and should be unpacked in memory and saved to disk
+  before disassembly.
+
+**** Disassemble
+
+- Use DIS6502 to disassemble into .asm
+
+- Resulting binaries assemble with [[https://mads.atari8.info/][MADS]].
+
+**** Find Game Over
+
+- Play test game
+
+- At game over, break into debugger
+
+- Disassembly view helps match to disassembled code
+
+**** Add JSR to HISCORE
+
+- At Game Over, it loops in this section of code
+  
+#+begin_src asm
+
+LA2C7       lda L0099
+            cmp #$07
+            beq LA2C7
+            cmp #$06
+            beq LA2D8
+            cmp #$05
+            beq LA2DE
+            jmp LA2C7
+
+#+end_src
+
+- We need to insert a jump to HISCORE
+  without disturbing the adjacent code
+
+#+begin_src asm
+
+LA2C7
+	    jsr hiscore
+hsback:	    nop
+	    nop
+	    nop
+	
+	    ;;  lda L0099
+	    ;;  cmp #$07
+	    ;;  beq LA2C7
+	    cmp #$06
+	    beq LA2D8
+	    cmp #$05
+	    beq LA2DE
+	    jmp HSBYE
+
+#+end_src
+
+**** Implement HISCORE.ASM
+
+***** Some equates we need
+
+#+begin_src asm
+
+CH1	equ $02F2
+chkey	equ $02FC
+ddevic	equ $0300
+dunit	equ $0301
+dcomnd	equ $0302	
+dstats	equ $0303
+dbuflo	equ $0304
+dbufhi	equ $0305
+dtimlo	equ $0306
+;; dbytlo	equ $0308
+dbythi	equ $0309		
+daux1	equ $030A
+daux2	equ $030B
+DSKINV	equ $E453
+siov	equ $E459
+vkeybd	equ $0208
+setvbv  equ $E45C
+
+p1scr	equ $3823		; Screen memory for P1 score
+
+#+end_src
+
+***** We need a display list to show score
+
+- We'll put our High Score code/data at $8000
+  
+#+begin_src asm
+
+	org $8000
+
+
+hiscore_dlist:
+	dta $70, $70, $70						; 3 sets of 8 blank lines (24 lines)
+	dta $44, $20, $38 						; existing centipede playfield
+	dta $04, $04, $04						; ...
+	dta $04						; ...
+	dta $46, .lo(hiscore_txt), .hi(hiscore_txt)		  ; LMS to hiscore text
+	dta $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06 ; Hiscore text
+	dta $44, $18, $3B	; Back to playfield
+	dta $04, $04, $04
+	dta $04
+	dta $41, .lo(hiscore_dlist), .hi(hiscore_dlist) ; Done
+
+#+end_src
+
+***** We need some space in memory for hiscore
+
+#+begin_src asm
+
+hiscore_txt:
+	.sb '                    '
+	.sb '    high   scores   '
+	.sb '                    '
+
+histr:  .ds 128 ; Some empty space
+histr2:	.ds 128 ; to be replaced by sector reads
+
+#+end_src
+
+***** We need some variables and to transform score.
+
+#+begin_src asm
+
+slot:	        .ds 1           ; Hiscore slot
+scootslot:		.ds 1		; Another temp location
+xoff:		.ds 1		; Score digit offset
+p1scr_store:	.ds 6		; store score because we need to transform it slightly.
+
+#+end_src
+
+***** Start of code, Transform score
+
+- Character set has digits +2 higher
+  than they need to be for normal charset,
+  so we need to scoot each digit back.
+
+- Score on Screen:
+#+begin_src
+014113
+#+end_src
+  
+- Score in memory:
+#+begin_src
+D2 D3 D6 D3 D3 D5
+#+end_src
+- We need it to be:
+#+begin_src
+D0 D1 D4 D1 D1 D3
+#+end_src
+
+so that it lines up with ANTIC screen codes of color=4
+
+#+begin_src asm
+
+	;; Hiscore entry point
+	
+hiscore:
+
+	ldx #$00           ; Start at offset 0
+hsstr:	lda p1scr,x        ; Get score digit from screen
+	sec                ;
+	sbc #$02           ; Subtract 2
+	sta p1scr_store,x  ; Store it in p1scr_store,x
+	cpx #$05           ; Have we done all 6 digits?
+	beq wait           ; Yes, get out of here.
+	inx                ; no? increment X
+	bne hsstr          ; and go again
+
+#+end_src
+
+***** Swap VBI Back to OS while Hiscore is active
+
+- Centipede does its own immediate VBI. This interferes
+  with keyboard operation, so we borrow it, by waiting
+  for the VBLANK to end, and then swap it out.
+
+#+begin_src asm
+	  
+wait:	LDA RTCLOK+2
+wait1:
+	CMP RTCLOK+2
+	BEQ wait1	; wait for end of current/next VBI
+
+	LDA VVBLKI
+	PHA
+	LDA VVBLKI+1
+	PHA
+	LDA SYSVBV+1
+	STA VVBLKI
+	LDA SYSVBV+2
+	STA VVBLKI+1
+
+#+end_src
+
+***** Load the Hiscore Table
+
+- We first do a dummy read of sector 1, to clear FujiNet cache
+  Into an area of memory we do not care about...
+
+- This resets the read-ahead cache, so we are guaranteed
+  to get a fresh read of the hi score table
+  in sectors 719-720
+
+#+begin_src asm
+
+hiscrl:	LDA #'R'
+	STA DCOMND
+	LDA #$01
+	STA DUNIT
+	LDA #$00
+	STA DBUFLO
+	LDA #$50
+	STA DBUFHI
+	LDA #$01
+	STA DAUX1
+	LDA #$00
+	STA DAUX2
+	JSR DSKINV
+
+#+end_src asm
+
+- We then do the actual read...
+
+#+begin_src asm
+
+	LDA #'R'		; Read...
+	BNE hiscrio
+
+#+end_src
+
+- A common routine is used for both reads/writes
+  with the difference being DCOMND being 'R' or 'W'
+
+- Since we need to write 10 lines of 20 chars
+  each, and we are using 128 byte sectors,
+  we need to do two sectors, each pointing into
+  HISTR and HISTR2, respectively.
+
+#+begin_src asm
+
+hiscrio:	STA DCOMND		; into command
+	LDA #$01		; drive 1
+	STA DUNIT		; into unit.
+	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$CF		; Sector 0x2CF (719)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR DSKINV		; Do it.
+
+	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR2)	; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$D0		; Sector 0x2D0 (720)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR DSKINV		; Do it.
+	RTS	 		; Done, goodbye
+
+#+end_src
+
+***** Restore the VBI
+
+#+begin_src asm
+
+	LDA RTCLOK+2
+wait2:
+	CMP RTCLOK+2
+	BEQ wait2	; wait for end of current/next VBI
+
+	PLA
+	STA VVBLKI+1
+	PLA
+	STA VVBLKI
+
+#+end_src
+
+***** Set to Hiscore display list
+
+- Point SDLSTL/H to the high score display list
+  which is similar to the game display list,
+  but puts mode 6 lines in the middle of the screen
+  to show the high score.
+
+#+begin_src asm
+
+	;; Set display list to show score
+	lda #.lo(hiscore_dlist)
+	sta $0230
+	lda #.hi(hiscore_dlist)
+	sta $0231
+
+#+end_src
+
+***** Remove leading zeroes from stored score
+
+- To make high score more readable, we transform
+  the leading zeroes into spaces.
+
+- p1scr_store starts with:
+#+begin_src
+D0 D1 D4 D1 D1 D3  
+#+end_src
+
+- p1scr_store is changed to:
+#+begin_src
+00 D1 D4 D1 D1 D3
+#+end_src
+
+#+begin_src asm
+
+	;; Remove leading zeroes from P1 score
+	
+	ldx #$00		; Start at 0
+hssk:	lda p1scr_store,x		; Get next char
+	cmp #$D0		; Check against 0
+	beq hssk2		;
+	bcs HSCONT		; If > 0, then continue
+hssk2:	lda #$00		; Zero out
+	sta p1scr_store,x		; The digit on display
+	inx			; Go to next digit
+	jmp hssk		; and go again.
+
+#+end_src
+
+***** Find Suitable High Score slot
+
+- There are 10 high score slots (0-9)
+
+- Start at Slot 0
+
+- There are 6 digits in each slot
+  Reset to digit 0 each slot.
+  
+- Compare each digit in p1scr_store
+  to what is stored in current slot
+
+- if digit in p1scr_store &gt; what is in slot
+  then we've found our slot
+
+- if we have done all digits in slot,
+  advance to next slot.
+
+- if we are at last digit; last slot,
+  our score is too low. fall out.
+
+- The table HSCROF stores offsets for the first
+  digit of each slot's score,
+  relative to start of HISTR:
+#+begin_src asm
+HSCROF:
+	.byte 11, 20+11, 40+11, 60+11, 80+11, 100+11, 120+11, 140+11, 160+11, 180+11
+#+end_src
+
+- The code to find a suitable slot:
+  
+#+begin_src asm
+
+HSCONT:	
+	LDX #$00		; Start with first place
+	STX SLOT		; Store it.
+	
+	;; Find possible slot
+
+HFSLT:	LDX SLOT
+	LDY #$00		; First score char position
+	LDA HSCROF,X		; Get high score screen ptr offset
+	TAX			; Set to X
+HFSLT2:	LDA p1scr_store,Y	; Load next char of high score slot
+	CMP HISTR,X		; Compare against top high score.
+	BEQ HFSLT3
+	BCC HFSLT4
+	BCS HSETSLT		; higher score than current slot, select this one.
+HFSLT3:	INY			; Increment current hiscore slot ptr.
+	INX			; Increment hiscore screen slot ptr
+	CPY #$06		; Are we done with string comparison?
+	BNE HFSLT2		; No, Continue string comparison
+HFSLT4:	INC SLOT		; Increment slot #
+	LDX SLOT		; Get Slot #
+	CPX #$0A		; Are we at last slot?
+	BNE HFSLT		; Not done yet, next slot.
+	JMP HSBYE		; Didn't find one, don't enter.
+	
+	;; Set Slot
+
+HSETSLT:
+	LDX SLOT		; Store found place.
+	LDA #$08		; Second to last place for scoot.
+	STA SCOOTSLOT		; Store in scoot position.
+
+#+end_src
+
+***** Scoot lower scores down one slot
+
+- If we aren't at the last slot, we need
+  to move each subsequent score down one slot
+  to make room for our new score.
+
+- Move each slot's character
+  starting point defined by the table HINIOF
+  Relative to start of HISTR:
+#+begin_src asm
+HINIOF:
+	.byte 6, 26, 46, 66, 86, 106, 126, 146, 166, 186
+#+end_src
+
+#+begin_src asm
+
+	;; Are we in slot 10? if so, bypass the scoot.
+
+	LDA SLOT
+	CMP #$09
+	BEQ HENTR
+	
+	;; Scoot older high scores down from selected slot
+	
+HSCOOT: LDY SCOOTSLOT
+	LDA HINIOF,Y
+	TAX
+	LDY #$00		; Beginning of string.
+
+HSCOOT2:
+	LDA HISTR,X
+	STA HISTR+20,X
+	INX
+	INY
+	CPY #12
+	BNE HSCOOT2
+
+	DEC SCOOTSLOT
+	LDA SCOOTSLOT
+	CMP SLOT
+	BPL HSCOOT
+
+#+end_src
+
+***** Copy High Score to Slot
+
+- Once a hole has been made for our high score
+  we then copy in the high score from p1scr_store
+  and then blank out the initials with ...
+
+#+begin_src asm
+
+	;; Copy high score to slot
+
+HENTR:	LDA SLOT		; Restore Score place
+	TAX			; into X.
+ 	LDA HSCROF,X		; Get score offset on screen
+ 	TAY			; And store in Y
+
+ 	LDX #$00
+HCPY:	LDA p1scr_store,X
+HCPY2:	STA HISTR,Y
+ 	INX
+ 	INY
+ 	CPX #$06
+ 	BNE HCPY
+
+	LDX SLOT
+ 	LDA HINIOF,X		; Find screen offset
+ 	TAX			; Send it to X
+
+	;; Blank out initials
+	
+	LDA #"."+0x40		; RED
+	STA HISTR,X
+	INX
+	STA HISTR,X
+	INX
+	STA HISTR,X
+	DEX
+	DEX	  
+
+#+end_src
+
+***** Get three initials from keyboard
+
+- We then ask for three initials, from
+  the keyboard, using HRKEY, which is:
+
+#+begin_src asm
+
+	;; Read key, convert to screen code. stored in SLOT
+	
+HRKEY:  TXA			; Save X
+	PHA			; ...
+	LDA #$FF
+	STA CHKEY
+	LDA $14
+	ADC #30			; keyboard debounce delay =30 jiffies
+	TAX
+HRKEY2: CPX $14			; delay expired?
+	BNE @+
+	LDA #0			; yes => reset "last" key
+	STA CH1
+@	LDA CHKEY
+        CMP #$FF
+        BEQ HRKEY2
+        LDX CHKEY
+        LDA HKTBL,X
+	STA TEMP		; Store into temp.
+	PLA			; Restore X
+	TAX			; ...
+	LDA TEMP		; restore A from temp.
+	RTS
+
+#+end_src
+
+- HRKEY gets valid key codes from the HKTBL table,
+  which converts key codes, to desired screen codes.
+
+#+begin_src asm
+
+        ;; Key to screen code table.
+
+HKTBL:
+	.SB "l"+0x80			; 0
+	.SB "j"+0x80			; 1
+	.SB ";"			; 2
+	.BY 0xFF			; 3 (F1)
+	.BY 0xFF			; 4 (F2)
+	.SB "k"+0x80			; 5
+	.SB "+"			; 6
+	.SB "*"			; 7
+	.SB "o"+0x80			; 8
+	.BY 0xFF			; 9
+	.SB "p"+0x80			; 10
+	.SB "u"+0x80			; 11
+	.BY 0xFF			; 12 (RETURN)
+	.SB "i"+0x80			; 13
+	.SB "-"			; 14
+	.SB "="			; 15
+	.SB "v"+0x80			; 16
+	.BY 0xFF			; 17 (HELP)
+	.SB "c"+0x80			; 18
+	.BY 0xFF			; 19 (F3)
+	.BY 0xFF			; 20 (F4)
+	.SB "b"+0x80			; 21
+	.SB "x"+0x80			; 22
+	.SB "z"+0x80			; 23
+	.SB "4"			; 24
+	.BY 0xFF			; 25 (DEAD)
+	.SB "3"			; 26
+	.SB "6"			; 27
+	.BY 0xFF			; 28 (ESC)
+	.SB "5"			; 29
+	.SB "2"			; 30
+	.SB "1"			; 31
+	.SB ","			; 32
+	.SB " "			; 33 (SPACE)
+	.SB "."			; 34
+	.SB "n"+0x80			; 35
+	.BY 0xFF			; 36 (DEAD)
+	.SB "m"+0x80			; 37
+	.SB "/"			; 38
+	.BY 0xFF			; 39 (ATARI)
+	.SB "r"+0x80			; 40
+	.BY 0xFF			; 41 (DEAD)
+	.SB "e"+0x80			; 42
+	.SB "y"+0x80			; 43
+	.BY 0xFF			; 44
+	.SB "t"+0x80			; 45
+	.SB "w"+0x80			; 46
+	.SB "q"+0x80			; 47
+	.SB "9"			; 48
+	.BY 0xFF			; 49 (DEAD)
+	.SB "0"			; 50
+	.SB "7"			; 51
+	.BY 0xFF			; 52 (DEL)
+	.SB "8"			; 53
+	.SB "<"			; 54
+	.SB ">"			; 55
+	.SB "f"+0x80			; 56
+	.SB "h"+0x80			; 57
+	.SB "d"+0x80			; 58
+	.BY 0xFF			; 59 (DEAD)
+	.BY 0xFF			; 60 CAPS/LOWR
+	.SB "g"+0x80			; 61
+	.SB "s"+0x80			; 62
+	.SB "a"+0x80			; 63
+
+#+end_src
+
+- The loop that gets the three initials is:
+
+#+begin_src asm
+
+	LDY #$00		; # of initials entered
+	LDX SLOT
+	LDA HINIOF,X
+	TAX
+	
+HENT:	JSR HRKEY		; Get initial.
+	CMP #$FF		; Dead key?
+	BEQ HENT		; Go back.
+	
+	CMP #52			; Backspace?
+	BNE HENT2		; Nope, go to enter/advance.
+	CPY #$00		; Are we at beginning?
+	BEQ HENT		; Yes, ignore and get another key.
+	DEY			; Otherwise, go backward
+	DEX
+	LDA #$00		; Blank char
+	STA HISTR,X		; Store it.
+	BEQ HENT		; Back to HENT. (always branch)
+
+HENT2:	STA HISTR,X		; Enter onto screen.
+	INX			; Advance screen pointer
+	INY			; Advance initial pointer
+	CPY #$03		; Are we at end?
+	BNE HENT		; Nope, get another one.
+
+#+end_src
+
+***** Write the new hiscore table to disk
+
+- After we temporarily swap back in the system VBV,
+  we write the high score table back, using hiscrw,
+  this falls back into hiscrio.
+
+#+begin_src asm
+
+hiscrw:
+	LDA #'W'		; Write...
+hiscrio:	STA DCOMND		; into command
+	LDA #$01		; drive 1
+	STA DUNIT		; into unit.
+	LDA #.LO(HISTR)		; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR)		; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$CF		; Sector 0x2CF (719)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR DSKINV		; Do it.
+
+	LDA #.LO(HISTR2)	; Hi score screen data buffer (LO)
+	STA DBUFLO		; into Buffer lo byte
+	LDA #.HI(HISTR2)	; Hi score screen data buffer (HI)
+	STA DBUFHI		; into Buffer hi byte
+	LDA #$D0		; Sector 0x2D0 (720)
+	STA DAUX1		; ...
+	LDA #$02		; ...
+	STA DAUX2		; into the daux parameter.
+	JSR DSKINV		; Do it.
+	RTS	 		; Done, goodbye
+
+#+end_src
+
+- We finish by swapping the VBI back to Centipede's.
+
+***** We return to normal game flow
+
+- After we are done writing the high score,
+  we jump to HSBYE, which does some clean up
+  and returns back to the game proper.
+
+- In this case, HSBYE does the check for console keys
+  and if one is pressed, return back to normal game flow.
+  This keeps the high score display up,
+  until a console key is pressed.
+
+#+begin_src asm
+
+HSBYE:	NOP			; Restore VBI vectors
+	LDA L0099		; Check console key debounce
+	CMP #$07                ; All clear?
+	BEQ HSBYE               ; Yes, check again.
+	
+	LDA #$00		; Otherwise, restore display list
+	STA $0230
+	LDA #$38
+	STA $0231
+	RTS		; ...and go back.
+
+#+end_src
+
+**** hiscore_table.asm
+
+- The High score table is stored on sectors 719-720
+  We populate it by creating a binary file using mads:
+
+#+begin_src asm
+
+	;; The High score table. Will be assembled sans header
+	;; to be written to disk using write-high-score.c
+
+	opt h-
+
+HISTR:	.SB "   1.               "
+	.SB "   2.               "
+	.SB "   3.               "
+	.SB "   4.               "
+	.SB "   5.               "
+	.SB "   6.               "
+	.SB "   7.               "
+	.SB "   8.               "
+	.SB "   9.               "
+	.SB "  10.               "
+	.SB "                    "
+	.SB "                    "
+	.SB "                "		  
+
+#+end_src
+
+**** write-high-score.c
+
+- The high score table is written to disk using
+  the following tool:
+
+#+begin_src c
+
+/**
+ * write-high-score - Takes <binfile> and writes to sector 720 of <atr>
+ *
+ * @author:  Thomas Cherryhomes
+ * @email:   thom dot cherryhomes at gmail dot com
+ * @license: gpl v. 3
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define SEEK_POS 0x16710 // sector 0x2CF
+
+char sectorBuf[256];
+
+int main(int argc, char *argv[])
+{
+  FILE *afp; FILE *bfp;
+  size_t len;
+  
+  if (argc<3)
+    {
+      printf("%s <atr-file> <bin-file>\n",argv[0]);
+      return 1;
+    }
+
+  afp = fopen(argv[1],"r+");
+
+  if (!afp)
+    {
+      perror("Could not open ATR file");
+      return 1; // Bail.
+    }
+
+  bfp = fopen(argv[2],"r");
+
+  if (!bfp)
+    {
+      perror("Could not open BIN file");
+      fclose(afp);
+      return 1; // Bail.
+    }
+
+  if (fseek(afp,SEEK_POS,SEEK_SET))
+    {
+      perror("Could not seek to ATR sector");
+      fclose(afp);
+      fclose(bfp);
+      return 1;
+    }
+
+  len = fread(&sectorBuf[0],sizeof(char),sizeof(sectorBuf),bfp);
+
+  if (len != sizeof(sectorBuf))
+    {
+      perror("Could not read BIN file");
+      fclose(afp);
+      fclose(bfp);
+      return 1;
+    }
+
+  fclose(bfp);
+  
+  fwrite(&sectorBuf[0],sizeof(char),sizeof(sectorBuf),afp);
+
+  fclose(afp);
+
+  // Done.
+  return 0;
+}
+
+#+end_src
+
+**** Making the ATR
+
+- To boot the game, we use 'dir2atr' from [[https://github.com/HiassofT/AtariSIO][Hias' AtariSIO Tools]]
+  to create an ATR image from a directory.
+
+- We borrow a copy of picoboot.bin from [[https://github.com/HiassofT/MyPicoDOS][MyPicoDOS]],
+  to use with dir2atr to set boot sectors that boot
+  our game.
+
+**** Inserting our High Score to the ATR
+
+- Once the ATR is created, write-high-score is used to write the
+  high score table to the new ATR.
+
+- The game is now ready to copy to the TNFS server.
+
+**** Makefile
+
+- The following Makefile ties all of the above steps together.
+
+#+begin_src makefile
+
+AS=mads
+CP=cp
+SRC=Centipede.asm
+XEX=AUTORUN
+LST=Centipede.lst
+ATR="Centipede.atr"
+BUILD=build
+MKDIR=mkdir
+DIR2ATR=dir2atr
+WRITE_HIGH_SCORE=./write-high-score
+HISCORE_TABLE_ASM=hiscore_table.asm
+HISCORE_TABLE_BIN=hiscore_table.bin
+HIGH_SCORE_ENABLE=high-score-enable
+BOOT_PROGRAM=picoboot.bin
+
+.PHONY: clean pre
+
+all:	clean pre xex dist hiscore hiscore_enable
+
+pre:
+	$(RM) -rf $(BUILD)
+	$(MKDIR) -p $(BUILD)
+
+xex:
+	$(AS) $(SRC) -o:$(BUILD)/$(XEX) -l:$(LST)
+
+dist:
+	$(DIR2ATR) -B $(BOOT_PROGRAM) -S $(ATR) $(BUILD)
+
+hiscore:
+	$(AS) $(HISCORE_TABLE_ASM) -o:$(BUILD)/$(HISCORE_TABLE_BIN)	
+	$(CC) -o$(WRITE_HIGH_SCORE) $(WRITE_HIGH_SCORE).c
+	$(WRITE_HIGH_SCORE) $(ATR) $(BUILD)/$(HISCORE_TABLE_BIN)
+
+hiscore_enable:
+	$(CC) -o$(HIGH_SCORE_ENABLE) $(HIGH_SCORE_ENABLE).c
+	$(HIGH_SCORE_ENABLE) $(ATR) 719 2
+
+clean:
+	$(RM) -rf $(BUILD)
+	$(RM) -rf $(ATR)
+	$(RM) -rf $(WRITE_HIGH_SCORE)
+	$(RM) -rf $(HIGH_SCORE_ENABLE)
+	$(RM) -rf $(LST)
+
+#+end_src
+
+**** The Centipede Web Scraper
+
+- Runs on the TNFS server
+
+- Watches for changes to the Centipede.atr file
+
+- On change, reads the two high score sectors
+  and generates a new HTML file.
+
+- Uses inotify, so must run on Linux.
+  
+#+begin_src c
+
+/**
+ * Grab high score from Centipede, write to HTML
+ *
+ * Linux required. (uses inotify)
+ * 
+ * @author  Thomas Cherryhomes
+ * @email   thom dot cherryhomes at gmail dot com
+ * @license gpl v. 3
+ */
+
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/inotify.h>
+#include <signal.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <linux/limits.h>
+
+#define EVENT_SIZE ( sizeof(struct inotify_event) )
+#define EVENT_BUF_LEN ( 1024 * ( EVENT_SIZE + NAME_MAX ) )
+
+#define PACMAN_SEEK_POS (0x16710)
+
+#define LINE_WIDTH 20
+
+static volatile bool ctrlc = false;
+
+int inotify_fd, inotify_wd;
+int inotify_event_len;
+
+char event_buffer[EVENT_BUF_LEN];
+
+void setctrlc(int dummy)
+{
+  ctrlc = true;
+}
+
+void centipede(char *atr, char *html)
+{
+  unsigned char buf[256];
+  FILE *fa, *fh;
+  int i, offset;
+
+  printf("Writing new centipede.html\n");
+  
+  fa = fopen(atr,"rb");
+  fh = fopen(html,"w");
+
+  fseek(fa,PACMAN_SEEK_POS,SEEK_SET);
+
+  fread(buf,sizeof(unsigned char),sizeof(buf),fa);
+
+  /* Process text */
+  for (i=0;i<sizeof(buf);i++)
+    {
+      /* Do very simple ANTIC screen code conversion to ASCII */
+      unsigned char c = buf[i];
+
+      if (c>127)
+	c -= 0xA0;
+      else if (c<64)
+	c+=32;
+      else if (c>64)
+	c-=32;
+      buf[i]=c;
+    }
+
+  /* small fix, erase first char in buf */
+  buf[0]=0x20;
+  
+  /* start html */
+  fprintf(fh,"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
+  fprintf(fh,"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\n");
+  fprintf(fh," <head>\n");
+  fprintf(fh,"  <title>Latest Centipede High Scores</title>\n");
+  fprintf(fh,"  <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n");
+  fprintf(fh,"  <meta http-equiv=\"refresh\" content=\"30\" />");
+  fprintf(fh,"  <meta name=\"keywords\" content=\" \" />\n");
+  fprintf(fh,"  <meta name=\"description\" content=\" \" />\n");
+  fprintf(fh,"  <link rel=\"stylesheet\" type=\"text/css\" href=\"centipede.css\" media=\"screen\" />\n");
+  fprintf(fh,"  <link rel=\"icon\" type=\"image/png\" href=\"icon.png\" />\n");
+  fprintf(fh," </head>\n");
+  fprintf(fh," <body>\n");
+  fprintf(fh,"  <pre>\n");
+
+  /* start body */
+
+  offset=0; /* buffer start for hi scores */
+
+  fprintf(fh,"\n== CENTIPEDE TOP SCORES ==\n");
+  
+  for (i=0;i<sizeof(buf);i++)
+    {
+      fprintf(fh, "%c", buf[offset++]);
+
+      if ((i % LINE_WIDTH) == 0)
+	fprintf(fh, "\n   ");
+    }
+
+  /* end body */
+
+  fprintf(fh,"\n");
+  fprintf(fh,"  </pre>\n");
+  fprintf(fh," </body>\n");
+  fprintf(fh,"</html>\n");
+  
+  fclose(fh);
+  fclose(fa);
+}
+
+int main(int argc, char *argv[])
+{
+  if (argc < 3)
+    {
+      printf("%s <path-to-centipede-atr> <path-to-output-html>\n",argv[0]);
+      return 1;
+    }
+
+  centipede(argv[1],argv[2]);
+  
+  signal(SIGINT, setctrlc);
+  signal(SIGTERM, setctrlc);
+  
+  inotify_fd = inotify_init();
+
+  if (inotify_fd < 0)
+    {
+      perror("inotify_init");
+      return 1;
+    }
+
+  inotify_wd = inotify_add_watch(inotify_fd, argv[1], IN_MODIFY);
+
+  if (inotify_wd == -1)
+    {
+      perror("inotify_add_watch");
+      goto bye2;
+    }
+
+  /* Set for non-blocking */
+  fcntl (inotify_fd, F_SETFL, fcntl (inotify_fd, F_GETFL) | O_NONBLOCK);
+  
+  while (!ctrlc)
+    {
+      int i;
+      
+      inotify_event_len = read(inotify_fd, event_buffer, EVENT_BUF_LEN);
+
+      i=0;
+
+      if (inotify_event_len < 0)
+	{
+	  usleep(100000);
+	  continue;
+	}
+      
+      while (i < inotify_event_len)
+	{
+	  struct inotify_event *event = ( struct inotify_event * ) &event_buffer[ i ];
+
+	  centipede(argv[1],argv[2]);
+
+	  i += EVENT_SIZE + event->len;
+	}
+    }
+
+  /* ctrl-C or termination, close it off. */
+
+  printf("Exiting %s\n",argv[0]);
+ bye:
+  inotify_rm_watch(inotify_fd,inotify_wd);
+ bye2:
+  close(inotify_fd);
+
+  return 0;
+}
+
+#+end_src
+
+**** centipede.service
+
+- To ensure the Centipede scraper service runs, it is
+  copied into /usr/local/sbin of the TNFS server,
+  and the following centipede.service is installed into systemd:
+
+#+begin_src service
+
+[Unit]
+Description=Atari Centipede Hi-scores
+After=remote-fs.target
+After=syslog.target
+
+# replace /tnfs with your TNFS directory
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/sbin/centipede "/tnfs/Atari_8-bit/Games/High Score Enabled/Centipede.atr" "/scores/centipede.html"
+
+[Install]
+WantedBy=multi-user.target
+
+#+end_src
+
+* Resources and Links
+
+- Altirra:
+  https://www.virtualdub.org/altirra.html
+
+- FujiNet High Scores Repository:
+  https://github.com/FujiNetWIFI/fujinet-high-scores/
+
+- high-score-enable:
+  https://github.com/FujiNetWIFI/fujinet-high-scores/tree/main/atari/high-score-enable
+
+- Centipede (game):
+  https://github.com/FujiNetWIFI/fujinet-high-scores/tree/main/atari-game-ports/centipede
+
+- Centipede (web scraper):
+  https://github.com/FujiNetWIFI/fujinet-high-scores/tree/main/atari/centipede
+    
+- MADS Assembler:
+  https://mads.atari8.info/
+  
+- Hias' AtariSIO Tools:
+  https://github.com/HiassofT/AtariSIO
+  
+- Hias' MyPicoDOS:
+  https://github.com/HiassofT/MyPicoDOS
+  
