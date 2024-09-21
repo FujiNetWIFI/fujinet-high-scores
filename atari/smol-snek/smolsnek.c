@@ -44,7 +44,7 @@ const char* header =
 		" <body>\n"
 		"  <pre>\n";
 
-const char* tail = 
+const char* tail =
 		"\n"
 		"  </pre>\n"
 		" </body>\n"
@@ -67,20 +67,20 @@ void smolsnek(char *atr, char *html)
 	char buf[128];
 
 	printf("Writing new smolsnek html\n");
-	
+
 	FILE* fa = fopen(atr,"rb");
 	FILE* fh = fopen(html,"w");
 
 	fseek(fa,SMOLSNEK_SEEK_POS,SEEK_SET);
 	fread(buf,sizeof(char),sizeof(buf),fa);
-	
+
 	/* start html */
-	fprintf(fh, header);
+	fprintf(fh, "%s", header);
 
 	/* start body */
 
 	fprintf(fh,"\n==== SMOLSNEK TOP SCORES ====\n");
-	
+
 	char name[10];
 	name[9] = 0;
 	uint8_t* buf_ptr = (uint8_t*)buf;
@@ -99,13 +99,13 @@ void smolsnek(char *atr, char *html)
 		// Smol snek only allows names with characters that 
 		// map directly to ascii, so no conversion needed.
 		memcpy(name, &buf_ptr[3], 9);
-		fprintf(fh, "%s     %06d\n", name, score);
+		fprintf(fh, "     %s    %06d\n", name, score);
 		buf_ptr += 12;
 	}
 
 	/* end body */
-	fprintf(fh,tail);
-	
+	fprintf(fh,"%s",tail);
+
 	fclose(fh);
 	fclose(fa);
 }
