@@ -65,6 +65,33 @@
 - All that was needed was the header change
   to mark the high score sectors.
 
+** Changes to the ATR header
+
+ - To mark an area of disk where it is legal to write
+
+ - Ostensibly for the High Score sectors
+   
+#+begin_src txt
+
+[HDR] [SIZ] SS SH [   CRC   ]    [HISCOR]
+96 02 80 16 80 00 00 00 00 00 00 02 CF 02 00
+
+#+end_src
+
+- HDR The ATR header 96 02 (NICKATARI)
+
+- SIZ The size of disk in paragraphs (80 16 = 90K disk)
+
+- SS The sector size, 80 = 128 byte sectors
+
+- SH The 24-bit high size of disk in paragraphs (not used here)
+
+- CRC 32-bit CRC, often not filled.
+
+- HISCORE - The hiscore data, where:
+  02 - The high score area is 2 sectors long
+  CF 02 - The high score area starts at sector 02CF (719)
+
 *** high-score-enable.c
 
 #+begin_src c
