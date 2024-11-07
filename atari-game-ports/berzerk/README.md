@@ -15,6 +15,8 @@ Thanks to @Ute on AtariAge for working disassembly.
 
   $84 - a flag, what is it tho
 
+$1859 - P1 score, BCD
+
 $3C58 - first line of score display
 
 $7FF0 - Part of stage clear/reset (this is patched in)
