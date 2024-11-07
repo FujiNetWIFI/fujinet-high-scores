@@ -8,7 +8,7 @@ After=syslog.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/local/sbin/smolsnek "/tnfs/smolsnek-fn-version.atr" "/var/www/html/smolsnek.html"
+ExecStart=/usr/local/sbin/smolsnek "/tnfs/Smol Snek.atr" "/var/www/html/smolsnek.html"
 
 [Install]
 WantedBy=multi-user.target
