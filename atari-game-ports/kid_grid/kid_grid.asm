@@ -1,118 +1,75 @@
 ; 
-            icl 'Kid Grid.inc'
+            icl 'kid_grid.inc'
 ;
 ; Start of code
 ;
-            org $3000
+		org $2000            
 ;
-L3000       ldx #$00
-L3002       lda L3010,X
-            sta.w LOMEM,X
-            inx
-            cpx #$20
-            bne L3002
-            jmp LOMEM
-L3010       ldx #$00
-L3012       lda L302F,X
-            sta L2180,X
-            inx
-            cpx #$00
-            bne L3012
-            inc.w L0084
-            inc.w L0087
-            dec.w L009E
-            lda.w L009E
-            bne L3010
-            jmp L2190
-            .byte $1F
-L302F       .byte $00
-            and L2180,X
-            bcc L3054+2
-            clc
-            rts
-L3037       jmp L2286
-            .byte $00,$00,$00,$00,$00
-L303F       lda CH
-            cmp #$21
-            bne L3037
-            lda #$EA
-L3048       sta L3970+1
-            sta L3972
-            sta L3973
-            sta L3B3D
-L3054       sta L3B3E
-            sta L3B3F
-L305A       lda #$23
-            sta L2F46
-            lda #$28
-            sta L2F47
-            lda #$25
-            sta L2F48
-            lda #$21
-L306B       sta L2F49
-            lda #$34
-            sta L2F4A
-            lda #$00
-            sta L2F4B
-            lda #$36
-            sta L2F4C
-            lda #$25
-            sta L2F4D
-            lda #$32
-            sta L2F4E
-            lda #$33
-            sta L2F4F
-            lda #$29
-            sta L2F50
-            lda #$2F
-            sta L2F51
-            lda #$2E
-            sta L2F52
-            lda #$00
-            sta L2F53
-            lda #$00
-            sta L2F53
-            jmp L2286
-            .byte $00,$00,$00,$00
-L30AC       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-L30B6       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00
-L30C8       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00
-L30DA       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-L3119       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-L3123       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$3B,$80,$22
-            .byte $80,$22
-L3135       lda #$3C
-            sta PACTL
-            lda #$03
-            sta SKCTL
-            lda #$5B
-            sta CASINI
-            lda #$3A
-            sta CASINI+1
-L3147       lda #$5B
-            sta DOSVEC
-            lda #$3A
-            sta DOSVEC+1
-            lda #$00
-            sta COLDST
-            jmp L2B00
+L2020       lsr SAVADR+1
+            jmp (L7665)
+            adc COLAC
+            .byte $73
+            adc #$6F
+            ror L6220
+            adc L4820,Y
+            .byte $4F
+            eor L5345
+            .byte $4F
+            lsr ROWCRS
+            jsr L203A
+L203A       jsr L0000
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00
+L2050       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-L3186       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-L3190       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00
-L31A2       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            bvs L3221
-            bvs L3200+1
-L31B3       bpl L31B8+2
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+L2100       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            bvs L2372
+            bvs L2351+1
+            bpl L2309+2
             asl L0E0E
-L31B8       asl L0E0E
+L2309       asl L0E0E
             asl L0E0E
             asl L0E0E
             asl L0E0E
@@ -136,155 +93,155 @@ L31B8       asl L0E0E
             asl L0E0E
             lsr L1000
             asl L0E0E
-L3200       asl L0E0E
+L2351       asl L0E0E
             asl L0E0E
-L3206       asl L0E0E
-            asl L0E0E
-            asl L0E0E
-            asl L0E0E
-            asl L0E0E
-L3215       asl L0E0E
-            asl L0E0E
-            asl L0E0E
-L321E       asl L0E0E
-L3221       asl L0E0E
-L3224       asl L0E0E
+L2357       asl L0E0E
             asl L0E0E
             asl L0E0E
             asl L0E0E
-L3230       asl L0E0E
             asl L0E0E
-L3236       asl L0E0E
+L2366       asl L0E0E
             asl L0E0E
             asl L0E0E
-L323F       asl L0E0E
-            asl L0E0E
-L3245       asl L0E0E
-L3248       asl L0E0E
-            asl L0E0E
-L324E       asl L0E0E
+L236F       asl L0E0E
+L2372       asl L0E0E
+L2375       asl L0E0E
             asl L0E0E
             asl L0E0E
             asl L0E0E
-L325A       asl L0E0E
+L2381       asl L0E0E
             asl L0E0E
-L3260       asl L4E0E
+L2387       asl L0E0E
+            asl L0E0E
+            asl L0E0E
+L2390       asl L0E0E
+            asl L0E0E
+L2396       asl L0E0E
+L2399       asl L0E0E
+            asl L0E0E
+L239F       asl L0E0E
+            asl L0E0E
+            asl L0E0E
+            asl L0E0E
+L23AB       asl L0E0E
+            asl L0E0E
+L23B1       asl L4E0E
             .byte $00
-L3264       jsr L0E0E
+L23B5       jsr L0E0E
             asl L0E0E
-L326A       asl L0E0E
+L23BB       asl L0E0E
             asl L0E0E
             asl L0E0E
-L3273       asl L0E0E
+L23C4       asl L0E0E
             asl.w SOUNDR
             .byte $23
-L327A       bpl L32DC
-            bcs L327E
-L327E       bvc L321E+2
-            beq L32C2
-            bcc L3264
-L3284       bmi L3206
-            bne L32A8
-            bvs L3248+2
-L328A       bpl L32EA+2
-            bcs L328E
-L328E       bvc L3230
-            beq L32D2
-L3292       bcc L3273+1
-L3294       bmi L3215+1
-            bne L32B8
-            bvs L325A
-            bpl L32FC
-            bcs L329E
-L329E       bvc L323F+1
-            beq L32E2
-            bcc L3284
-L32A4       bmi L3224+2
-            bne L32C8
-L32A8       bvs L326A
-            bpl L330C
-            bcs L32AE
-L32AE       bvc L324E+2
-            beq L32F2
-            bcc L3294
-L32B4       bmi L3236
-            bne L32D8
-L32B8       bvs L327A
-            bpl L331A+2
-            bcs L32BE
-L32BE       bvc L3260
-L32C0       beq L3302
-L32C2       bcc L32A4
-            bmi L3245+1
-            bne L32E7+1
-L32C8       bvs L328A
-            bpl L332C
-            bcs L32D2+1
+L23CB       bpl L242D
+            bcs L23CF
+L23CF       bvc L236F+2
+            beq L2413
+            bcc L23B5
+L23D5       bmi L2357
+            bne L23F9
+            bvs L2399+2
+L23DB       bpl L243B+2
+            bcs L23DF
+L23DF       bvc L2381
+            beq L2423
+            bcc L23C4+1
+L23E5       bmi L2366+1
+            bne L2409
+            bvs L23AB
+            bpl L244D
+            bcs L23EF
+L23EF       bvc L2390+1
+            beq L2433
+            bcc L23D5
+L23F5       bmi L2375+2
+            bne L2419
+L23F9       bvs L23BB
+            bpl L245D
+            bcs L23FF
+L23FF       bvc L239F+2
+            beq L2443
+            bcc L23E5
+            bmi L2387
+            bne L2429
+L2409       bvs L23CB
+            bpl L246B+2
+            bcs L240F
+L240F       bvc L23B1
+            beq L2453
+L2413       bcc L23F5
+            bmi L2396+1
+            bne L2438+1
+L2419       bvs L23DB
+            bpl L247D
+L241D       bcs L2423+1
             ora RAMLO+1
             asl TRAMSZ
-L32D2       asl TRAMSZ
+L2423       asl TRAMSZ
             .byte $07,$07,$07
             php
-L32D8       php
+L2429       php
             php
             ora #$09
-L32DC       ora #$0A
+L242D       ora #$0A
             asl
             asl
             .byte $0B,$0B
-L32E2       .byte $0B,$0B,$0C,$0C,$0C
-L32E7       ora L0D0D
-L32EA       asl L0E0E
+L2433       .byte $0B,$0B,$0C,$0C,$0C
+L2438       ora L0D0D
+L243B       asl L0E0E
             .byte $0F,$0F,$0F
-            bpl L3302
-L32F2       bpl L3304
+            bpl L2453
+L2443       bpl L2455
             ora (BRKKEY),Y
             ora (RTCLOK),Y
             .byte $12,$12,$13,$13
-L32FC       .byte $13,$14,$14,$14
+L244D       .byte $13,$14,$14,$14
             ora BUFADR,X
-L3302       ora BUFADR,X
-L3304       asl BUFADR+1,X
+L2453       ora BUFADR,X
+L2455       asl BUFADR+1,X
             asl ICCOMT,X
             .byte $17,$17
             clc
             clc
-L330C       clc
+L245D       clc
             ora L1919,Y
             .byte $1A,$1A,$1A,$1A,$1B,$1B,$1B,$1C,$1C,$1C
-L331A       ora L1D1D,X
+L246B       ora L1D1D,X
             asl L1E1E,X
-            lda #$00
+L2471       lda #$00
             sta L00B0
-L3324       lda #$05
+            lda #$05
             sta L00B1
             ldy #$10
-            bne L332E
-L332C       ldy #$00
-L332E       lda #$00
-L3330       sta (L00B0),Y
-L3332       iny
-            bne L3330
+            bne L247F
+L247D       ldy #$00
+L247F       lda #$00
+L2481       sta (L00B0),Y
+            iny
+            bne L2481
             inc L00B1
             lda L00B1
             cmp #$23
-            bne L332E
+            bne L247F
             rts
-            jsr L2471
+L248F       jsr L2471
             lda #$00
             sta SDLSTL
             lda #$23
             sta SDLSTH
-L334B       lda #$00
+            lda #$00
             sta L0500
-            ldx L0500
+L24A1       ldx L0500
             lda L24D8,X
-            bne L335B
+            bne L24AC
             jmp L24DF
-L335B       tay
+L24AC       tay
             lda L23CB,Y
             sta L00B0
-L3361       lda L241E,Y
+            lda L241D+1,Y
             sta L00B1
             inc L0500
             lda L00B0
@@ -296,263 +253,262 @@ L3361       lda L241E,Y
             sta L00B3
             ldx #$23
             ldy #$03
-L337A       lda #$F0
+L24CB       lda #$F0
             sta (L00B0),Y
             sta (L00B2),Y
             iny
             dex
-            bne L337A
+            bne L24CB
             jmp L24A1
-            bvc L33CA
+L24D8       bvc L251B
             .byte $32,$23,$14
             ora L0000
-            sta L0500
-            ldx L0500
+L24DF       sta L0500
+L24E2       ldx L0500
             lda L2523,X
-            bne L339A
+            bne L24EB
             rts
-L339A       tay
+L24EB       tay
             inc L0500
             lda #$A0
             sta L00B0
             lda #$06
             sta L00B1
             lda #$19
-L33A8       sta L0501
-L33AB       ldx #$06
+            sta L0501
+L24FC       ldx #$06
             lda #$00
             sta L0503
-L33B2       lda (L00B0),Y
+L2503       lda (L00B0),Y
             ora L0503
             sta (L00B0),Y
-L33B9       jsr L3A3A
+            jsr L3A3A
             dex
-            beq L33CA
+            beq L251B
             cpx #$03
-            bne L33B2
+            bne L2503
             lda #$0F
             sta L0503
-            bne L33B2
-L33CA       dec L0501
-            bne L33AB
+            bne L2503
+L251B       dec L0501
+            bne L24FC
             jmp L24E2
-            and ICHIDZ
+L2523       and ICHIDZ
             .byte $1B
             asl BRKKEY,X
-            .byte $0C
-L33D8       .byte $07,$02,$00
-L33DB       .byte $00,$00,$00,$00,$00,$00,$00
-            lda L04A0
+            .byte $0C,$07,$02,$00,$00,$00,$00,$00,$00,$00,$00
+L2533       lda L04A0
             jsr L261B
-            bcc L33F2
+            bcc L2543
             lda L04A1
-L33ED       jsr L262F
-L33F0       bcs L33F3
-L33F2       rts
-L33F3       lda #$0F
+            jsr L262F
+            bcs L2544
+L2543       rts
+L2544       lda #$0F
             sta L04A2
             lda L04A0
-            cmp L264A
-            bne L340B
+            cmp L2649+1
+            bne L255C
             lda #$0D
             and L04A2
             sta L04A2
-L3408       jmp L2569
-L340B       cmp L2643
-            bne L3418
+            jmp L2569
+L255C       cmp L2643
+            bne L2569
             lda #$0E
             and L04A2
             sta L04A2
-L3418       lda L04A1
+L2569       lda L04A1
             cmp L2651
-            bne L342B
+            bne L257C
             lda #$07
-L3422       and L04A2
+            and L04A2
             sta L04A2
             jmp L2589
-L342B       cmp L264C
-            bne L3438
+L257C       cmp L264C
+            bne L2589
             lda #$0B
             and L04A2
-L3435       sta L04A2
-L3438       lda L0450
+            sta L04A2
+L2589       lda L0450
             sec
             sbc L04A0
-            bcs L3443
+            bcs L2594
             eor #$FF
-L3443       sta L04A3
+L2594       sta L04A3
             lda L0451
             sec
             sbc L04A1
-            bcs L3451
+            bcs L25A2
             eor #$FF
-L3451       sta L04A4
+L25A2       sta L04A4
             lsr
             clc
             adc L04A4
             sta L04A4
             clc
             adc L04A3
-            bcs L34A2
+            bcs L25F3
             cmp L04A5
-L3465       bcc L346A
+            bcc L25BB
             jmp L25F3
-L346A       lda RANDOM
+L25BB       lda RANDOM
             lsr
-            bcc L34AB
+            bcc L25FC
             lda L04A3
             cmp L04A4
-            bcc L348A
+            bcc L25DB
             lda L0450
             cmp L04A0
-            bcc L3485
+            bcc L25D6
             lda #$01
-L3482       jmp L25EA
-L3485       lda #$02
             jmp L25EA
-L348A       lda L0451
+L25D6       lda #$02
+            jmp L25EA
+L25DB       lda L0451
             cmp L04A1
-            bcc L3497
+            bcc L25E8
             lda #$04
             jmp L25EA
-L3497       lda #$08
-            and L04A2
-            beq L34A2
+L25E8       lda #$08
+L25EA       and L04A2
+            beq L25F3
             sta L04A6
             rts
-L34A2       lda L04A6
+L25F3       lda L04A6
             and L04A2
-            beq L34AB
+            beq L25FC
             rts
-L34AB       lda #$00
+L25FC       lda #$00
             sta L04A3
             lda RANDOM
             and #$03
             tax
             inx
             sec
-L34B8       rol L04A3
+L2609       rol L04A3
             dex
-            bne L34B8
-L34BE       lda L04A3
+            bne L2609
+            lda L04A3
             and L04A2
-            beq L34AB
+            beq L25FC
             sta L04A6
             rts
-            sta L04A3
+L261B       sta L04A3
             ldx #$00
-L34CF       lda L2643,X
-            beq L34DC
+L2620       lda L2643,X
+            beq L262D
             inx
             cmp L04A3
-            bne L34CF
+            bne L2620
             sec
             rts
-L34DC       clc
+L262D       clc
             rts
-            sta L04A3
+L262F       sta L04A3
             ldx #$00
-L34E3       lda L264C,X
-            beq L34F0
+L2634       lda L264C,X
+            beq L2641
             inx
             cmp L04A3
-            bne L34E3
+            bne L2634
             sec
             rts
-L34F0       clc
+L2641       clc
             rts
-            stx L0082,Y
-            ror L4659+1
+L2643       stx L0082,Y
+            ror L465A
             .byte $32
-            asl.w DOSVEC,X
-            bvc L353D+1
-            .byte $32,$23,$14
-L3500       ora L0000
-            lda #$00
+L2649       asl.w DOSVEC,X
+L264C       bvc L268E+1
+            .byte $32,$23
+L2650       .byte $14
+L2651       ora L0000
+L2653       lda #$00
             sta L04C0
             sta L04C1
             sta L04C2
             sta L04C3
-L3510       lda M0PL
+            lda M0PL
             jsr L271F
             lda M1PL
             jsr L271F
             lda M2PL
-L351F       jsr L271F
+            jsr L271F
             lda M3PL
             jsr L271F
-L3528       lda L04C0
-            beq L3550
+            lda L04C0
+            beq L26A1
             lda L0450
             sec
-L3531       sbc L0400
-            bcs L3538
+            sbc L0400
+            bcs L2689
             eor #$FF
-L3538       cmp L04CF
-            bcs L3550
-L353D       lda L0451
+L2689       cmp L04CF
+            bcs L26A1
+L268E       lda L0451
             sec
             sbc L0401
-            bcs L3548
+            bcs L2699
             eor #$FF
-L3548       cmp L04CF
-            bcs L3550
+L2699       cmp L04CF
+            bcs L26A1
             jmp L2730
-L3550       lda L04C1
-            beq L3578
+L26A1       lda L04C1
+            beq L26C9
             lda L0450
             sec
             sbc L0410
-            bcs L3560
+            bcs L26B1
             eor #$FF
-L3560       cmp L04CF
-            bcs L3578
+L26B1       cmp L04CF
+            bcs L26C9
             lda L0451
             sec
             sbc L0411
-            bcs L3570
+            bcs L26C1
             eor #$FF
-L3570       cmp L04CF
-            bcs L3578
+L26C1       cmp L04CF
+            bcs L26C9
             jmp L2730
-L3578       lda L04C2
-            beq L35A0
-L357D       lda L0450
+L26C9       lda L04C2
+            beq L26F1
+            lda L0450
             sec
             sbc L0420
-            bcs L3588
+            bcs L26D9
             eor #$FF
-L3588       cmp L04CF
-            bcs L35A0
+L26D9       cmp L04CF
+            bcs L26F1
             lda L0451
             sec
             sbc L0421
-            bcs L3598
+            bcs L26E9
             eor #$FF
-L3598       cmp L04CF
-            bcs L35A0
+L26E9       cmp L04CF
+            bcs L26F1
             jmp L2730
-L35A0       lda L04C3
-            beq L35C8
+L26F1       lda L04C3
+            beq L2719
             lda L0450
             sec
-L35A9       sbc L0430
-            bcs L35B0
+            sbc L0430
+            bcs L2701
             eor #$FF
-L35B0       cmp L04CF
-            bcs L35C8
+L2701       cmp L04CF
+            bcs L2719
             lda L0451
             sec
             sbc L0431
-            bcs L35C0
+            bcs L2711
             eor #$FF
-L35C0       cmp L04CF
-            bcs L35C8
+L2711       cmp L04CF
+            bcs L2719
             jmp L2730
-L35C8       lda #$00
+L2719       lda #$00
             sta HITCLR
             rts
-            lsr
+L271F       lsr
             rol L04C0
             lsr
             rol L04C1
@@ -561,8 +517,8 @@ L35C8       lda #$00
             lsr
             rol L04C3
             rts
-            lda #$00
-L35E1       sta AUDC2
+L2730       lda #$00
+            sta AUDC2
             sta AUDC3
             sta AUDC4
             sta AUDCTL
@@ -570,18 +526,18 @@ L35E1       sta AUDC2
             sta AUDC1
             ldy #$00
             ldx #$00
-L35F6       tya
+L2747       tya
             sta AUDF1
-L35FA       dex
-            bne L35FA
+L274B       dex
+            bne L274B
             dey
             dey
-            bne L35F6
+            bne L2747
             lda #$28
             sta AUDC1
             lda #$01
             sta L045F
-L360B       lda L045F
+L275C       lda L045F
             sta AUDF1
             lsr
             lsr
@@ -589,19 +545,19 @@ L360B       lda L045F
             lsr
             eor #$0F
             sta COLOR4
-L361A       ldy #$06
+            ldy #$06
             ldx #$00
-L361E       dex
-            bne L361E
+L276F       dex
+            bne L276F
             dey
-            bne L361E
+            bne L276F
             inc L045F
-            bne L360B
+            bne L275C
             lda #$00
             sta AUDC1
             lda #$FF
             rts
-            lda L0451
+L2782       lda L0451
             clc
             asl
             clc
@@ -609,24 +565,24 @@ L361E       dex
             tay
             ldx #$00
             lda L0452
-            bne L3653
+            bne L27A4
             sty L0452
-L3644       lda L27DF,X
+L2795       lda L27DF,X
             sta L2B00,Y
             iny
             inx
             cpx #$12
-            bne L3644
+            bne L2795
             jmp L27B5
-L3653       lda #$00
+L27A4       lda #$00
             sta L0452
-L3658       lda L27F1,X
+L27A9       lda L27F1,X
             sta L2B00,Y
             iny
             inx
             cpx #$12
-            bne L3658
-            lda L0450
+            bne L27A9
+L27B5       lda L0450
             clc
             adc #$2D
             sta HPOSM3
@@ -640,99 +596,100 @@ L3658       lda L27F1,X
             adc #$02
             sta HPOSM0
             rts
-            lda #$28
+L27D1       lda #$28
             clc
-L3683       adc L00B0
+            adc L00B0
             sta L00B0
             lda #$00
             adc L00B1
             sta L00B1
             rts
-            .byte $00,$00
+L27DF       .byte $00,$00
             inc LD6D6,X
-L3693       inc L3810,X
+            inc L3810,X
             jmp (L7CFE)
             sec
             plp
             pla
-            .byte $0C,$00,$00,$00,$00,$00
+            .byte $0C,$00,$00,$00
+L27F1       .byte $00,$00
             inc LD6D6,X
             inc L3810,X
             jmp (L7CFE)
             sec
             plp
             bit.w FKDEF
+            .byte $00,$00
+L2803       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00
-L36C1       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$00
-            lda STICK0
+            .byte $00,$00,$00,$00
+L2827       lda STICK0
             lsr
-            bcs L36EB
+            bcs L283C
             lda L0451
             jsr L28FF
-            bcc L371F
+            bcc L2870
             lda #$08
             sta L0455
-            bne L371F
-L36EB       lsr
-            bcs L36FD
+            bne L2870
+L283C       lsr
+            bcs L284E
             lda L0451
             jsr L28FF
-            bcc L371F
+            bcc L2870
             lda #$04
             sta L0455
-            bne L371F
-L36FD       lsr
-            bcs L370F
+            bne L2870
+L284E       lsr
+            bcs L2860
             lda L0450
             jsr L2910
-            bcc L371F
+            bcc L2870
             lda #$02
             sta L0455
-            bne L371F
-L370F       lsr
-            bcs L371F
+            bne L2870
+L2860       lsr
+            bcs L2870
             lda L0450
             jsr L2910
-            bcc L371F
+            bcc L2870
             lda #$01
             sta L0455
-L371F       jsr L2921
+L2870       jsr L2921
             jsr L2782
             jsr L2A1E
             jsr L2A3C
-            inc L0473
+L287C       inc L0473
             lda L0473
             cmp #$10
-            bcc L373A
+            bcc L288B
             lda #$0A
             sta L0473
-L373A       sta AUDF2
+L288B       sta AUDF2
             rts
-            sty L0456
+L288F       sty L0456
             ldy L0451
             lda L23CB,Y
             sta L00B0
-            lda L241E,Y
-L374C       sta L00B1
+            lda L241D+1,Y
+            sta L00B1
             lda L0450
             lsr
-            bcs L3765
+            bcs L28B6
             lsr
             tay
-            bcs L377F
+            bcs L28D0
             lda (L00B0),Y
             and #$F0
             cmp #$50
-            bne L376A
+            bne L28BB
             lda #$00
             sta AUDC2
-L3765       ldy L0456
+L28B6       ldy L0456
             sec
             rts
-L376A       lda (L00B0),Y
-L376C       and #$0F
+L28BB       lda (L00B0),Y
+            and #$0F
             ora #$50
             sta (L00B0),Y
             jsr L27D1
@@ -740,255 +697,255 @@ L376C       and #$0F
             and #$0F
             ora #$50
             sta (L00B0),Y
-            bne L37A4
-L377F       lda (L00B0),Y
+            bne L28F5
+L28D0       lda (L00B0),Y
             and #$0F
             cmp #$05
-            bne L3791
+            bne L28E2
             lda #$00
-L3789       sta AUDC2
+            sta AUDC2
             ldy L0456
             sec
             rts
-L3791       lda (L00B0),Y
+L28E2       lda (L00B0),Y
             and #$F0
             ora #$05
             sta (L00B0),Y
-L3799       jsr L27D1
+            jsr L27D1
             lda (L00B0),Y
             and #$F0
             ora #$05
             sta (L00B0),Y
-L37A4       lda #$C3
+L28F5       lda #$C3
             sta AUDC2
             ldy L0456
             clc
             rts
-            ldx #$00
-L37B0       lda L2643,X
-            beq L37BD
+L28FF       ldx #$00
+L2901       lda L2643,X
+            beq L290E
             inx
             cmp L0450
-            bne L37B0
+            bne L2901
             sec
             rts
-L37BD       clc
+L290E       clc
             rts
-            ldx #$00
-L37C1       lda L264C,X
-            beq L37CE
+L2910       ldx #$00
+L2912       lda L264C,X
+            beq L291F
             inx
             cmp L0451
-            bne L37C1
+            bne L2912
             sec
             rts
-L37CE       clc
+L291F       clc
             rts
-            lda L0455
+L2921       lda L0455
             lsr
-            bcc L37E5
+            bcc L2936
             lda L0450
             cmp L2643
-            beq L37F7
-L37DE       inc L0450
+            beq L2948
+            inc L0450
             jsr L2970
             rts
-L37E5       lsr
-            bcc L37FB
-L37E8       lda L0450
-            cmp L264A
-            beq L37F7
+L2936       lsr
+            bcc L294C
+            lda L0450
+            cmp L2649+1
+            beq L2948
             dec L0450
             jsr L2970
             rts
-L37F7       jsr L288F
+L2948       jsr L288F
             rts
-L37FB       lsr
-            bcc L380D
+L294C       lsr
+            bcc L295E
             lda L0451
-L3801       cmp L264C
-            beq L37F7
+            cmp L264C
+            beq L2948
             inc L0451
             jsr L29C5
             rts
-L380D       lsr
-            bcc L381E
-L3810       lda L0451
+L295E       lsr
+            bcc L296F
+            lda L0451
             cmp L2651
-            beq L37F7
+            beq L2948
             dec L0451
             jsr L29C5
-L381E       rts
-            lda L0450
+L296F       rts
+L2970       lda L0450
             cmp L2643
-            beq L383D
+            beq L298E
             ldx #$01
-L3829       ldy #$23
-L382B       lda L0450
+            ldy #$23
+L297C       lda L0450
             cmp L2643,X
-            beq L383D
-            bcs L3841
+            beq L298E
+            bcs L2992
             inx
             tya
             sec
             sbc #$05
             tay
-            bne L382B
-L383D       jsr L288F
+            bne L297C
+L298E       jsr L288F
             rts
-L3841       ldx #$00
-L3843       lda L264C,X
-L3846       cmp L2650
-            beq L3857
+L2992       ldx #$00
+L2994       lda L264C,X
+            cmp L2650
+            beq L29A8
             lda L0451
             cmp L264C,X
-L3851       beq L3857
+            beq L29A8
             inx
             dey
-            bne L3843
-L3857       jsr L288F
-            bcc L385D
-L385C       rts
-L385D       tya
+            bne L2994
+L29A8       jsr L288F
+            bcc L29AE
+L29AD       rts
+L29AE       tya
             tax
             dec L2803,X
             lda L0451
             cmp L2651
-            beq L385C
-L386A       cmp L264C
-            beq L385C
+            beq L29AD
+            cmp L264C
+            beq L29AD
             inx
             dec L2803,X
             rts
-            lda L0451
+L29C5       lda L0451
             cmp L264C
-            beq L3898
+            beq L29E9
             ldx #$00
             ldy #$23
-L3880       lda L2643,X
+L29D1       lda L2643,X
             cmp L2649
-            beq L389C
+            beq L29ED
             lda L0450
             cmp L2643,X
-            beq L389C
+            beq L29ED
             inx
             tya
             sec
             sbc #$05
             tay
-            bne L3880
-L3898       jsr L288F
+            bne L29D1
+L29E9       jsr L288F
             rts
-L389C       ldx #$01
-L389E       lda L0451
+L29ED       ldx #$01
+L29EF       lda L0451
             cmp L264C,X
-            beq L3898
-            bcs L38AC
+            beq L29E9
+            bcs L29FD
             inx
             dey
-            bne L389E
-L38AC       jsr L288F
-            bcc L38B2
-L38B1       rts
-L38B2       tya
+            bne L29EF
+L29FD       jsr L288F
+            bcc L2A03
+L2A02       rts
+L2A03       tya
             tax
             dec L2803,X
             lda L0450
-            cmp L264A
-            beq L38B1
-L38BF       cmp L2643
-            beq L38B1
+            cmp L2649+1
+            beq L2A02
+            cmp L2643
+            beq L2A02
             txa
             clc
             adc #$05
             tax
             dec L2803,X
             rts
-            ldx #$00
-L38CF       lda L2803,X
-            beq L38DA
+L2A1E       ldx #$00
+L2A20       lda L2803,X
+            beq L2A2B
             inx
             cpx #$24
-            bne L38CF
+            bne L2A20
             rts
-L38DA       lda #$FF
+L2A2B       lda #$FF
             sta L2803,X
-L38DF       stx L0457
+            stx L0457
             ldx #$03
             jsr L3324
             dec L2803
             rts
-            ldx L0457
-            bne L38F1
+L2A3C       ldx L0457
+            bne L2A42
             rts
-L38F1       cpx L041B
-            bne L391D
+L2A42       cpx L041B
+            bne L2A6E
             lda #$00
             sta L041B
-L38FB       lda RANDOM
+L2A4C       lda RANDOM
             and #$07
             cmp #$05
-            bcs L38FB
+            bcs L2A4C
             sta L047F
             inc L047F
             sta L042E
             inc L042E
-L3910       jsr L3324
+L2A61       jsr L3324
             dec L047F
-            bne L3910
+            bne L2A61
             nop
             nop
             ldx L0457
-L391D       lda L2ADB,X
+L2A6E       lda L2ADB,X
             tay
             lda L23CB,Y
             sta L00B0
-            lda L241E,Y
+            lda L241D+1,Y
             sta L00B1
             lda L042E
-            bne L3935
+            bne L2A86
             lda #$FF
             sta L042F
-L3935       lda L2AB7,X
+L2A86       lda L2AB7,X
             lsr
-L3939       tay
+            tay
             lda #$18
             sta L00B2
-L393E       lda #$03
+L2A8F       lda #$03
             sta L00B3
             lda (L00B0),Y
             ora #$0F
             sta (L00B0),Y
             iny
             lda #$FF
-L394B       sta (L00B0),Y
+L2A9C       sta (L00B0),Y
             iny
             dec L00B3
-L3950       bne L394B
+            bne L2A9C
             dec L00B2
-            beq L3960
+            beq L2AB1
             jsr L27D1
             tya
             sec
             sbc #$04
             tay
-            bne L393E
-L3960       lda #$00
+            bne L2A8F
+L2AB1       lda #$00
             sta L0457
             rts
-            .byte $00,$07,$07,$07,$07,$07
+L2AB7       .byte $00,$07,$07,$07,$07,$07
             ora (BRKKEY),Y
             ora (BRKKEY),Y
-L3970       ora (DSKUTL+1),Y
-L3972       .byte $1B
-L3973       .byte $1B,$1B,$1B
+            ora (DSKUTL+1),Y
+            .byte $1B,$1B,$1B,$1B
             and ICBAHZ
             and ICBAHZ
             and ICAX6Z
             .byte $2F,$2F,$2F,$2F
             and L3939,Y
-L3983       and L4338+1,Y
-            .byte $43,$43,$43,$43,$00,$07
+            and L4339,Y
+            .byte $43,$43,$43,$43
+L2ADB       .byte $00,$07
             asl ICBAHZ,X
             .byte $34,$43,$07
             asl ICBAHZ,X
@@ -1003,16 +960,16 @@ L3983       and L4338+1,Y
             .byte $34,$43,$07
             asl ICBAHZ,X
             .byte $34,$43,$00
-            ldx #$00
+L2B00       ldx #$00
             lda #$00
-L39B3       sta L0400,X
-L39B6       inx
-            bne L39B3
+L2B04       sta L0400,X
+            inx
+            bne L2B04
             lda #$20
             sta SDLSTL
             lda #$2C
             sta SDLSTH
-L39C3       lda #$56
+            lda #$56
             sta COLOR4
             sta COLOR2
             lda #$0F
@@ -1025,91 +982,91 @@ L39C3       lda #$56
             sta L046F
             lda #$00
             sta L04F0
-            lda #$08
+L2B35       lda #$08
             sta CONSOL
             lda CONSOL
             lsr
-            bcs L3A18
-L39EF       lda #$08
+            bcs L2B69
+L2B40       lda #$08
             sta CONSOL
-L39F4       lda CONSOL
+            lda CONSOL
             lsr
-            bcc L39EF
+            bcc L2B40
             ldx L04AB
             lda #$26
-L39FF       clc
+L2B50       clc
             adc #$08
             dex
-            bne L39FF
+            bne L2B50
             sta L04AC
-L3A08       lda #$1B
+            lda #$1B
             sec
             sbc L04AB
             sec
             sbc L04AB
             sta L045B
-            jmp L3A5A+1
-L3A18       lsr
-            bcs L3A42
-L3A1B       lda #$08
+            jmp L3A5B
+L2B69       lsr
+            bcs L2B93
+L2B6C       lda #$08
             sta CONSOL
             jsr L2BE8
             lda #$02
             bit CONSOL
-            beq L3A1B
+            beq L2B6C
             lda L04AA
-L3A2D       clc
+            clc
             adc #$02
             cmp #$08
-            bcc L3A36
+            bcc L2B87
             lda #$03
-L3A36       sta L04AA
+L2B87       sta L04AA
             clc
-L3A3A       adc #$10
-            sta L2FC7
+            adc #$10
+            sta L2FC6+1
             jmp L2BBA
-L3A42       lsr
-            bcs L3A69
-L3A45       lda #$08
+L2B93       lsr
+            bcs L2BBA
+L2B96       lda #$08
             sta CONSOL
             jsr L2BE8
             lda #$04
             bit CONSOL
-            beq L3A45
+            beq L2B96
             inc L04AB
             lda L04AB
-L3A5A       cmp #$06
-            bcc L3A60
+            cmp #$06
+            bcc L2BB1
             lda #$01
-L3A60       sta L04AB
+L2BB1       sta L04AB
             clc
             adc #$10
-            sta L2FBE
-L3A69       lda CH
+            sta L2FBC+2
+L2BBA       lda CH
             cmp #$FF
-L3A6E       bne L3A73
+            bne L2BC4
             jmp L2B35
-L3A73       cmp #$00
-            bne L3A81
+L2BC4       cmp #$00
+            bne L2BD2
             lda #$FF
             sta L04F0
             lda #$2C
             jmp L2BDD
-L3A81       cmp #$28
-            bne L3A8F
+L2BD2       cmp #$28
+            bne L2BE0
             lda #$00
             sta L04F0
             lda #$32
-            sta L2FD3
-L3A8F       lda #$FF
+L2BDD       sta L2FD2+1
+L2BE0       lda #$FF
             sta CH
             jmp L2B35
-            ldx #$00
+L2BE8       ldx #$00
             ldy #$30
-L3A9B       dex
-            bne L3A9B
+L2BEC       dex
+            bne L2BEC
             dey
-            bne L3A9B
+            bne L2BEC
             rts
             eor (ICHIDZ,X)
             .byte $23
@@ -1117,7 +1074,8 @@ L3A9B       dex
             lsr L009B
             .byte $9E,$0C
             asl L2020
-            .byte $53,$54
+            .byte $53
+L2C00       .byte $54
             eor (ICHIDZ,X)
             bit BFENLO
             eor LTEMP+1
@@ -1126,15 +1084,15 @@ L3A9B       dex
             .byte $0C
             asl L2020
             lsr
-L3ABD       eor L2050
+            eor L2050
             eor #$4E
             .byte $54
             and L009B,X
             .byte $B2,$0C,$13
-L3AC8       jsr L4E49
+            jsr L4E49
             .byte $54,$34
             jsr L704C
-            bvs L3B42
+            bvs L2C93
             .byte $42
             rti
             bit VPRCED
@@ -1164,7 +1122,7 @@ L3AC8       jsr L4E49
             .byte $43,$7C
             eor (FMSZPG+2),Y
             .byte $7C,$00,$7C
-L3B27       eor (FMSZPG+2),Y
+            eor (FMSZPG+2),Y
             .byte $7C,$7C
             eor (LMARGN),Y
             eor HOLDCH
@@ -1173,18 +1131,14 @@ L3B27       eor (FMSZPG+2),Y
             .byte $43,$5A
             eor OLDROW
             eor HOLD1
-            .byte $43,$00,$00,$00,$00
-L3B3D       .byte $00
-L3B3E       .byte $00
-L3B3F       .byte $00,$00,$00
-L3B42       .byte $00,$00,$00,$00,$7C,$7C,$00,$7C,$5A,$43,$5A
+            .byte $43,$00,$00,$00,$00,$00,$00,$00,$00,$00
+L2C93       .byte $00,$00,$00,$00,$7C,$7C,$00,$7C,$5A,$43,$5A
             eor HOLDCH
-            .byte $7C,$7C,$7C,$7C,$7C
-L3B54       .byte $00,$7C,$7C,$00,$7C,$7C,$00,$00,$5A
+            .byte $7C,$7C,$7C,$7C,$7C,$00,$7C,$7C,$00,$7C,$7C,$00,$00,$5A
             eor OLDROW
             eor L0000
-            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$7C,$7C
-L3B70       .byte $00,$7C
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$7C,$7C,$00
+            .byte $7C
             eor (FMSZPG+2),Y
             .byte $00,$7C,$7C,$5A,$43,$7C,$7C,$7C,$00,$7C,$7C
             eor (FMSZPG),Y
@@ -1195,9 +1149,10 @@ L3B70       .byte $00,$7C
             eor L0000
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$5A,$43,$00,$5A
             .byte $43,$5A,$52,$43,$5A,$52,$52,$43,$5A,$43,$00,$5A,$43,$5A,$52,$52
-            .byte $43,$5A,$52,$43,$5A,$52,$43,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            bvs L3C3B
+            .byte $43,$5A,$52,$43,$5A
+L2D00       .byte $52,$43,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00
+            bvs L2D8C
             adc COLAC+1
             adc BITMSK
             .byte $74,$73,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
@@ -1206,45 +1161,48 @@ L3B70       .byte $00,$7C
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$80,$80,$00,$80,$80,$00,$00,$80,$80,$00
             .byte $80,$80,$80,$80,$80,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$00,$00,$00,$00
-L3C35       .byte $00,$00,$00,$00,$00,$00
-L3C3B       .byte $80,$80,$00,$80,$80,$00,$00,$80,$80,$00,$80,$80,$00,$80,$80,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+L2D8C       .byte $80,$80,$00,$80,$80,$00,$00,$80,$80,$00,$80,$80,$00,$80,$80,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$80,$80,$80,$80,$80,$80,$00,$80
             .byte $80,$00,$80,$80,$00,$80,$80,$80,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $80,$80,$00,$80
-L3C8F       .byte $80,$80,$00,$80,$80,$00,$80,$80,$00,$80,$80,$80,$00,$00,$00,$00
+            .byte $80,$80,$00,$80,$80,$80,$00,$80,$80,$00,$80,$80,$00,$80,$80,$80
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$80,$80
-L3CB5       .byte $00,$80,$80,$80,$00,$80,$80,$00,$80,$80,$80,$80,$80,$80,$00,$00
+            .byte $00,$00,$00,$00
+L2E00       .byte $00,$00,$00,$00,$80,$80,$00,$80,$80,$80,$00,$80,$80,$00,$80,$80
+            .byte $80,$80,$80,$80,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00
-L3CE7       .byte $00,$00,$00,$00,$00
-L3CEC       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$80,$80,$80,$80,$80,$80,$00,$80
-L3D08       .byte $80,$80,$80,$80,$00,$00,$80,$80,$00,$80,$80,$80,$80,$80,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $80,$80,$00,$00,$00,$00,$00,$80,$80,$00,$80,$80
-L3D34       .byte $00,$00,$80,$80,$00,$80,$80,$00,$80,$80,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-L3D4F       .byte $00,$80,$80,$80,$00,$80,$80,$00,$80,$80,$80,$80,$80,$80,$00,$80
+            .byte $00,$80,$80,$80,$80,$80,$80,$00,$80,$80,$80,$80,$80,$00,$00,$80
+            .byte $80,$00,$80,$80,$80,$80,$80,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$80,$80,$00,$00,$00,$00,$00
+            .byte $80,$80,$00,$80,$80,$00,$00,$80,$80,$00,$80,$80,$00,$80,$80,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$80,$80,$80,$00,$80,$80,$00,$80,$80,$80,$80,$80,$80,$00,$80
             .byte $80,$00,$80,$80,$00,$80,$80,$80,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$80,$80,$80,$00,$00,$80,$00
             .byte $80,$80,$00,$80,$80,$80,$00,$80,$80,$00,$80,$80,$00,$80,$80,$80
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$80,$80,$80,$80,$80,$80,$00,$80,$80,$00,$80,$80,$80,$00,$80
-            .byte $80,$00
-L3DB1       .byte $80,$80,$80,$80,$80,$80,$00,$00,$00,$00
-L3DBB       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$00,$00,$00,$00
-L3DD3       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-L3DDD       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$00,$00,$00
-L3DF4       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+L2F00       .byte $80,$00,$80,$80,$80,$80,$80,$80,$00,$00,$00,$00,$00,$00,$00,$00
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$22
+            adc L2100,Y
+            .byte $72,$74
+            adc #$00
+            plp
+            adc (COLAC,X)
+            .byte $6F
+            adc ENDPT,X
+            adc BITMSK,X
+            adc #$61
+            ror.w L0000
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00
             php
             .byte $63
             ora #$00
@@ -1252,33 +1210,31 @@ L3DF4       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$0
             clc
             .byte $12,$00,$34,$32,$2F
             rol L3829
-            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-L3E3A       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-L3E44       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00,$00,$00,$00,$00
-L3E5C       .byte $00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00
             bit SAVADR+1
             ror MLTTMP
             adc #$63
             adc BUFSTR,X
             .byte $74
-            adc L111D,Y
+L2FBC       adc L111D,Y
             .byte $00,$00,$33,$74
             adc BITMSK,X
             .byte $73
-            ora.w BUFADR,X
+L2FC6       ora.w BUFADR,X
             .byte $00
             rol
             .byte $6F
-L3E7B       adc L7473,Y
+            adc L7473,Y
             adc #$63
             .byte $6B
-            ora.w BUFRLO,X
+L2FD2       ora.w BUFRLO,X
             .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-            .byte $00,$00,$00,$00
-L3E98       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-L3EA6       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-            lda L0401
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+            .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+L3000       lda L0401
             clc
             asl
             clc
@@ -1287,46 +1243,47 @@ L3EA6       .byte $00,$00,$00,$00,$00,$00,$00,$00,$00
             ldx #$00
             lda L0402
             cmp #$02
-            bcs L3ED3
+            bcs L3024
             inc L0402
-L3EC4       lda L3048+1,X
-            sta L2C00,Y
-            iny
-            inx
-L3ECC       cpx #$12
-            bne L3EC4
-            jmp L303F
-L3ED3       inc L0402
-            lda L0402
-            cmp #$04
-            bne L3EE2
-            lda #$00
-            sta L0402
-L3EE2       lda L305A+1,X
+L3015       lda L3049,X
             sta L2C00,Y
             iny
             inx
             cpx #$12
-            bne L3EE2
-            lda L0400
+            bne L3015
+            jmp L303F
+L3024       inc L0402
+            lda L0402
+            cmp #$04
+            bne L3033
+            lda #$00
+            sta L0402
+L3033       lda L305B,X
+            sta L2C00,Y
+            iny
+            inx
+            cpx #$12
+            bne L3033
+L303F       lda L0400
             clc
             adc #$2D
             sta HPOSP0
             rts
-            .byte $00,$00
+L3049       .byte $00,$00
             inc LAAAA
             inc L287C,X
-L3F00       jmp (LFEC6)
+L3051       jmp (LFEC6)
             .byte $44
             cpy TRAMSZ
-            .byte $00,$00,$00,$00,$00,$00
-L3F0C       inc LAAAA
+            .byte $00,$00,$00,$00
+L305B       .byte $00,$00
+L305D       inc LAAAA
             inc L287C,X
             jmp (LFEC6)
             .byte $44
             lsr L00C0
             .byte $00,$00,$00,$00
-            lda L0411
+L306D       lda L0411
             clc
             asl
             clc
@@ -1334,47 +1291,48 @@ L3F0C       inc LAAAA
             tay
             ldx #$00
             lda L0412
-L3F2A       cmp #$02
-            bcs L3F40
+            cmp #$02
+            bcs L3091
             inc L0412
-L3F31       lda L30B6,X
+L3082       lda L30B6,X
             sta L2D00,Y
             iny
             inx
             cpx #$12
-            bne L3F31
+            bne L3082
             jmp L30AC
-L3F40       inc L0412
+L3091       inc L0412
             lda L0412
             cmp #$04
-            bne L3F4F
+            bne L30A0
             lda #$00
             sta L0412
-L3F4F       lda L30C8,X
+L30A0       lda L30C8,X
             sta L2D00,Y
             iny
             inx
             cpx #$12
-            bne L3F4F
-            lda L0410
+            bne L30A0
+L30AC       lda L0410
             clc
             adc #$2D
             sta HPOSP1
             rts
-            .byte $00,$00,$00,$00
-            bvs L3F7C+1
+L30B6       .byte $00,$00,$00,$00
+            bvs L30CD+1
             .byte $12
             tsx
             inc LBAFE,X
-            bcc L3F00+2
-            .byte $1C,$00,$00,$00,$00,$00,$00,$00,$00,$1C
-L3F7C       bcc L3F0C+2
+            bcc L3051+2
+            .byte $1C,$00,$00,$00,$00
+L30C8       .byte $00,$00,$00,$00,$1C
+L30CD       bcc L305D+2
             tsx
             inc LBAFE,X
             .byte $12,$12
-            bvs L3F86
-L3F86       .byte $00,$00,$00
-            lda L0421
+            bvs L30D7
+L30D7       .byte $00,$00,$00
+L30DA       lda L0421
             clc
             asl
             clc
@@ -1383,33 +1341,33 @@ L3F86       .byte $00,$00,$00
             ldx #$00
             lda L0422
             cmp #$02
-            bcs L3FAD
-L3F9B       inc L0422
-L3F9E       lda L3123,X
+            bcs L30FE
+            inc L0422
+L30EF       lda L3123,X
             sta L2E00,Y
             iny
             inx
             cpx #$12
-            bne L3F9E
+            bne L30EF
             jmp L3119
-L3FAD       inc L0422
+L30FE       inc L0422
             lda L0422
             cmp #$04
-            bne L3FBC
+            bne L310D
             lda #$00
             sta L0422
-L3FBC       lda L3135,X
+L310D       lda L3135,X
             sta L2E00,Y
             iny
             inx
             cpx #$12
-            bne L3FBC
-            lda L0420
+            bne L310D
+L3119       lda L0420
             clc
             adc #$2D
-L3FCE       sta HPOSP2
+            sta HPOSP2
             rts
-            .byte $00,$00
+L3123       .byte $00,$00
             cpx #$A7
             lda L00E5
             .byte $67
@@ -1418,8 +1376,9 @@ L3FCE       sta HPOSP2
             clc
             bit ADRESS
             asl L0000
-            .byte $00,$00,$00,$00,$07
-L3FE7       sbc L00A5
+            .byte $00,$00
+L3135       .byte $00,$00,$07
+            sbc L00A5
             .byte $A7
             inc MLTTMP
             ror NOCKSM
@@ -1428,7 +1387,7 @@ L3FE7       sbc L00A5
             bit ICPTLZ
             rts
             .byte $00,$00,$00
-            lda L0431
+L3147       lda L0431
             clc
             asl
             clc
@@ -1437,33 +1396,33 @@ L3FE7       sbc L00A5
             ldx #$00
             lda L0432
             cmp #$02
-            bcs L401A
+            bcs L316B
             inc L0432
-L400B       lda L3190,X
+L315C       lda L3190,X
             sta L2F00,Y
             iny
             inx
             cpx #$12
-            bne L400B
+            bne L315C
             jmp L3186
-L401A       inc L0432
+L316B       inc L0432
             lda L0432
             cmp #$04
-            bne L4029
+            bne L317A
             lda #$00
             sta L0432
-L4029       lda L31A2,X
+L317A       lda L31A2,X
             sta L2F00,Y
             iny
             inx
             cpx #$12
-            bne L4029
-            lda L0430
+            bne L317A
+L3186       lda L0430
             clc
             adc #$2D
             sta HPOSP3
             rts
-            .byte $00,$00
+L3190       .byte $00,$00
             clc
             .byte $3C
             ror L5A5A,X
@@ -1472,7 +1431,8 @@ L4029       lda L31A2,X
             clc
             bit ADRESS
             asl L0000
-            .byte $00,$00,$00,$00
+            .byte $00,$00
+L31A2       .byte $00,$00
             clc
             .byte $3C
             ror L5A5A,X
@@ -1482,9 +1442,9 @@ L4029       lda L31A2,X
             bit ICPTLZ
             rts
             .byte $00,$00,$00
-            lda L0460
+L31B4       lda L0460
             lsr
-            bcc L409E
+            bcc L31EF
             lda #$02
             sta L0461
             lda #$FE
@@ -1505,94 +1465,94 @@ L4029       lda L31A2,X
             sta AUDC3
             sta L0471
             lda #$FF
-L409E       lsr
-            bcc L40BA
-            jsr L32A4+1
-            jsr L32A4+1
-            jsr L32A4+1
+L31EF       lsr
+            bcc L320B
+            jsr L32A5
+            jsr L32A5
+            jsr L32A5
             dec L0461
-            bne L40B9
+            bne L320A
             lda #$02
             sta L0461
             lda #$FC
             sta L0460
-L40B9       rts
-L40BA       lsr
-            bcc L40D3
-            jsr L32A4+1
-            jsr L32A4+1
+L320A       rts
+L320B       lsr
+            bcc L3224
+            jsr L32A5
+            jsr L32A5
             dec L0461
-            bne L40B9
+            bne L320A
             lda #$03
             sta L0461
             lda #$F8
             sta L0460
             rts
-L40D3       lsr
-            bcc L40E9
-            jsr L32A4+1
+L3224       lsr
+            bcc L323A
+            jsr L32A5
             dec L0461
-            bne L40B9
+            bne L320A
             lda #$03
             sta L0461
             lda #$F0
             sta L0460
             rts
-L40E9       lsr
-            bcc L40FF
-            jsr L3292+1
+L323A       lsr
+            bcc L3250
+            jsr L3293
             dec L0461
-            bne L40FE
+            bne L324F
             lda #$02
             sta L0461
             lda #$E0
             sta L0460
-L40FE       rts
-L40FF       lsr
-            bcc L4118
-            jsr L3292+1
-            jsr L3292+1
+L324F       rts
+L3250       lsr
+            bcc L3269
+            jsr L3293
+            jsr L3293
             dec L0461
-            bne L40FE
+            bne L324F
             lda #$02
             sta L0461
             lda #$C0
             sta L0460
             rts
-L4118       jsr L3292+1
-            jsr L3292+1
-            jsr L3292+1
+L3269       jsr L3293
+            jsr L3293
+            jsr L3293
             dec L0461
-            bne L40FE
+            bne L324F
             lda #$00
             sta L0460
             lda #$FF
             sta L04E0
             ldx L043F
             ldy #$00
-L4135       lda L35E1+1,X
+L3286       lda L35E2,X
             sta PCOLR0,Y
             inx
             iny
             cpy #$04
-            bne L4135
+            bne L3286
             rts
-            jsr L32C0
+L3293       jsr L32C0
             inc L0500
             inc L0500
             inc L0500
             inc L0500
             jmp L32B4
-            jsr L32C0
+L32A5       jsr L32C0
             dec L0500
             dec L0500
             dec L0500
             dec L0500
-            jsr L3000
-            jsr L306B+2
+L32B4       jsr L3000
+            jsr L306D
             jsr L30DA
             jsr L3147
-            dec L0470
+L32C0       dec L0470
             dec L0470
             dec L0470
             dec L0470
@@ -1602,82 +1562,82 @@ L4135       lda L35E1+1,X
             adc #$04
             sta AUDF3
             and #$0F
-            beq L418C
+            beq L32DD
             rts
-L418C       dec L0471
+L32DD       dec L0471
             lda L0471
             cmp #$9F
-            bne L419B
+            bne L32EC
             lda #$A0
             sta L0471
-L419B       sta AUDC1
+L32EC       sta AUDC1
             sta AUDC3
             rts
-            lda L0480,X
+L32F3       lda L0480,X
             clc
             adc #$10
             cmp #$A0
-            beq L41B0
+            beq L3301
             sta L0480,X
             rts
-L41B0       lda #$00
+L3301       lda #$00
             sta L0480,X
             cpx #$02
-            bne L41D0
+            bne L3321
             lda L044F
             cmp #$05
-            bne L41D0
+            bne L3321
             inc L044F
             ldx L044F
-            jsr L3435+1
+            jsr L3436
             lda #$FF
             sta L042D
             ldx #$02
-L41D0       lda #$00
+L3321       lda #$00
             rts
-            ldx #$03
-L41D5       jsr L32F2+1
+L3324       ldx #$03
+L3326       jsr L32F3
             pha
             jsr L3789
             dex
             pla
-            beq L41D5
+            beq L3326
             rts
-            ldx #$04
-L41E3       lda L0480,X
-            bne L41EC
+L3332       ldx #$04
+L3334       lda L0480,X
+            bne L333D
             dex
-            bpl L41E3
+            bpl L3334
             rts
-L41EC       ldx #$04
-L41EE       jsr L334B
+L333D       ldx #$04
+L333F       jsr L334B
             pha
             jsr L3789
             dex
             pla
-            beq L41EE
+            beq L333F
             rts
-            lda L0480,X
+L334B       lda L0480,X
             sec
             sbc #$10
             cmp #$F0
-            beq L420A
+            beq L335B
             sta L0480,X
             lda #$01
             rts
-L420A       lda #$90
+L335B       lda #$90
             sta L0480,X
             lda #$00
             rts
-            dec L041A
-            beq L4218
+L3363       dec L041A
+            beq L3369
             rts
-L4218       lda L041B
-            beq L4224
+L3369       lda L041B
+            beq L3375
             tax
             jsr L33D8
             jsr L3332
-L4224       lda #$AA
+L3375       lda #$AA
             sta L041A
             lda #$00
             sta L041B
@@ -1695,11 +1655,11 @@ L4224       lda #$AA
             inc L041C
             ldx L041C
             lda L2803,X
-            bpl L4251
+            bpl L33A2
             rts
-L4251       stx L041B
-            jmp L33ED+1
-            .byte $02
+L33A2       stx L041B
+            jmp L33EE
+L33A8       .byte $02
             tax
             .byte $00
             asl
@@ -1712,7 +1672,7 @@ L4251       stx L041B
             ldy #$00
             ldy #$00
             .byte $00,$00
-            ldy #$BD
+L33B9       ldy #$BD
             .byte $DB
             rol
             clc
@@ -1720,7 +1680,7 @@ L4251       stx L041B
             tay
             lda L23CB,Y
             sta L00B0
-            lda L241E,Y
+            lda L241D+1,Y
             sta L00B1
             lda L2AB7,X
             lsr
@@ -1730,32 +1690,32 @@ L4251       stx L041B
             sta L00B2
             ldx #$00
             rts
-            jsr L33B9+1
-            lda #$00
+L33D8       jsr L33B9+1
+L33DB       lda #$00
             sta (L00B0),Y
             iny
             sta (L00B0),Y
             dec L00B2
-            bne L4296
+            bne L33E7
             rts
-L4296       dey
+L33E7       dey
             jsr L3A3A
             jmp L33DB
-            jsr L33B9+1
-            lda L33A8,X
+L33EE       jsr L33B9+1
+L33F1       lda L33A8,X
             sta (L00B0),Y
             inx
             iny
             lda L33A8,X
             sta (L00B0),Y
             dec L00B2
-            bne L42B1
+            bne L3402
             rts
-L42B1       dey
+L3402       dey
             inx
             jsr L3A3A
-            jmp L33F0+1
-            tax
+            jmp L33F1
+L340A       tax
             tay
             ldx #$28
             ldx #$28
@@ -1775,7 +1735,7 @@ L42B1       dey
             php
             .byte $80
             plp
-            ldy #$8A
+L3423       ldy #$8A
             asl
             tay
             lda #$A1
@@ -1786,31 +1746,31 @@ L42B1       dey
             sta L00B2
             ldx #$00
             rts
-            jsr L3422+2
-            lda L3408+2,X
+L3436       jsr L3423+1
+L3439       lda L340A,X
             sta (L00B0),Y
             inx
             iny
-            lda L3408+2,X
+            lda L340A,X
             sta (L00B0),Y
             dec L00B2
-            bne L42F9
+            bne L344A
             rts
-L42F9       inx
+L344A       inx
             dey
             jsr L3A3A
-            jmp L3438+1
-            jsr L3422+2
-L4304       lda #$00
+            jmp L3439
+L3452       jsr L3423+1
+L3455       lda #$00
             sta (L00B0),Y
             iny
             sta (L00B0),Y
             dey
             jsr L3A3A
             dec L00B2
-            bne L4304
+            bne L3455
             rts
-            lda #$00
+L3465       lda #$00
             sta AUDCTL
             sta AUDF1
             sta AUDF2
@@ -1821,16 +1781,16 @@ L4304       lda #$00
             stx L040B
             stx L040D
             stx L040E
-            lda L040A
-            beq L4347
-L4338       dec L040A
+L3484       lda L040A
+            beq L3498
+            dec L040A
             dec L040C
             lda L040C
             sta AUDC1
-            jmp L34BE+1
-L4347       ldx L040D
+            jmp L34BF
+L3498       ldx L040D
             lda L3510,X
-            beq L43A1
+            beq L34F2
             sta L040A
             lda L3500,X
             sta AUDF1
@@ -1842,35 +1802,35 @@ L4347       ldx L040D
             sta L040C
             inx
             stx L040D
-            jmp L3482+2
-            lda L040B
-            beq L4379
+            jmp L3484
+L34BF       lda L040B
+            beq L34CA
             dec L040B
-            jmp L34E3+2
-L4379       ldx L040E
-            lda L351F+2,X
+            jmp L34E5
+L34CA       ldx L040E
+            lda L3521,X
             sta AUDF2
             lda #$A8
             sta AUDC2
-            lda L3528+1,X
-L438A       sta L040B
+            lda L3529,X
+L34DB       sta L040B
             inx
             stx L040E
-            jmp L34BE+1
-            ldx #$00
+            jmp L34BF
+L34E5       ldx #$00
             ldy #$20
-L4398       dex
-            bne L4398
+L34E9       dex
+            bne L34E9
             dey
-            bne L4398
-            jmp L3482+2
-L43A1       lda #$00
+            bne L34E9
+            jmp L3484
+L34F2       lda #$00
             sta AUDC1
             sta AUDC2
             lda #$DC
             sta COLOR3
             rts
-            .byte $F3
+L3500       .byte $F3
             sta L99B6,Y
             .byte $F3
             sta L99B6,Y
@@ -1879,15 +1839,15 @@ L43A1       lda #$00
             ldx #$88
             .byte $F3
             sta L99B6,Y
-            .byte $04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04
+L3510       .byte $04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04
             .byte $00
-            adc L4C5B,Y
+L3521       adc L4C5B,Y
             .byte $5B
             rts
             .byte $5B
             eor (OLDCOL),Y
-            .byte $0C,$04,$0C,$04,$0C,$02,$02
-            bpl L438A+1
+L3529       .byte $0C,$04,$0C,$04,$0C,$02,$02
+L3530       bpl L34DB+1
             ldy #$AA
             tay
             rol
@@ -1950,57 +1910,57 @@ L43A1       lda #$00
             asl
             .byte $80
             asl
-            lda #$47
+L357E       lda #$47
             sta L00B0
             lda #$05
             sta L00B1
             ldx #$00
-            ldy #$00
-L4439       lda L3531,X
+L3588       ldy #$00
+L358A       lda L3530+1,X
             sta (L00B0),Y
             inx
             iny
             cpy #$0B
-            bne L4439
+            bne L358A
             cpx #$4D
-            beq L444E
+            beq L359F
             jsr L3A3A
             jmp L3588
-L444E       rts
-            lda #$47
+L359F       rts
+L35A0       lda #$47
             sta L00B0
             lda #$05
             sta L00B1
             ldx #$00
-            ldy #$00
-L445B       lda #$00
+L35AA       ldy #$00
+L35AC       lda #$00
             sta (L00B0),Y
             inx
             iny
             cpy #$0B
-            bne L445B
+            bne L35AC
             cpx #$4D
-            beq L444E
+            beq L359F
             jsr L3A3A
-            jmp L35A9+1
-            lda L0405,X
+            jmp L35AA
+L35C0       lda L0405,X
             lsr
-            bcc L447A
+            bcc L35CB
             inc L0400,X
-            bne L4490
-L447A       lsr
-            bcc L4482
+            bne L35E1
+L35CB       lsr
+            bcc L35D3
             dec L0400,X
-            bne L4490
-L4482       lsr
-            bcc L448A
+            bne L35E1
+L35D3       lsr
+            bcc L35DB
             inc L0401,X
-            bne L4490
-L448A       lsr
-            bcc L4490
+            bne L35E1
+L35DB       lsr
+            bcc L35E1
             dec L0401,X
-L4490       rts
-            asl
+L35E1       rts
+L35E2       asl
             .byte $3A,$5A
             tsx
             stx L00DA
@@ -2038,15 +1998,15 @@ L4490       rts
             tsx
             stx BUFRFL,Y
             dec L00DC,X
-            lda #$00
+L361A       lda #$00
             tax
-L44CC       sta L2B00,X
+L361D       sta L2B00,X
             sta L2C00,X
             sta L2D00,X
             sta L2E00,X
             sta L2F00,X
             inx
-            bne L44CC
+            bne L361D
             lda #$28
             sta PMBASE
             lda #$11
@@ -2079,39 +2039,39 @@ L44CC       sta L2B00,X
             sta L0422
             sta L0432
             rts
-            ldx #$00
+L3683       ldx #$00
             lda #$2E
-L4536       sta L2803,X
+L3687       sta L2803,X
             inx
             cpx #$24
-            bne L4536
+            bne L3687
             lda #$23
             sta L2803
             rts
-            lda L043F
+L3695       lda L043F
             clc
             adc #$08
             cmp #$38
-            bne L4550
+            bne L36A1
             lda #$00
-L4550       sta L043F
+L36A1       sta L043F
             tax
             lda #$08
             sta L00B2
             ldy #$00
-L455A       lda L35E1+1,X
+L36AB       lda L35E2,X
             sta PCOLR0,Y
             iny
             inx
             dec L00B2
-            bne L455A
+            bne L36AB
             rts
             lda #$C1
             sta L00B2
             lda #$36
             sta L00B3
             rts
-            tax
+L36C1       tax
             tay
             ldy #$28
             ldy #$28
@@ -2227,7 +2187,7 @@ L455A       lda L35E1+1,X
             tay
             .byte $00
             tay
-            txa
+L374D       txa
             asl
             tay
             stx L0486
@@ -2239,36 +2199,36 @@ L455A       lda L35E1+1,X
             tax
             inx
             lda #$00
-L460D       dex
-            beq L4615
+L375E       dex
+            beq L3766
             clc
             adc #$0E
-            bne L460D
-L4615       tax
+            bne L375E
+L3766       tax
             lda #$07
             sta L0487
-            lda L36C1,X
+L376C       lda L36C1,X
             sta (L00B0),Y
             inx
             iny
             lda L36C1,X
             sta (L00B0),Y
             dec L0487
-            beq L4634
+            beq L3785
             dey
             inx
             jsr L3A3A
             jmp L376C
-L4634       ldx L0486
+L3785       ldx L0486
             rts
-            lda #$82
+L3789       lda #$82
             sta L00B0
             lda #$21
             sta L00B1
             lda L0480,X
             sta L0488
-            jmp L374C+1
-            tax
+            jmp L374D
+L379A       tax
             tay
             tax
             tay
@@ -2280,7 +2240,7 @@ L4634       ldx L0486
             ldy #$00
             ldy #$00
             ldy #$28
-L4659       ldy #$A0
+            ldy #$A0
             ldy #$00
             ldy #$00
             ldy #$00
@@ -2326,24 +2286,24 @@ L4659       ldy #$A0
             tay
             tax
             tay
-            lda #$93
+L37E0       lda #$93
             sta L00B0
             lda #$1F
             sta L00B1
             ldx #$00
-            ldy #$00
-L469B       lda L3799+1,X
+L37EA       ldy #$00
+L37EC       lda L379A,X
             sta (L00B0),Y
             inx
             iny
             cpy #$0A
-            bne L469B
+            bne L37EC
             cpx #$46
-            beq L46B0
+            beq L3801
             jsr L3A3A
-            jmp L37E8+2
-L46B0       rts
-            tax
+            jmp L37EA
+L3801       rts
+L3802       tax
             tay
             tax
             tay
@@ -2355,7 +2315,7 @@ L46B0       rts
             ldy #$00
             asl
             .byte $00
-            ldy #$28
+L3810       ldy #$28
             ldy #$28
             ldy #$00
             ldy #$00
@@ -2373,7 +2333,7 @@ L46B0       rts
             tay
             plp
             tax
-            tay
+L3829       tay
             .byte $00
             plp
             asl
@@ -2404,24 +2364,24 @@ L46B0       rts
             plp
             tax
             tay
-            lda #$86
+L3848       lda #$86
             sta L00B0
             lda #$1F
             sta L00B1
             ldx #$00
-            ldy #$00
-L4703       lda L3801+1,X
+L3852       ldy #$00
+L3854       lda L3802,X
             sta (L00B0),Y
             inx
             iny
             cpy #$0A
-            bne L4703
+            bne L3854
             cpx #$46
-            beq L4718
+            beq L3869
             jsr L3A3A
-            jmp L3851+1
-L4718       rts
-            lda #$7A
+            jmp L3852
+L3869       rts
+L386A       lda #$7A
             sta L00B0
             lda #$21
             sta L00B1
@@ -2432,11 +2392,11 @@ L4718       rts
             asl
             asl
             sta L0488
-            jmp L374C+1
-            lda L046F
+            jmp L374D
+L3881       lda L046F
             sta L043E
             ldx #$00
-L4738       lda L043E
+L3889       lda L043E
             sta L04A5
             clc
             adc #$0A
@@ -2457,87 +2417,87 @@ L4738       lda L043E
             adc #$10
             tax
             cpx #$40
-            bne L4738
+            bne L3889
             rts
-            ldx #$00
-L4771       stx L04A3
+L38C0       ldx #$00
+L38C2       stx L04A3
             jsr L35C0
             lda L04A3
             clc
             adc #$10
             tax
             cpx #$40
-            bne L4771
+            bne L38C2
             jsr L3000
-            jsr L306B+2
+            jsr L306D
             jsr L30DA
             jsr L3147
             rts
-            jsr L3683
+L38E0       jsr L3683
             jsr L248F
             nop
             nop
             nop
             jsr L361A
-            jsr L3693+2
+            jsr L3695
             jsr L2782
             jsr L288F
             jsr L288F
             jsr L3000
-            jsr L306B+2
+            jsr L306D
             jsr L30DA
             jsr L3147
             ldx #$05
-L47B5       jsr L3789
+L3906       jsr L3789
             dex
-            bpl L47B5
+            bpl L3906
             ldx L044F
-            beq L47CC
-L47C0       stx L04A3
-            jsr L3435+1
+            beq L391D
+L3911       stx L04A3
+            jsr L3436
             ldx L04A3
             dex
-            bne L47C0
-L47CC       lda L046F
+            bne L3911
+L391D       lda L046F
             cmp #$64
-            bcs L47D9
+            bcs L392A
             clc
             adc #$0A
             sta L046F
-L47D9       lda #$01
+L392A       lda #$01
             sta L041A
             lda #$0A
             sta L0473
             lda #$00
             sta L0460
-            lda #$05
+L3939       lda #$05
             sta L0489
             jsr L386A
-            jsr L37DE+2
-            jsr L3846+2
+            jsr L37E0
+            jsr L3848
             dec L045B
-            bne L47FE
+            bne L394F
             inc L045B
-L47FE       rts
-            lda L044F
+L394F       rts
+L3950       lda L044F
             jsr L361A
             jsr L2782
             jsr L288F
             jsr L288F
             jsr L3000
-            jsr L306B+2
+            jsr L306D
             jsr L30DA
             jsr L3147
             ldx L044F
-            jsr L3451+1
+            jsr L3452
             dec L044F
-            jsr L357D+1
+            jsr L357E
             jsr L3A18
             jsr L35A0
             lda #$FF
             sta L04E0
             rts
-            jsr L3A2D
+L3983       jsr L3A2D
             lda #$AA
             sta AUDC1
             sta AUDC2
@@ -2548,21 +2508,21 @@ L47FE       rts
             sta L0401
             lda #$FF
             sta L0403
-L484F       ldx L0401
+L39A0       ldx L0401
             lda L39F4,X
-            beq L489A
+            beq L39EB
             inc L0401
             sta L0402
             lda L0403
             eor #$FF
             sta L0403
-            lda L0403
-            bne L4870
+L39B6       lda L0403
+            bne L39C1
             dec L0400
-            jmp L39C3+1
-L4870       inc L0400
-            lda L0400
-L4876       sta AUDF1
+            jmp L39C4
+L39C1       inc L0400
+L39C4       lda L0400
+L39C7       sta AUDF1
             pha
             sec
             sbc #$04
@@ -2572,65 +2532,65 @@ L4876       sta AUDF1
             sta COLOR2
             pla
             cmp L0402
-            beq L484F
+            beq L39A0
             ldy #$02
             ldx #$00
-L4891       dex
-            bne L4891
+L39E2       dex
+            bne L39E2
             dey
-            bne L4891
+            bne L39E2
             jmp L39B6
-L489A       lda #$00
+L39EB       lda #$00
             sta AUDC1
             sta AUDC2
             rts
-            ldy #$E0
-            bcc L4876+1
+L39F4       ldy #$E0
+            bcc L39C7+1
             .byte $80
             cpy #$70
-            bcs L490C
+            bcs L3A5D
             ldy #$50
-            bcc L48EF+1
+            bcc L3A40+1
             .byte $80
-            bmi L4922+1
+            bmi L3A73+1
             jsr L1060
             .byte $00
-            ldx #$00
+L3A08       ldx #$00
             lda #$00
-L48BB       sta AUDF1,X
+L3A0C       sta AUDF1,X
             inx
             cpx #$09
-            bne L48BB
+            bne L3A0C
             sta L04E0
             rts
-            lda #$05
+L3A18       lda #$05
             sta L0413
             ldx #$00
             ldy #$00
-L48D0       dex
-            bne L48D0
+L3A21       dex
+            bne L3A21
             dey
-            bne L48D0
+            bne L3A21
             dec L0413
-            bne L48D0
+            bne L3A21
             rts
-            lda #$00
+L3A2D       lda #$00
             ldx #$00
-L48E0       sta HPOSP0,X
+L3A31       sta HPOSP0,X
             inx
             cpx #$08
-            bne L48E0
+            bne L3A31
             rts
-            lda L00B1
+L3A3A       lda L00B1
             cmp #$1F
-            bne L48FA
-L48EF       lda L00B0
+            bne L3A4B
+L3A40       lda L00B0
             cmp #$C8
-            bcc L48FA
+            bcc L3A4B
             clc
             adc #$10
             sta L00B0
-L48FA       clc
+L3A4B       clc
             lda L00B0
             adc #$28
             sta L00B0
@@ -2639,17 +2599,17 @@ L48FA       clc
             sta L00B1
             rts
             .byte $00,$00
-            lda #$3E
-L490C       sta SDMCTL
+L3A5B       lda #$3E
+L3A5D       sta SDMCTL
             lda #$03
             sta GRACTL
             jsr L3B70
             lda L045B
             sta L04DF
-            ldx #$FF
+L3A6E       ldx #$FF
             txs
             lda #$02
-L4922       sta L044F
+L3A73       sta L044F
             lda #$00
             sta COLOR4
             sta ATRACT
@@ -2658,95 +2618,95 @@ L4922       sta L044F
             lda L04DF
             sta L045B
             ldx #$05
-L493A       lda #$00
+L3A8B       lda #$00
             sta L0480,X
             dex
-            bpl L493A
+            bpl L3A8B
             lda #$F8
             sta L043F
             jsr L3A08
             jsr L3A2D
-            jsr L38DF+1
+            jsr L38E0
             lda L04AA
             sta L0489
             jsr L386A
-            jsr L357D+1
+            jsr L357E
             jsr L3465
             jsr L35A0
             lda #$04
             sta L04CF
             lda L04AC
             sta L046F
-            lda #$FF
+L3ABE       lda #$FF
             sta L04E0
             lda #$00
             sta ATRACT
             sta HITCLR
-            lda L2803
-            bne L49A4
+L3ACA       lda L2803
+            bne L3AF5
             jsr L3A08
             jsr L3983
-            jsr L38DF+1
+            jsr L38E0
             lda L04AA
             sta L0489
             jsr L386A
             jsr L2782
-            jsr L357D+1
+            jsr L357E
             jsr L3A18
             jsr L3683
             jsr L35A0
             lda #$FF
             sta L04E0
-L49A4       jsr L3361+2
+L3AF5       jsr L3363
             lda CH
             cmp #$FF
-            beq L49CB
+            beq L3B1C
             cmp #$21
-            bne L49C6
+            bne L3B17
             lda #$FF
             sta CH
             jsr L3A08
-L49BA       lda CH
+L3B0B       lda CH
             cmp #$21
-            bne L49BA
+            bne L3B0B
             lda #$FF
             sta L04E0
-L49C6       lda #$FF
+L3B17       lda #$FF
             sta CH
-L49CB       lda #$00
+L3B1C       lda #$00
             sta ATRACT
             jsr L2827
             lda L0460
-            beq L49DD
-            jsr L31B3+1
+            beq L3B2E
+L3B28       jsr L31B4
             jmp L3B54
-L49DD       lda STRIG0
-            bne L49F8
+L3B2E       lda STRIG0
+            bne L3B49
             lda L0489
-            beq L49F8
+            beq L3B49
             lda #$FF
             sta L0460
             dec L0489
             lda L0489
             jsr L386A
-            jmp L3B27+1
-L49F8       jsr L38BF+1
-            jsr L3880+1
+            jmp L3B28
+L3B49       jsr L38C0
+            jsr L3881
             jsr L2653
-            bne L4A11
-            ldx #$00
+            bne L3B62
+L3B54       ldx #$00
             ldy L045B
-L4A08       dex
-            bne L4A08
+L3B59       dex
+            bne L3B59
             dey
-            bne L4A08
-            jmp L3AC8+2
-L4A11       lda L044F
-            beq L4A1C
+            bne L3B59
+            jmp L3ACA
+L3B62       lda L044F
+            beq L3B6D
             jsr L3950
-            jmp L3ABD+1
-L4A1C       jmp L3EA6
-            lda #$00
+            jmp L3ABE
+L3B6D       jmp L3EA6
+L3B70       lda #$00
             sta L042D
             sta L042E
             sta L042F
@@ -2762,9 +2722,9 @@ L4A1C       jmp L3EA6
             sta NMIEN
             rts
             lda L04E0
-            beq L4AB9
+            beq L3C0A
             lsr
-            bcc L4A6E
+            bcc L3BBF
             lda #$A1
             sta AUDC1
             sta AUDC3
@@ -2778,39 +2738,39 @@ L4A1C       jmp L3EA6
             sta L04E0
             lda #$F0
             sta L04E4
-L4A6E       lda L04E3
-            bne L4A92
+L3BBF       lda L04E3
+            bne L3BE3
             dec L04E4
             dec L04E4
             dec L04E4
             dec L04E4
             lda L04E4
             cmp L04E2
-            beq L4AB1
+            beq L3C02
             sta AUDF1
             clc
             adc #$03
             sta AUDF3
-            bne L4AB9
-L4A92       inc L04E4
+            bne L3C0A
+L3BE3       inc L04E4
             inc L04E4
             inc L04E4
             inc L04E4
             lda L04E4
             cmp L04E1
-            beq L4AB1
+            beq L3C02
             sta AUDF1
             clc
             adc #$03
             sta AUDF3
-            bne L4AB9
-L4AB1       lda L04E3
+            bne L3C0A
+L3C02       lda L04E3
             eor #$FF
             sta L04E3
-L4AB9       lda L042E
-            beq L4B08
+L3C0A       lda L042E
+            beq L3C59
             cmp #$80
-            beq L4ADA
+            beq L3C2B
             lda L042E
             sta L04E5
             inc L04E5
@@ -2820,89 +2780,89 @@ L4AB9       lda L042E
             sta L04E6
             lda #$80
             sta L042E
-L4ADA       dec L04E6
+L3C2B       dec L04E6
             dec L04E6
             dec L04E6
-            dec L04E6
+L3C34       dec L04E6
             lda L04E6
             sta AUDF4
             cmp #$10
-            bne L4B3E
+            bne L3C8F
             dec L04E5
-            bne L4B00
+            bne L3C51
             lda #$00
             sta L042E
             sta AUDC4
             jmp L3C8F
-L4B00       lda #$40
+L3C51       lda #$40
             sta L04E6
             jmp L3C8F
-L4B08       lda L042F
-            beq L4B3E
+L3C59       lda L042F
+            beq L3C8F
             lsr
-            bcc L4B1D
+            bcc L3C6E
             lda #$A9
             sta AUDC4
             lda #$10
             sta L04E5
             sta L042F
-L4B1D       inc L04E5
+L3C6E       inc L04E5
             inc L04E5
             inc L04E5
             inc L04E5
             lda L04E5
             cmp #$40
-            beq L4B36
+            beq L3C87
             sta AUDF4
             jmp L3C8F
-L4B36       lda #$00
+L3C87       lda #$00
             sta L042F
             sta AUDC4
-L4B3E       lda #$08
+L3C8F       lda #$08
             sta CONSOL
             lda L04E7
-            bne L4B56
+            bne L3CA7
             lda CONSOL
             lsr
-            bcs L4B64
+            bcs L3CB5
             lda #$FF
             sta L04E7
             jmp L3CB5
-L4B56       lda CONSOL
+L3CA7       lda CONSOL
             lsr
-            bcc L4B64
+            bcc L3CB5
             lda #$00
             sta L04E7
             jmp L3A6E
-L4B64       lda L04F0
-            beq L4B90
+L3CB5       lda L04F0
+            beq L3CE1
             lda STICK0
             sta L04F1
             lda #$0F
             lsr L04F1
-            bcs L4B78
+            bcs L3CC9
             and #$07
-L4B78       lsr L04F1
-            bcs L4B7F
+L3CC9       lsr L04F1
+            bcs L3CD0
             and #$0B
-L4B7F       lsr L04F1
-            bcs L4B86
+L3CD0       lsr L04F1
+            bcs L3CD7
             and #$0E
-L4B86       lsr L04F1
-            bcs L4B8D
+L3CD7       lsr L04F1
+            bcs L3CDE
             and #$0D
-L4B8D       sta STICK0
-L4B90       pla
+L3CDE       sta STICK0
+L3CE1       pla
             tay
             pla
             tax
             pla
             rti
-            ldx #$00
+L3CE7       ldx #$00
             stx L04B0
-            ldx L04B0
+L3CEC       ldx L04B0
             lda L3D34,X
-            beq L4BDF
+            beq L3D30
             sta AUDF1
             clc
             adc #$01
@@ -2911,28 +2871,28 @@ L4B90       pla
             sta AUDC1
             sta AUDC2
             sta L04B1
-            lda L04B1
+L3D08       lda L04B1
             cmp #$A4
-            beq L4BD7
+            beq L3D28
             dec L04B1
             lda L04B1
             sta AUDC1
             sta AUDC2
             ldx #$00
             ldy #$08
-L4BCE       dex
-            bne L4BCE
+L3D1F       dex
+            bne L3D1F
             dey
-            bne L4BCE
+            bne L3D1F
             jmp L3D08
-L4BD7       ldx #$00
+L3D28       ldx #$00
             inc L04B0
             jmp L3CEC
-L4BDF       jsr L3A08
+L3D30       jsr L3A08
             rts
-            and ICSTAZ
+L3D34       and ICSTAZ
             plp
-            and L3C35
+            and L3C34+1
             pha
             .byte $32,$2F
             pha
@@ -2942,9 +2902,9 @@ L4BDF       jsr L3A08
             eor (FKDEF),Y
             jmp (L9079)
             adc L7290,Y
-            bcc L4C57
+            bcc L3DA8
             .byte $5B,$00
-            tax
+L3D4F       tax
             tay
             plp
             .byte $00
@@ -3009,48 +2969,47 @@ L4BDF       jsr L3A08
             tax
             tay
             tay
-L4C57       plp
+L3DA8       plp
             asl
-            .byte $80,$00
-L4C5B       .byte $00
+            .byte $80,$00,$00
             ldx #$88
             tax
             tay
-            lda #$45
+L3DB1       lda #$45
             sta L00B0
             lda #$05
             sta L00B1
             ldx #$00
-            ldy #$00
-L4C6C       lda L3D4F,X
+L3DBB       ldy #$00
+L3DBD       lda L3D4F,X
             sta (L00B0),Y
             inx
             iny
             cpy #$0E
-            bne L4C6C
+            bne L3DBD
             cpx #$62
-            beq L4C81
+            beq L3DD2
             jsr L3A3A
             jmp L3DBB
-L4C81       rts
-            lda #$45
+L3DD2       rts
+L3DD3       lda #$45
             sta L00B0
             lda #$05
             sta L00B1
             ldx #$00
-            ldy #$00
-L4C8E       lda #$00
+L3DDD       ldy #$00
+L3DDF       lda #$00
             sta (L00B0),Y
             inx
             iny
             cpy #$0E
-            bne L4C8E
+            bne L3DDF
             cpx #$62
-            beq L4CA2
+            beq L3DF3
             jsr L3A3A
             jmp L3DDD
-L4CA2       rts
-            .byte $00
+L3DF3       rts
+L3DF4       .byte $00
             ldy #$28
             ldy #$AA
             tay
@@ -3098,65 +3057,65 @@ L4CA2       rts
             tay
             plp
             .byte $00,$00
-            lda #$93
+L3E3A       lda #$93
             sta L00B0
             lda #$1F
             sta L00B1
             ldx #$00
-            ldy #$00
-L4CF5       lda L3DF4,X
+L3E44       ldy #$00
+L3E46       lda L3DF4,X
             sta (L00B0),Y
             inx
             iny
             cpy #$0A
-            bne L4CF5
+            bne L3E46
             cpx #$46
-            beq L4D0A
+            beq L3E5B
             jsr L3A3A
             jmp L3E44
-L4D0A       rts
-            ldx #$00
-L4D0D       lda L0480,X
+L3E5B       rts
+L3E5C       ldx #$00
+L3E5E       lda L0480,X
             cmp L0440,X
-            bcc L4D1C
-            bne L4D1D
+            bcc L3E6D
+            bne L3E6E
             inx
             cpx #$05
-            bne L4D0D
-L4D1C       rts
-L4D1D       ldx #$00
-L4D1F       lda L0480,X
+            bne L3E5E
+L3E6D       rts
+L3E6E       ldx #$00
+L3E70       lda L0480,X
             sta L0440,X
             inx
             cpx #$05
-            bne L4D1F
+            bne L3E70
             rts
-            jsr L3E3A
+L3E7C       jsr L3E3A
             ldx #$00
-L4D30       lda L0440,X
+L3E81       lda L0440,X
             sta L0488
             lda #$82
             sta L00B0
             lda #$21
             sta L00B1
-            jsr L374C+1
+            jsr L374D
             inx
             cpx #$06
-            bne L4D30
+            bne L3E81
             rts
-            jsr L37DE+2
+L3E98       jsr L37E0
             ldx #$00
-L4D4C       jsr L3789
+L3E9D       jsr L3789
             inx
             cpx #$06
-            bne L4D4C
+            bne L3E9D
             rts
-            jsr L3A08
+L3EA6       jsr L3A08
             lda #$00
             sta L04E0
             sta L0407
             jsr L3CE7
-            jsr L3E5C
+            jsr hiscore
             jsr L3A2D
             lda #$40
             sta L046F
@@ -3165,8 +3124,8 @@ L4D4C       jsr L3789
             jsr L248F
             jsr L361A
             jsr L3F86
-            jsr L38BF+1
-            jsr L3880+1
+L3ECD       jsr L38C0
+            jsr L3881
             lda RANDOM
             and #$7F
             sta L0450
@@ -3175,35 +3134,35 @@ L4D4C       jsr L3789
             inc L0406
             lda L0406
             cmp #$32
-            bne L4DA0
-            jsr L3E7B+1
+            bne L3EF1
+            jsr L3E7C
             jsr L3DB1
-L4DA0       cmp #$64
-            bne L4DAF
+L3EF1       cmp #$64
+            bne L3F00
             lda #$00
             sta L0406
             jsr L3E98
             jsr L3DD3
-L4DAF       lda STRIG0
-            bne L4DB7
+L3F00       lda STRIG0
+            bne L3F08
             jmp L3A6E
-L4DB7       lda L0407
+L3F08       lda L0407
             cmp #$05
-            bne L4DCD
+            bne L3F1E
             lda #$00
             sta L0407
             lda RANDOM
             and #$F0
             ora #$08
             sta COLOR1
-L4DCD       ldx #$00
+L3F1E       ldx #$00
             ldy #$19
-L4DD1       dex
-            bne L4DD1
+L3F22       dex
+            bne L3F22
             dey
-            bne L4DD1
-            jmp L3ECC+1
-            ldy #$A0
+            bne L3F22
+            jmp L3ECD
+L3F2B       ldy #$A0
             ldy #$AA
             ldy #$00
             tax
@@ -3236,7 +3195,7 @@ L4DD1       dex
             tay
             tay
             ldy #$A8
-L4E0E       tay
+            tay
             plp
             tay
             ldy #$A8
@@ -3271,53 +3230,53 @@ L4E0E       tay
             tay
             tax
             tay
-            lda #$53
+L3F86       lda #$53
             sta L00B0
             lda #$20
             sta L00B1
-            jsr L3FCE+2
-            jsr L3FCE+2
-            jsr L3FE7+1
-            jsr L3FE7+1
-L4E49       ldx #$00
-            ldy #$00
+            jsr L3FD0
+            jsr L3FD0
+            jsr L3FE8
+            jsr L3FE8
+            ldx #$00
+L3F9C       ldy #$00
             lda #$28
             sta (L00B0),Y
             iny
-L4E52       lda L3F2A+1,X
+L3FA3       lda L3F2B,X
             sta (L00B0),Y
             inx
             iny
             cpy #$0E
-            bne L4E52
+            bne L3FA3
             cpx #$5B
-            beq L4E6B
+            beq L3FBC
             lda #$A0
             sta (L00B0),Y
             jsr L3A3A
-            jmp L3F9B+1
-L4E6B       lda #$A0
+            jmp L3F9C
+L3FBC       lda #$A0
             sta (L00B0),Y
             jsr L3A3A
-            jsr L3FE7+1
-            jsr L3FE7+1
-            jsr L3FCE+2
-            jsr L3FCE+2
+            jsr L3FE8
+            jsr L3FE8
+            jsr L3FD0
+            jsr L3FD0
             rts
-            ldy #$00
+L3FD0       ldy #$00
             lda #$2A
             sta (L00B0),Y
             lda #$AA
             iny
-L4E88       sta (L00B0),Y
+L3FD9       sta (L00B0),Y
             iny
             cpy #$0E
-            bne L4E88
+            bne L3FD9
             lda #$A0
             sta (L00B0),Y
             jsr L3A3A
             rts
-            lda #$28
+L3FE8       lda #$28
             ldy #$00
             sta (L00B0),Y
             lda #$A0
@@ -3327,8 +3286,9 @@ L4E88       sta (L00B0),Y
             rts
             .byte $00,$00,$00,$00,$00,$00,$00,$00
 ;
-            org $02E0
-;
-            .word L3000
-;
-         
+
+        icl "hiscore.asm"
+        
+        org $02E0
+        .word $2B00
+        
