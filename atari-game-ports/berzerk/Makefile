@@ -10,7 +10,7 @@ DIR2ATR=dir2atr
 WRITE_HIGH_SCORE=./write-high-score
 HISCORE_TABLE_ASM=hiscore_table.asm
 HISCORE_TABLE_BIN=hiscore_table.bin
-HIGH_SCORE_ENABLE=high-score-enable
+HIGH_SCORE_ENABLE=./high-score-enable
 BOOT_PROGRAM=picoboot.bin
 
 .PHONY: clean pre
