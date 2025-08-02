@@ -615,6 +615,9 @@ L8898       = $8898
 L9512       = $9512
 LBF0B       = $BF0B
 LCCD2       = $CCD2
+
+	;;  Include Hiscore
+	icl 'hiscore.asm'
 ;
 ; Start of code
 ;
@@ -626,7 +629,7 @@ L8000:      lda L0907
             lda L0908
             cmp #$5A
             bne L8011
-            jmp L88E5
+            jmp vsav		; Save our vectors real quick. will return to 88E5
 L8011:      lda #$00
             ldx #$03
 L8015:      sta L0909,X
@@ -1352,7 +1355,7 @@ L85F4:      lda DELTAC+1
             sta L0911
             cmp #$FF
             bne L85F4
-            jmp L88E5
+            jmp hiscore		; jmp L88E5
 L8600:      ldx L0603,Y
             cpx #$06
             bcs L861C
@@ -4505,6 +4508,6 @@ LBF7A:      .byte $2C,$25,$36,$25,$2C,$00,$00,$0E
 ;
             ORG $02E2
 ;
-            .word L8000
+            .word vsav
 ;
          
