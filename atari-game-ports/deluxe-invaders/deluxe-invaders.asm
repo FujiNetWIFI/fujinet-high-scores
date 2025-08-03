@@ -875,7 +875,9 @@ L3997       = $3997
 LE080       = $E080
 LE100       = $E100
 LE150       = $E150
-;
+
+	icl "hiscore.asm"
+				;
 ; Start of code
 ;
             ORG $3FCE
@@ -1856,7 +1858,7 @@ L47F4:      lda #$2D
 L480D:      jsr L1FB3
             jsr L1FC1
 L4813:      jsr L1F23
-            jsr L2048
+            jsr hiscore
             rts
             ldx #$11
 L481C:      lda L0629,X
@@ -1932,7 +1934,7 @@ L489D:      lda #$57
             jmp L2036
 L48B6:      jsr L1F97
 L48B9:      jsr L1F23
-            jsr L2048
+            jsr hiscore
             rts
             lda L163E
             sta L00A7
