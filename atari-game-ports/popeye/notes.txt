@@ -1,0 +1,39 @@
+Game over search
+     A48B? Looks like this is it.
+     8673? NOPE.
+     8D5C? NOPE. gets triggered on Start
+     8D46? NOPE. Part of start
+
+     86D2 is our wait for console switches, hiscore returns here
+
+Hiscore is screen codes starting at $01, so add $0F to get screen code.
+
+5 DLIs in original game
+
+DLI 0 $8A32
+DLI 1 $8A54
+DLI 2 and 3 $8a70
+DLI 4 $8AB9
+
+Charset at $1000
+
+Game uses its own deferred DLI. Disabling it completely disables graphic output.
+
+So... We have to use POKEY for keycodes directly
+      HRKEY modded to use KBCODE and SKSTAT.
+
+The DLI mess:
+
+Game uses DLIs to set color, and to do missile repositioning.
+
+8a32 and 8a54 are static.
+8a70 does two different things depending on where DLI fires
+8aB9 loops back around to 8a32
+
+Solution was to:
+
+* self modify second to last DLI to point to hsdli2, which resets charset to game
+* self modify first DLI to jump to our routine which does same as original, also setting to system charset
+* patch the last DLI to point to code that resets charset to $1000
+
+Not perfect. But doesn't crash. If you can do it better, please fix.
