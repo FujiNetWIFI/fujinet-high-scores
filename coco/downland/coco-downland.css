@@ -1,0 +1,13 @@
+body {
+    background: #0a0a0a;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+svg {
+    width: min(92vw, 820px);
+    display: block;
+}
