@@ -281,6 +281,10 @@ moExit:
 ;--------------------------------------------------------------
 PChr:
         pshs    d,y
+        cmpa    #38             ; clamp bad codes to a space (no out-of-range font read)
+        bls     pcdraw
+        lda     #36
+pcdraw:
         ldy     #FONT
         ldb     #7
         mul
