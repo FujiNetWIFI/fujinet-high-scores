@@ -573,11 +573,26 @@ stnext: ldd     RowPtr
         ldx     #PAKPOS
         lbsr    PStr
 
-        lbsr    KRel            ; wait for a fresh keypress
-stkey:  lbsr    KGet
+        lbsr    KRel            ; start clean: wait for keys...
+stbclr: lda     #$FF            ; ...and the joystick button released
+        sta     $FF02
+        lda     $FF00
+        bita    #1
+        beq     stbclr
+stkey:  lbsr    KGet            ; dismiss on any key...
         cmpa    #$FF
-        beq     stkey
-        lbsr    KRel
+        bne     stdone
+        lda     #$FF            ; ...or the joystick button
+        sta     $FF02
+        lda     $FF00
+        bita    #1
+        bne     stkey
+stdone: lbsr    KRel            ; consume the press so the title loop doesn't
+stbrel: lda     #$FF            ; see the button still down and start a game
+        sta     $FF02
+        lda     $FF00
+        bita    #1
+        beq     stbrel
         ldb     SavCol
         stb     $FF02
         rts
