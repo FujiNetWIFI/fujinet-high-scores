@@ -27,9 +27,10 @@ module (`hiscore.asm`) into the stock `DOWNLAND.BIN`:
   page-1 entry screen before the table is written.
 * The title loop's `JSR IncrementRomAddressCounter` at **$C109** is hooked so
   pressing **H** shows the **top-10 table**, then returns to the title.
-* An EXEC stub captures the drive number ($EB) and Disk BASIC's NMI ($0109)
-  and IRQ ($010C) vectors before the bootstrap runs, so the module writes back
-  to the disk it loaded from and can hand the floppy controller live vectors.
+* An EXEC stub captures the drive number ($EB), the HDB-DOS "DRIVE #n" slot
+  selector ($0151), and Disk BASIC's NMI ($0109)/IRQ ($010C) vectors before
+  the bootstrap runs, so the module writes back to the disk (and FujiNet
+  slot) it loaded from, and can hand the floppy controller live vectors.
 * `DSKCON` needs the ROM mapped in, which would unmap $E0xx — so the call runs
   through a trampoline copied to low RAM ($4100), with the sector buffer at
   $4200 (low RAM exists in both SAM maps, on all CoCos).

@@ -7,7 +7,8 @@
 ;   - reached via JSR $E030 patched over `LDU #$00B3` at $C0DD, which runs on
 ;     every title-screen visit, after the game has folded the player scores
 ;     into the high score
-;   - an EXEC-time stub pokes the RUNM drive number into DriveNum before the
+;   - an EXEC-time stub pokes the RUNM drive number into DriveNum, and the
+;     HDB-DOS "DRIVE #n" slot selector ($0151) into SlotNum, before the
 ;     bootstrap copies the image up
 ;
 ; On each title visit (IRQs masked, DP=0):
@@ -40,6 +41,7 @@ DCSEC   equ $00ED
 DCBPT   equ $00EE
 DCSTA   equ $00F0          ; 0 = success
 HDFLAG  equ $014E          ; 0 => all drives route to DriveWire
+HDIDNUM equ $0151          ; HDB-DOS "DRIVE #n" slot selector (not DCDRV)
 
 ; Downland
 HISCORE equ $00B3          ; high-score string, 7 digit bytes
@@ -89,6 +91,8 @@ cptr:   lda     ,x+
         clr     HDFLAG          ; route all drives to DriveWire
         lda     DriveNum
         sta     DCDRV
+        lda     SlotNum         ; restore the FujiNet slot -- clobbered by
+        sta     HDIDNUM         ; Downland's startup like everything else here
         lda     #2              ; read score sector
         sta     DCOPC
         lda     #STRACK
@@ -128,13 +132,73 @@ fstamp: lda     ,u+
         inc     Dirty
 
 Merge:
+        clr     Pend1Flag
+        clr     Pend2Flag
         ldu     #P1SCORE
         ldx     #LastP1
+        ldy     #Pend1
         lbsr    MergeOne
         ldu     #P2SCORE
         ldx     #LastP2
+        ldy     #Pend2
         lbsr    MergeOne
 
+        lda     Pend1Flag       ; did either merge produce a new entry?
+        ora     Pend2Flag
+        beq     Restore         ; no: table in SBUF is already current
+
+        ; disk is shared over the network; re-read fresh and redo the
+        ; insert against it so a slow EnterName above doesn't clobber
+        ; another machine's write
+        lda     #2
+        sta     DCOPC
+        lda     #STRACK
+        sta     DCTRK
+        lda     #SSECTOR
+        sta     DCSEC
+        ldx     #SBUF
+        stx     DCBPT
+        lbsr    SafeDSKCON
+        lbne    Restore         ; re-read failed: fall back to the stale copy
+
+        ldx     #SBUF           ; re-validate signature (defensive)
+        ldu     #SigSrc
+        ldb     #5
+cksig2: lda     ,x+
+        cmpa    ,u+
+        bne     Format2
+        decb
+        bne     cksig2
+        bra     Commit2
+Format2:
+        ldx     #SBUF
+        clrb
+fwipe2: clr     ,x+
+        decb
+        bne     fwipe2
+        ldx     #SBUF
+        ldu     #SigSrc
+        ldb     #5
+fstamp2: lda    ,u+
+        sta     ,x+
+        decb
+        bne     fstamp2
+
+Commit2:
+        inc     Dirty
+
+        lda     Pend1Flag
+        beq     skip1
+        ldx     #Pend1
+        lbsr    Insert
+skip1:
+        lda     Pend2Flag
+        beq     skip2
+        ldx     #Pend2
+        lbsr    Insert
+skip2:
+
+Restore:
         lda     ENTRIES+8       ; empty table? (no restore from zeros)
         beq     NoRestore
         ldx     #ENTRIES+8      ; restore: table[0].score -> $B3 if greater
@@ -178,13 +242,13 @@ Done:
         rts
 
 ;--------------------------------------------------------------
-; MergeOne: U -> live 7-digit score, X -> its 7-byte shadow copy.
-; Inserts the score into the table (initials 'aaa') if it is made of valid
-; digits, differs from the shadow (dedup for title revisits), is not already
-; in the table, and beats an entry. Sets Dirty on insert.
+; MergeOne: U -> live 7-digit score, X -> its 7-byte shadow copy, Y ->
+; 17-byte pending buf (16-byte entry + flag, cleared by caller). Inserts
+; the score (initials 'aaa') if valid, new, and beats an entry; stashes
+; the finished entry at Y for Merge to reinsert after a fresh re-read.
 ;--------------------------------------------------------------
 MergeOne:
-        pshs    x,u             ; 0,s = shadow, 2,s = live
+        pshs    x,u,y            ; 0,s = shadow, 2,s = pending buf, 4,s = live
 
         ldb     #7              ; all digits 0-9?
 mval:   lda     ,u+
@@ -193,7 +257,7 @@ mval:   lda     ,u+
         decb
         bne     mval
 
-        ldu     2,s             ; identical to shadow? (already merged)
+        ldu     4,s             ; identical to shadow? (already merged)
         ldx     0,s
         ldb     #7
 mchg:   lda     ,u+
@@ -203,7 +267,7 @@ mchg:   lda     ,u+
         bne     mchg
         lbra    moExit
 
-mnew:   ldu     2,s             ; update shadow
+mnew:   ldu     4,s             ; update shadow
         ldx     0,s
         ldb     #7
 mshd:   lda     ,u+
@@ -211,7 +275,7 @@ mshd:   lda     ,u+
         decb
         bne     mshd
 
-        ldu     2,s             ; live score as ASCII digits
+        ldu     4,s             ; live score as ASCII digits
         ldx     #TmpScore
         ldb     #7
 masc:   lda     ,u+
@@ -272,8 +336,71 @@ mwsc:   lda     ,u+
         inc     Dirty
         ldx     SlotPtr
         lbsr    EnterName       ; replace the 'aaa' placeholder
+
+        ldx     SlotPtr         ; stash the finished entry: Merge redoes
+        ldy     2,s             ; this insert below against a freshly
+        ldb     #ENTLEN         ; re-read table, since EnterName may have
+mpsav:  lda     ,x+             ; run long enough for another machine to
+        sta     ,y+             ; have written its own update meanwhile
+        decb
+        bne     mpsav
+        lda     #1              ; Y now sits right past the 16 copied
+        sta     ,y              ; bytes -- exactly the flag byte's address
 moExit:
-        puls    x,u,pc
+        puls    x,y,u,pc
+
+;--------------------------------------------------------------
+; Insert: X -> 16-byte entry (name+score, ASCII). Same slot-search/shift
+; as MergeOne's mslot/mins/mshift, minus dedup and the name prompt.
+;--------------------------------------------------------------
+Insert:
+        pshs    x               ; 0,s = pending entry
+
+        clr     Slot            ; find first entry the pending score beats
+        ldx     #ENTRIES
+islot:  ldu     0,s
+        leau    8,u             ; pending entry's score field
+        leay    8,x             ; table entry's score field
+        ldb     #7
+idig:   lda     ,u+
+        cmpa    ,y+
+        bhi     iins            ; pending > entry: insert at this slot
+        blo     inext           ; pending < entry: try next slot
+        decb
+        bne     idig
+        bra     iexit           ; equal: already recorded, skip
+inext:  leax    ENTLEN,x
+        inc     Slot
+        lda     Slot
+        cmpa    #NENTRY
+        blo     islot
+        bra     iexit           ; doesn't make the table
+
+iins:   lda     Slot            ; SlotPtr = ENTRIES + Slot*16
+        ldb     #ENTLEN
+        mul
+        addd    #ENTRIES
+        std     SlotPtr
+        ldx     #ENTRIES+(NENTRY-2)*ENTLEN  ; shift Slot..8 down one
+ishift: cmpx    SlotPtr
+        blo     iwrite
+        leau    ENTLEN,x        ; copy entry at X to X+16
+        ldb     #ENTLEN
+icopy:  lda     ,x+
+        sta     ,u+
+        decb
+        bne     icopy
+        leax    -2*ENTLEN,x     ; previous entry
+        bra     ishift
+
+iwrite: ldx     SlotPtr
+        ldu     0,s             ; pending entry -> table
+        ldb     #ENTLEN
+iwr:    lda     ,u+
+        sta     ,x+
+        decb
+        bne     iwr
+iexit:  puls    x,pc
 
 ;--------------------------------------------------------------
 ; PChr: draw glyph A at gfx address X; X advances one column.
@@ -361,6 +488,62 @@ kghit:  lda     KRow
         rts
 
 ;--------------------------------------------------------------
+; GetKeyEvent: debounced, edge-triggered key scan for name entry.
+; Returns A = keycode 0-55 on a new keypress, else $FF.
+;
+; Unlike KGet+KRel (which demands the whole matrix go idle, plus a fixed
+; delay, before the next key can register), this only requires the raw
+; scan to settle on a value different from the last-latched one. That
+; lets a second key be recognized as soon as the first releases, even if
+; the second was already pressed (rollover) -- fast typing no longer
+; drops characters. Settling is confirmed over DEBTHRESH consecutive
+; samples spaced SDELAYCNT cycles apart, which filters contact bounce
+; (on press or release) without re-arming on the same key.
+;--------------------------------------------------------------
+DEBTHRESH equ 3             ; consecutive matching samples to accept
+
+GetKeyEvent:
+        lbsr    KGet
+        cmpa    LastRaw
+        beq     gkesame
+        sta     LastRaw         ; scan changed: restart debounce
+        clr     DebCnt
+        bra     gkedelay
+gkesame:
+        lda     DebCnt
+        cmpa    #DEBTHRESH
+        bhs     gkestable
+        inc     DebCnt
+gkedelay:
+        lbsr    SDelay
+        lda     #$FF
+        rts
+gkestable:
+        lda     LastRaw
+        cmpa    CurKey
+        beq     gkenone         ; unchanged from what's already latched
+        sta     CurKey          ; latch new stable state
+        cmpa    #$FF
+        bne     gkeevent        ; non-idle: report the new key
+gkenone:
+        lda     #$FF
+gkeevent:
+        rts
+
+;--------------------------------------------------------------
+; SDelay: short fixed delay between GetKeyEvent debounce samples.
+;--------------------------------------------------------------
+SDELAYCNT equ 400
+
+SDelay:
+        pshs    x
+        ldx     #SDELAYCNT
+sdlp:   leax    -1,x
+        bne     sdlp
+        puls    x
+        rts
+
+;--------------------------------------------------------------
 ; KRel: wait for all keys released (ignoring joystick-button ghosts),
 ; then a short debounce delay.
 ;--------------------------------------------------------------
@@ -426,7 +609,12 @@ enini:  sta     ,x+
         decb
         bne     enini
         clr     NamePos
-        lbsr    KRel
+        lbsr    KRel            ; make sure nothing is still held from before
+
+        lda     #$FF            ; arm the debounced scanner fresh
+        sta     LastRaw
+        sta     CurKey
+        clr     DebCnt
 
 enloop: ldx     #FLDPOS         ; redraw the field
         ldu     #NameBuf
@@ -436,7 +624,7 @@ enfld:  lda     ,u+
         decb
         bne     enfld
 
-enkey:  lbsr    KGet
+enkey:  lbsr    GetKeyEvent
         cmpa    #$FF
         beq     enkey
         cmpa    #48             ; ENTER
@@ -446,33 +634,42 @@ enkey:  lbsr    KGet
         cmpa    #31             ; space bar
         beq     enspc
         cmpa    #1              ; A-Z?
-        blo     ennope
+        blo     enloop
         cmpa    #26
-        bhi     ennope
+        bhi     enloop
         adda    #9              ; letter font code
         bra     enput
 enspc:  lda     #36             ; space glyph
 enput:  ldb     NamePos
         cmpb    #8
-        bhs     ennope
+        bhs     enloop
         ldx     #NameBuf
         abx
         sta     ,x
         inc     NamePos
-ennope: lbsr    KRel
         bra     enloop
 enbksp: ldb     NamePos
-        beq     ennope
+        beq     enloop
         dec     NamePos
         ldb     NamePos
         ldx     #NameBuf
         abx
         lda     #38
         sta     ,x
-        bra     ennope
+        bra     enloop
 endone: ldb     NamePos
-        beq     ennope          ; need at least one character
-        puls    x               ; commit as ASCII, space-padded
+        beq     enloop          ; need at least one character
+        ldx     #NameBuf        ; ...and at least one non-space letter
+        ldb     #8
+enchk:  lda     ,x+
+        cmpa    #10             ; letter font codes are 10-35
+        blo     enchknx
+        cmpa    #35
+        bls     endok
+enchknx: decb
+        bne     enchk
+        bra     enloop          ; all spaces: reject, keep editing
+endok:  puls    x               ; commit as ASCII, space-padded
         ldu     #NameBuf
         ldb     #8
 encmt:  lda     ,u+
@@ -707,17 +904,26 @@ Slot:   fcb     0
 SlotPtr: fdb    0
 LastP1: fcb     0,0,0,0,0,0,0   ; last-merged player scores (dedup shadows)
 LastP2: fcb     0,0,0,0,0,0,0
+Pend1:  rmb     ENTLEN          ; entries staged by MergeOne, applied by
+Pend1Flag: fcb  0               ; Merge against a freshly re-read table
+Pend2:  rmb     ENTLEN
+Pend2Flag: fcb  0
 KCol:   fcb     0
 KRow:   fcb     0
 KMask:  fcb     0
 SavCol: fcb     0
 SavCol2: fcb    0
 NamePos: fcb    0
+CurKey: fcb     0               ; GetKeyEvent: last key latched as "active"
+LastRaw: fcb    0               ; GetKeyEvent: last raw KGet sample
+DebCnt: fcb     0               ; GetKeyEvent: consecutive matching samples
 NameBuf: fcb    0,0,0,0,0,0,0,0
 TmpScore: fcb   0,0,0,0,0,0,0
 Row:    fcb     0
 RowPtr: fdb     0
 DriveNum:
         fcb     0               ; poked at EXEC time with the RUNM drive ($EB)
+SlotNum:
+        fcb     0               ; poked at EXEC time with HDIDNUM ($0151)
 WsBuf:  rmb     WSLEN           ; scratch: saved copy of the shielded workspace
         end

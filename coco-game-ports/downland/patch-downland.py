@@ -9,7 +9,8 @@ $4000) and produces DOWNLAND-HS.BIN:
   2. extends the bootstrap's copy bound (CMPU #$4000 -> past the module)
   3. patches the title-screen `LDU #$00B3` at $C0DD to `JSR $E030`
   4. appends an EXEC stub that pokes the RUNM drive ($EB) into the module's
-     DriveNum before jumping to the original bootstrap at $4000
+     DriveNum, and HDB-DOS's own "DRIVE #n" slot selector ($0151) into
+     SlotNum, before jumping to the original bootstrap at $4000
 
 Usage: patch-downland.py <orig DOWNLAND.BIN> <hiscore.bin> <hiscore.sym> <out.BIN>
 """
@@ -62,6 +63,7 @@ def main():
         return load
 
     drivenum_load = var_load("DriveNum")
+    slotnum_load = var_load("SlotNum")
     nmivec_load = var_load("SavedNmiVec")
     diskirq_load = var_load("SavedDiskIrq")
 
@@ -101,16 +103,17 @@ def main():
     data[NGLYPH_OFF:NGLYPH_OFF + 7] = bytes(
         [0xCC, 0xCC, 0xFC, 0xFC, 0xFC, 0xCC, 0xCC])
 
-    # 4. EXEC stub, run before the bootstrap while Disk BASIC's state is still
-    #    intact: capture the drive number ($EB) and the Disk BASIC NMI ($0109)
-    #    and IRQ ($010C) vectors (3 bytes each) into the module, then enter the
-    #    bootstrap. Downland wipes these once it runs.
+    # 4. EXEC stub, run before the bootstrap: capture the drive number ($EB),
+    #    HDB-DOS's "DRIVE #n" slot selector ($0151), and the Disk BASIC NMI
+    #    ($0109)/IRQ ($010C) vectors into the module, then enter the bootstrap.
     def hi(a): return (a >> 8) & 0xFF
     def lo(a): return a & 0xFF
     stub_addr = LOAD_ORG + len(data)
     data += bytes([
         0x96, 0xEB,                                  # lda  <$EB
         0xB7, hi(drivenum_load), lo(drivenum_load),  # sta  DriveNum
+        0xB6, 0x01, 0x51,                            # lda  $0151
+        0xB7, hi(slotnum_load), lo(slotnum_load),    # sta  SlotNum
         0xBE, 0x01, 0x09,                            # ldx  $0109
         0xBF, hi(nmivec_load), lo(nmivec_load),      # stx  SavedNmiVec
         0xB6, 0x01, 0x0B,                            # lda  $010B
