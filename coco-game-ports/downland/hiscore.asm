@@ -93,43 +93,9 @@ cptr:   lda     ,x+
         sta     DCDRV
         lda     SlotNum         ; restore the FujiNet slot -- clobbered by
         sta     HDIDNUM         ; Downland's startup like everything else here
-        lda     #2              ; read score sector
-        sta     DCOPC
-        lda     #STRACK
-        sta     DCTRK
-        lda     #SSECTOR
-        sta     DCSEC
-        ldx     #SBUF
-        stx     DCBPT
-        lbsr    SafeDSKCON
-        lbne    Done            ; read failed: leave everything alone
-
         clr     Dirty
-
-        ldx     #SBUF           ; signature + version valid?
-        ldu     #SigSrc
-        ldb     #5
-cksig:  lda     ,x+
-        cmpa    ,u+
-        bne     Format
-        decb
-        bne     cksig
-        bra     Merge
-
-Format:                         ; fresh/foreign sector: wipe and stamp
-        ldx     #SBUF
-        clrb                    ; 256 times
-fwipe:  clr     ,x+
-        decb
-        bne     fwipe
-        ldx     #SBUF
-        ldu     #SigSrc
-        ldb     #5
-fstamp: lda     ,u+
-        sta     ,x+
-        decb
-        bne     fstamp
-        inc     Dirty
+        lbsr    ReadAndValidate
+        lbne    Done            ; read failed: leave everything alone
 
 Merge:
         clr     Pend1Flag
@@ -138,65 +104,32 @@ Merge:
         ldx     #LastP1
         ldy     #Pend1
         lbsr    MergeOne
+
+        lda     Pend1Flag       ; new entry: resync before P2's own check
+        beq     noSync1
+        lbsr    ReadAndValidate
+        bne     noSync1
+        ldx     #Pend1
+        lbsr    Insert
+noSync1:
+
         ldu     #P2SCORE
         ldx     #LastP2
         ldy     #Pend2
         lbsr    MergeOne
 
-        lda     Pend1Flag       ; did either merge produce a new entry?
-        ora     Pend2Flag
-        beq     Restore         ; no: table in SBUF is already current
-
-        ; disk is shared over the network; re-read fresh and redo the
-        ; insert against it so a slow EnterName above doesn't clobber
-        ; another machine's write
-        lda     #2
-        sta     DCOPC
-        lda     #STRACK
-        sta     DCTRK
-        lda     #SSECTOR
-        sta     DCSEC
-        ldx     #SBUF
-        stx     DCBPT
-        lbsr    SafeDSKCON
-        lbne    Restore         ; re-read failed: fall back to the stale copy
-
-        ldx     #SBUF           ; re-validate signature (defensive)
-        ldu     #SigSrc
-        ldb     #5
-cksig2: lda     ,x+
-        cmpa    ,u+
-        bne     Format2
-        decb
-        bne     cksig2
-        bra     Commit2
-Format2:
-        ldx     #SBUF
-        clrb
-fwipe2: clr     ,x+
-        decb
-        bne     fwipe2
-        ldx     #SBUF
-        ldu     #SigSrc
-        ldb     #5
-fstamp2: lda    ,u+
-        sta     ,x+
-        decb
-        bne     fstamp2
-
-Commit2:
-        inc     Dirty
-
-        lda     Pend1Flag
-        beq     skip1
+        lda     Pend2Flag       ; resync once more before the final commit
+        beq     noSync2
+        lbsr    ReadAndValidate
+        bne     noSync2
+        lda     Pend1Flag       ; not in this fresh read yet
+        beq     sk2a
         ldx     #Pend1
         lbsr    Insert
-skip1:
-        lda     Pend2Flag
-        beq     skip2
+sk2a:
         ldx     #Pend2
         lbsr    Insert
-skip2:
+noSync2:
 
 Restore:
         lda     ENTRIES+8       ; empty table? (no restore from zeros)
@@ -239,6 +172,83 @@ NoWrite:
 Done:
         puls    cc,a,b,dp,x,y,u
         ldu     #HISCORE        ; displaced original instruction
+        rts
+
+; ReadSector: dummy-reads track 0/sector 1 to bust FujiNet's per-sector
+; cache, then reads the real score sector into SBUF. Z=1 on success.
+ReadSector:
+        lda     #2
+        sta     DCOPC
+        clr     DCTRK
+        lda     #1
+        sta     DCSEC
+        ldx     #SBUF
+        stx     DCBPT
+        lbsr    SafeDSKCON      ; discarded; SBUF overwritten below
+
+        lda     #2
+        sta     DCOPC
+        lda     #STRACK
+        sta     DCTRK
+        lda     #SSECTOR
+        sta     DCSEC
+        ldx     #SBUF
+        stx     DCBPT
+        lbsr    SafeDSKCON
+        rts
+
+; ReadAndValidate: reads via ReadSector, formats a bad/foreign signature.
+; Backs up/restores SBUF around a failed read. Z=1 on success, Z=0 on
+; failed read (SBUF unchanged).
+ReadAndValidate:
+        ldx     #SBUF           ; back up in case the read fails
+        ldu     #BackBuf
+        clrb
+ravsave: lda    ,x+
+        sta     ,u+
+        decb
+        bne     ravsave
+
+        lbsr    ReadSector
+        beq     ravreadok
+
+        ldx     #BackBuf
+        ldu     #SBUF
+        clrb
+ravrest: lda    ,x+
+        sta     ,u+
+        decb
+        bne     ravrest
+        andcc   #$FB            ; Z=0
+        rts
+
+ravreadok:
+        ldx     #SBUF           ; signature valid?
+        ldu     #SigSrc
+        ldb     #5
+ravck:  lda     ,x+
+        cmpa    ,u+
+        bne     ravfmt
+        decb
+        bne     ravck
+        orcc    #$04            ; Z=1
+        rts
+
+ravfmt:                         ; wipe and stamp fresh/foreign sector
+        ldx     #SBUF
+        clrb
+ravwipe: clr    ,x+
+        decb
+        bne     ravwipe
+        ldx     #SBUF
+        ldu     #SigSrc
+        ldb     #5
+ravstamp: lda   ,u+
+        sta     ,x+
+        decb
+        bne     ravstamp
+        inc     Dirty
+        orcc    #$04            ; Z=1
         rts
 
 ;--------------------------------------------------------------
@@ -810,6 +820,7 @@ TitleHook2:
         stb     $FF02
         cmpa    #8              ; H key (row 1, column 0)
         bne     th2out
+        lbsr    RereadTable     ; refresh SBUF from disk before showing it
         ldd     #PAGE1
         jsr     >SAMPAGES       ; display page 1
 
@@ -830,6 +841,48 @@ th2cp:  ldd     ,x
         ldd     #PAGE0
         jsr     >SAMPAGES       ; back to the title
 th2out: puls    cc,a,b,dp,x,y,u
+        rts
+
+; RereadTable: refreshes SBUF from disk for the H-key display; restores
+; the backup on a failed read or bad signature rather than showing garbage.
+RereadTable:
+        pshs    cc,dp
+        ldx     #SBUF           ; save the in-memory table
+        ldu     #BackBuf
+        clrb
+rrsave: lda     ,x+
+        sta     ,u+
+        decb
+        bne     rrsave
+
+        orcc    #$50            ; mask IRQ+FIRQ for the disk op
+        clra
+        tfr     a,dp
+
+        lbsr    ReadSector
+        beq     rrtvalid        ; read ok: check signature
+        bra     rrtbad          ; read failed: restore the backup
+
+rrtvalid:
+        ldx     #SBUF           ; signature valid?
+        ldu     #SigSrc
+        ldb     #5
+rrck:   lda     ,x+
+        cmpa    ,u+
+        bne     rrtbad
+        decb
+        bne     rrck
+        bra     rrtok
+
+rrtbad: ldx     #BackBuf        ; restore the previous in-memory table
+        ldu     #SBUF
+        clrb
+rrrest: lda     ,x+
+        sta     ,u+
+        decb
+        bne     rrrest
+
+rrtok:  puls    cc,dp           ; unmask IRQ, restore dp
         rts
 
 ; strings (font codes, $FF-terminated)
@@ -926,4 +979,5 @@ DriveNum:
 SlotNum:
         fcb     0               ; poked at EXEC time with HDIDNUM ($0151)
 WsBuf:  rmb     WSLEN           ; scratch: saved copy of the shielded workspace
+BackBuf: rmb    256             ; SBUF backup for failed reads
         end
