@@ -1,0 +1,42 @@
+; 3x5 glyphs lifted from the title bitmap at $F7D5
+; each logical column is doubled so it artifacts white, not blue
+FONTBASE equ *
+        fcb     $00,$00,$00,$00,$00   ; SPACE
+        fcb     $30,$CC,$CC,$FC,$CC   ; A
+        fcb     $F0,$CC,$F0,$CC,$F0   ; B
+        fcb     $3C,$C0,$C0,$C0,$3C   ; C
+        fcb     $F0,$CC,$CC,$CC,$F0   ; D
+        fcb     $FC,$C0,$F0,$C0,$FC   ; E
+        fcb     $FC,$C0,$F0,$C0,$C0   ; F
+        fcb     $3C,$C0,$CC,$CC,$3C   ; G
+        fcb     $CC,$CC,$FC,$CC,$CC   ; H
+        fcb     $30,$30,$30,$30,$30   ; I
+        fcb     $0C,$0C,$0C,$CC,$30   ; J
+        fcb     $CC,$CC,$F0,$CC,$CC   ; K
+        fcb     $C0,$C0,$C0,$C0,$FC   ; L
+        fcb     $CC,$FC,$FC,$CC,$CC   ; M
+        fcb     $CC,$FC,$FC,$FC,$CC   ; N
+        fcb     $30,$CC,$CC,$CC,$30   ; O
+        fcb     $F0,$CC,$F0,$C0,$C0   ; P
+        fcb     $30,$CC,$CC,$FC,$3C   ; Q
+        fcb     $F0,$CC,$F0,$CC,$CC   ; R
+        fcb     $3C,$C0,$30,$0C,$F0   ; S
+        fcb     $FC,$30,$30,$30,$30   ; T
+        fcb     $CC,$CC,$CC,$CC,$30   ; U
+        fcb     $CC,$CC,$CC,$FC,$30   ; V
+        fcb     $CC,$CC,$FC,$FC,$CC   ; W
+        fcb     $CC,$CC,$30,$CC,$CC   ; X
+        fcb     $CC,$CC,$30,$30,$30   ; Y
+        fcb     $FC,$0C,$30,$C0,$FC   ; Z
+        fcb     $30,$CC,$CC,$CC,$30   ; 0
+        fcb     $30,$30,$30,$30,$30   ; 1
+        fcb     $F0,$0C,$30,$C0,$FC   ; 2
+        fcb     $F0,$0C,$30,$0C,$F0   ; 3
+        fcb     $CC,$CC,$FC,$0C,$0C   ; 4
+        fcb     $FC,$C0,$F0,$0C,$F0   ; 5
+        fcb     $3C,$C0,$F0,$CC,$30   ; 6
+        fcb     $FC,$0C,$30,$30,$30   ; 7
+        fcb     $30,$CC,$30,$CC,$30   ; 8
+        fcb     $30,$CC,$3C,$0C,$F0   ; 9
+        fcb     $00,$00,$00,$00,$30   ; DOT
+        fcb     $00,$30,$00,$30,$00   ; COLON
