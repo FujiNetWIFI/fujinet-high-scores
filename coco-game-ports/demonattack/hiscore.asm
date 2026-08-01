@@ -60,6 +60,7 @@ PROMPTPOS equ SCREEN+145*32+9
 HDRPOS  equ SCREEN+28*32+10
 ROW0POS equ SCREEN+44*32+6
 TROWSTEP equ 192           ; 6 scanlines between table rows
+PLRPOS  equ SCREEN+30*32+12
 NHSPOS  equ SCREEN+40*32+9
 SCPOS   equ SCREEN+56*32+12
 NMPOS   equ SCREEN+72*32+8
@@ -71,6 +72,7 @@ SAVETOP equ SCREEN         ; rows 0-151: everything above the ground, so no
 SAVELEN equ 4864           ; fragment of the title shows through the table
 SAVEBUF equ $8A00          ; above the module; the patcher asserts this
 SCORE   equ $000B          ; player 1 score, 3 bytes packed BCD, LSB first
+SCORE2  equ $000E          ; player 2; the game's own draw does LEAY $03,Y
 
 ; sector format: "DAHS" + version(1) + reserved, then 10 x 16-byte
 ; entries [8 name][7 score digits][1 pad], score stored as plain ASCII
@@ -107,23 +109,44 @@ hookdone:
 ; cleared by the $C080 reset at the next game start.
 ;--------------------------------------------------------------
 GameOverHook:
-        lda     >SCORE          ; snapshot the still-live score for
-        sta     LastScore       ; UnpackScore to format
-        lda     >SCORE+1
-        sta     LastScore+1
-        lda     >SCORE+2
-        sta     LastScore+2
+        ldx     #SCORE          ; both scores are still live here
+        ldu     #Score1
+        ldb     #3
+gohc1:  lda     ,x+
+        sta     ,u+
+        decb
+        bne     gohc1
+        ldx     #SCORE2
+        ldu     #Score2
+        ldb     #3
+gohc2:  lda     ,x+
+        sta     ,u+
+        decb
+        bne     gohc2
 
-        lbsr    Qualifies
+        clr     PendMask
+        lda     Score1
+        ora     Score1+1
+        ora     Score1+2
+        beq     goh2
+        lda     #1
+        sta     PendMask
+goh2:   lda     >$0004          ; bit 0 set = one player, so no player 2
+        anda    #$01
+        bne     gohno
+        lda     Score2
+        ora     Score2+1
+        ora     Score2+2
         beq     gohno
+        lda     PendMask
+        ora     #2
+        sta     PendMask
+
+gohno:
+        lda     #SETTLE
+        sta     SettleDelay
         lda     #1
-        sta     NamePend        ; flagged only; PromptHook opens the overlay
-gohno:                          ; once the settle window below expires
-        lda     #SETTLE         ; every game over, qualifying or not: the
-        sta     SettleDelay     ; death flash is still running and freezing
-                                ; on one of its frames wrecks the colours
-        lda     #1
-        sta     ShowPrompt      ; back to the title: prompt is visible again
+        sta     ShowPrompt
 
         lda     >$0004          ; displaced originals: LDA <04 / STA <08
         sta     >$0008
@@ -149,10 +172,9 @@ PromptHook:
         dec     SettleDelay
         bra     phdone
 
-phready: lda    NamePend
+phready: lda    PendMask
         beq     phnorm
-        clr     NamePend
-        lbsr    NameEnter
+        lbsr    NextName
         bra     phdone
 
 phnorm: ldu     #PromptMsg
@@ -485,6 +507,52 @@ qyes:   puls    b,x,y,u
         rts
 
 ;--------------------------------------------------------------
+; NextName: start the next queued player's entry. Qualification is
+; checked here, against a fresh read, so player 2 is judged against a
+; table that already holds player 1's new entry.
+;--------------------------------------------------------------
+NextName:
+        pshs    cc,d,x,y,u
+        lda     PendMask
+        bita    #1
+        beq     nn2
+        clr     CurPlayer
+        ldx     #Score1
+        bra     nnld
+nn2:    lda     #1
+        sta     CurPlayer
+        ldx     #Score2
+nnld:   ldu     #LastScore
+        ldb     #3
+nncp:   lda     ,x+
+        sta     ,u+
+        decb
+        bne     nncp
+        lbsr    Qualifies
+        bne     nnok
+        lbsr    ClearPend
+        puls    cc,d,x,y,u
+        rts
+nnok:   lbsr    NameEnter
+        puls    cc,d,x,y,u
+        rts
+
+;--------------------------------------------------------------
+; ClearPend: drop the current player from the queue.
+;--------------------------------------------------------------
+ClearPend:
+        lda     CurPlayer
+        bne     cp2
+        lda     PendMask
+        anda    #$FE
+        sta     PendMask
+        rts
+cp2:    lda     PendMask
+        anda    #$FD
+        sta     PendMask
+        rts
+
+;--------------------------------------------------------------
 ; NameEnter: stash the screen, draw the name-entry panel and switch the
 ; freeze on. The score is not written until ENTER is pressed.
 ;--------------------------------------------------------------
@@ -499,6 +567,12 @@ nesv:   lda     ,x+
         bne     nesv
 
         lbsr    ClearPanel
+        ldu     #MsgP1
+        lda     CurPlayer
+        beq     nep1
+        ldu     #MsgP2
+nep1:   ldx     #PLRPOS
+        lbsr    DrawStr
         ldu     #MsgNHS
         ldx     #NHSPOS
         lbsr    DrawStr
@@ -547,14 +621,18 @@ NameFrame:
         cmpa    #29             ; left arrow
         beq     nfbk
         cmpa    #31             ; space
-        beq     nfput
+        beq     nfsp
         cmpa    #1              ; A-Z share our glyph indices 1-26
         blo     nfdraw
         cmpa    #26
+        bls     nfput1
+        cmpa    #32             ; 0-9 are keycodes 32-41
+        blo     nfdraw
+        cmpa    #41
         bhi     nfdraw
-nfput:  cmpa    #31
-        bne     nfput1
-        clra                    ; space glyph
+        suba    #5              ; -> glyph 27-36
+        bra     nfput1
+nfsp:   clra
 nfput1: ldb     NamePos
         cmpb    #NAMELEN
         bhs     nfdraw
@@ -574,9 +652,16 @@ nfbk:   lda     NamePos
         sta     ,x
         bra     nfdraw
 
-nfent:  lda     NamePos         ; need at least one character
-        beq     nfdraw
-        lbsr    NameCommit
+nfent:  ldx     #NameBuf        ; need at least one letter or digit;
+        ldb     #NAMELEN        ; spaces and untyped dots do not count
+nfchk:  lda     ,x+
+        beq     nfchkn
+        cmpa    #36             ; glyph 1-26 = A-Z, 27-36 = 0-9
+        bls     nfok
+nfchkn: decb
+        bne     nfchk
+        bra     nfdraw
+nfok:   lbsr    NameCommit
         bra     nfout
 
 nfdraw: ldu     #NameBuf        ; repaint the field
@@ -602,7 +687,11 @@ nc1:    lda     ,u+
         beq     ncsp
         cmpa    #DOTGLYPH       ; untyped slot
         beq     ncsp
-        adda    #64             ; glyph 1..26 -> 'A'..'Z'
+        cmpa    #26
+        bhi     ncdig
+        adda    #64             ; glyph 1-26 -> 'A'-'Z'
+        bra     ncst
+ncdig:  adda    #21             ; glyph 27-36 -> '0'-'9'
         bra     ncst
 ncsp:   lda     #$20
 ncst:   sta     ,x+
@@ -610,6 +699,7 @@ ncst:   sta     ,x+
         bne     nc1
 
         lbsr    DoCapture
+        lbsr    ClearPend
 
         ldx     #SAVEBUF        ; put the screen back
         ldu     #SAVETOP
@@ -1074,8 +1164,13 @@ MsgHdr: fcb     8,9,7,8,0,19,3,15,18,5,19,$FF
 PressMsg: fcb   16,18,5,19,19,0,1,14,25,0,11,5,25,$FF
 MsgNHS: fcb     14,5,23,0,8,9,7,8,0,19,3,15,18,5,$FF
 MsgName: fcb    14,1,13,5,38,$FF
+MsgP1:  fcb     16,12,1,25,5,18,0,28,$FF
+MsgP2:  fcb     16,12,1,25,5,18,0,29,$FF
 NameOn: fcb     0
-NamePend: fcb   0
+PendMask: fcb   0
+CurPlayer: fcb  0
+Score1: fcb     0,0,0
+Score2: fcb     0,0,0
 SettleDelay: fcb 0
 NamePos: fcb    0
 LastKey: fcb    $FF

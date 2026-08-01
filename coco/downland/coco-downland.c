@@ -140,7 +140,7 @@ static void render(const uint8_t *sec, FILE *fh)
       for (int j = 0; j < 8; j++)
         {
           char c = valid ? (char)e[j] : 0;
-          name[j] = (c >= 'A' && c <= 'Z') ? c : ' ';
+          name[j] = ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) ? c : ' ';
         }
       name[8] = 0;
       for (int j = 0; j < 7; j++)

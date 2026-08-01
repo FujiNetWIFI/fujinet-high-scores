@@ -58,8 +58,11 @@ ENTLEN  equ 16
 DRAWMASK equ $0069         ; game's character drawing mask (artifact color)
 STRACK  equ 34
 SSECTOR equ 18
+DTRACK  equ 17            ; cache-bust read, LSN 306 -- see ReadSector
+DSECTOR equ 1
 FONT    equ $D9B7          ; V1.0 CharacterFont, 7 bytes/glyph
 PAGE1   equ $1C00          ; displayed video page during title redraw
+PLRPOS  equ $210C          ; "player n"  (page 1, row 40, col 12)
 NHSPOS  equ $2309          ; "new high score"
 SCPOS   equ $260C          ; the qualifying score
 NMPOS   equ $2909          ; "name:"
@@ -100,6 +103,7 @@ cptr:   lda     ,x+
 Merge:
         clr     Pend1Flag
         clr     Pend2Flag
+        clr     CurPlayer
         ldu     #P1SCORE
         ldx     #LastP1
         ldy     #Pend1
@@ -113,6 +117,8 @@ Merge:
         lbsr    Insert
 noSync1:
 
+        lda     #1
+        sta     CurPlayer
         ldu     #P2SCORE
         ldx     #LastP2
         ldy     #Pend2
@@ -174,13 +180,17 @@ Done:
         ldu     #HISCORE        ; displaced original instruction
         rts
 
-; ReadSector: dummy-reads track 0/sector 1 to bust FujiNet's per-sector
-; cache, then reads the real score sector into SBUF. Z=1 on success.
+; ReadSector: cache-bust read, then the real score sector into SBUF. Z=1 on
+; success. The cache-bust target must be far from the score sector (reads are
+; served from a buffered block, so a nearby sector evicts nothing) and must not
+; be LSN 0 (block 0 trips a _media_last_block + 1 wraparound in the FujiNet
+; media layer after a write, so the read fails and evicts nothing).
 ReadSector:
         lda     #2
         sta     DCOPC
-        clr     DCTRK
-        lda     #1
+        lda     #DTRACK
+        sta     DCTRK
+        lda     #DSECTOR
         sta     DCSEC
         ldx     #SBUF
         stx     DCBPT
@@ -587,6 +597,12 @@ EnterName:
         stb     SavCol
 
         lbsr    PClear
+        ldu     #MsgP1
+        lda     CurPlayer
+        beq     enp1
+        ldu     #MsgP2
+enp1:   ldx     #PLRPOS
+        lbsr    PStr
         ldu     #MsgNHS
         ldx     #NHSPOS
         lbsr    PStr
@@ -646,8 +662,14 @@ enkey:  lbsr    GetKeyEvent
         cmpa    #1              ; A-Z?
         blo     enloop
         cmpa    #26
-        bhi     enloop
+        bhi     endig
         adda    #9              ; letter font code
+        bra     enput
+endig:  cmpa    #32             ; 0-9 are keycodes 32-41
+        blo     enloop
+        cmpa    #41
+        bhi     enloop
+        suba    #32             ; digit font code
         bra     enput
 enspc:  lda     #36             ; space glyph
 enput:  ldb     NamePos
@@ -672,11 +694,9 @@ endone: ldb     NamePos
         ldx     #NameBuf        ; ...and at least one non-space letter
         ldb     #8
 enchk:  lda     ,x+
-        cmpa    #10             ; letter font codes are 10-35
-        blo     enchknx
-        cmpa    #35
+        cmpa    #35             ; 0-35 = digit or letter
         bls     endok
-enchknx: decb
+        decb
         bne     enchk
         bra     enloop          ; all spaces: reject, keep editing
 endok:  puls    x               ; commit as ASCII, space-padded
@@ -687,7 +707,11 @@ encmt:  lda     ,u+
         beq     encsp
         cmpa    #38             ; unfilled '.' placeholder
         beq     encsp
-        adda    #55             ; font letter -> ASCII 'A'-'Z'
+        cmpa    #9
+        bhi     enclet
+        adda    #48             ; font 0-9 -> '0'-'9'
+        bra     encst
+enclet: adda    #55             ; font 10-35 -> 'A'-'Z'
         bra     encst
 encsp:  lda     #$20
 encst:  sta     ,x+
@@ -754,10 +778,14 @@ stez:   clra
 stfull: ldb     #8              ; name (ASCII -> font)
 stini:  lda     ,u+
         cmpa    #$20
-        bne     stlet
-        lda     #36
+        beq     stsp
+        cmpa    #'9
+        bhi     stlet
+        suba    #48             ; '0'-'9' -> 0-9
         bra     stput
-stlet:  suba    #55
+stlet:  suba    #55             ; 'A'-'Z' -> 10-35
+        bra     stput
+stsp:   lda     #36
 stput:  lbsr    PChr
         decb
         bne     stini
@@ -886,6 +914,8 @@ rrtok:  puls    cc,dp           ; unmask IRQ, restore dp
         rts
 
 ; strings (font codes, $FF-terminated)
+MsgP1:  fcb     25,21,10,34,14,27,36,1,$FF     ; "player 1"
+MsgP2:  fcb     25,21,10,34,14,27,36,2,$FF     ; "player 2"
 MsgNHS: fcb     23,14,32,36,17,18,16,17,36,28,12,24,27,14,$FF  ; "new high score"
 MsgName: fcb    23,10,22,14,37,$FF                             ; "name:"
 MsgTop: fcb     29,24,25,36,29,14,23,$FF                       ; "top ten"
@@ -961,6 +991,7 @@ Pend1:  rmb     ENTLEN          ; entries staged by MergeOne, applied by
 Pend1Flag: fcb  0               ; Merge against a freshly re-read table
 Pend2:  rmb     ENTLEN
 Pend2Flag: fcb  0
+CurPlayer: fcb  0
 KCol:   fcb     0
 KRow:   fcb     0
 KMask:  fcb     0
