@@ -19,8 +19,10 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/inotify.h>
 #include <signal.h>
+#include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <linux/limits.h>
@@ -216,7 +218,7 @@ int main(int argc, char *argv[])
       perror("inotify_init");
       return 1;
     }
-  wd = inotify_add_watch(fd, argv[1], IN_MODIFY);
+  wd = inotify_add_watch(fd, argv[1], IN_MODIFY | IN_CLOSE_WRITE);
   if (wd < 0)
     {
       fprintf(stderr, "coco-demonattack: watch %s: %s\n", argv[1], strerror(errno));
@@ -225,18 +227,40 @@ int main(int argc, char *argv[])
 
   write_page(argv[1], argv[2]);   /* render once at startup */
 
+  time_t last_scrape_time = time(NULL);
+  time_t last_check = time(NULL);
+
   while (!ctrlc)
     {
       int len = read(fd, buf, EVENT_BUF_LEN);
-      if (len <= 0)
-        continue;
-      for (int i = 0; i < len; )
+      if (len > 0)
         {
-          struct inotify_event *ev = (struct inotify_event *)&buf[i];
-          if (ev->mask & IN_MODIFY)
-            write_page(argv[1], argv[2]);
-          i += EVENT_SIZE + ev->len;
+          for (int i = 0; i < len; )
+            {
+              struct inotify_event *ev = (struct inotify_event *)&buf[i];
+              if (ev->mask & (IN_MODIFY | IN_CLOSE_WRITE))
+                {
+                  write_page(argv[1], argv[2]);
+                  last_scrape_time = time(NULL);
+                }
+              i += EVENT_SIZE + ev->len;
+            }
         }
+
+      time_t now = time(NULL);
+      if (now - last_check > 60)
+        {
+          struct stat st;
+          if (stat(argv[1], &st) == 0 && st.st_mtime > last_scrape_time)
+            {
+              write_page(argv[1], argv[2]);
+              last_scrape_time = time(NULL);
+            }
+          last_check = now;
+        }
+
+      if (len <= 0)
+        usleep(10000);
     }
 
   inotify_rm_watch(fd, wd);

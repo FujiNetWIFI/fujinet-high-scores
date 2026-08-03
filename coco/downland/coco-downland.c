@@ -19,8 +19,10 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/inotify.h>
 #include <signal.h>
+#include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <linux/limits.h>
@@ -230,7 +232,7 @@ int main(int argc, char *argv[])
       return 1;
     }
 
-  inotify_wd = inotify_add_watch(inotify_fd, argv[1], IN_MODIFY);
+  inotify_wd = inotify_add_watch(inotify_fd, argv[1], IN_MODIFY | IN_CLOSE_WRITE);
   if (inotify_wd == -1)
     {
       perror("inotify_add_watch");
@@ -240,19 +242,37 @@ int main(int argc, char *argv[])
 
   fcntl(inotify_fd, F_SETFL, fcntl(inotify_fd, F_GETFL) | O_NONBLOCK);
 
+  time_t last_scrape_time = time(NULL);
+  time_t last_check = time(NULL);
+
   while (!ctrlc)
     {
       len = read(inotify_fd, event_buffer, EVENT_BUF_LEN);
       if (len < 0)
         {
           usleep(100000);
-          continue;
         }
-      for (int i = 0; i < len; )
+      else
         {
-          struct inotify_event *event = (struct inotify_event *)&event_buffer[i];
-          scrape(argv[1], argv[2]);
-          i += EVENT_SIZE + event->len;
+          for (int i = 0; i < len; )
+            {
+              struct inotify_event *event = (struct inotify_event *)&event_buffer[i];
+              scrape(argv[1], argv[2]);
+              last_scrape_time = time(NULL);
+              i += EVENT_SIZE + event->len;
+            }
+        }
+
+      time_t now = time(NULL);
+      if (now - last_check > 60)
+        {
+          struct stat st;
+          if (stat(argv[1], &st) == 0 && st.st_mtime > last_scrape_time)
+            {
+              scrape(argv[1], argv[2]);
+              last_scrape_time = time(NULL);
+            }
+          last_check = now;
         }
     }
 
